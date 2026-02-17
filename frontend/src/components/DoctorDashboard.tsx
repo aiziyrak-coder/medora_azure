@@ -336,14 +336,30 @@ const DocumentsView: React.FC<{ user: User }> = ({ user }) => {
     )
 }
 
+const SUBSCRIPTION_PLANS = [
+    { months: 1, price: 10, label: '1 oy', badge: '' },
+    { months: 3, price: 25, label: '3 oy', badge: '17% tejash', originalPrice: 30 },
+    { months: 6, price: 45, label: '6 oy', badge: '25% tejash', originalPrice: 60 },
+    { months: 12, price: 80, label: '1 yil', badge: '33% tejash', originalPrice: 120, popular: true },
+];
+
+const CARD_NUMBER = '9860 3566 2700 0702';
+
 const ProfileView: React.FC<{ user: User, onLogout: () => void }> = ({ user, onLogout }) => {
     const { t, language, setLanguage } = useTranslation();
     const [stats, setStats] = useState<UserStats | null>(null);
+    const [selectedPlan, setSelectedPlan] = useState(SUBSCRIPTION_PLANS[0]);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
+    const [uploadSuccess, setUploadSuccess] = useState(false);
+    const [showPayment, setShowPayment] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         let cancelled = false;
         (async () => {
-            // Load analyses - try API first, fallback to local
             try {
                 const { getAnalyses } = await import('../services/apiAnalysisService');
                 const response = await getAnalyses();
@@ -352,11 +368,8 @@ const ProfileView: React.FC<{ user: User, onLogout: () => void }> = ({ user, onL
                     setStats(caseService.getDashboardStats(response.data));
                     return;
                 }
-            } catch {
-                // Fallback to local
-            }
+            } catch { /* Fallback */ }
             if (cancelled) return;
-            // Fallback to local storage
             const { getAnalyses: getLocalAnalyses } = await import('../services/authService');
             const history = getLocalAnalyses(user.phone);
             setStats(caseService.getDashboardStats(history));
@@ -364,54 +377,330 @@ const ProfileView: React.FC<{ user: User, onLogout: () => void }> = ({ user, onL
         return () => { cancelled = true; };
     }, [user.phone]);
 
+    // Subscription status helpers
+    const isActive = user.subscriptionStatus === 'active';
+    const isPending = user.subscriptionStatus === 'pending';
+    const isTrial = user.trialEndsAt && new Date(user.trialEndsAt) > new Date();
+    const daysLeft = user.subscriptionExpiry
+        ? Math.max(0, Math.ceil((new Date(user.subscriptionExpiry).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+        : user.trialEndsAt && new Date(user.trialEndsAt) > new Date()
+            ? Math.max(0, Math.ceil((new Date(user.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+            : 0;
+    const expiryDate = user.subscriptionExpiry
+        ? new Date(user.subscriptionExpiry).toLocaleDateString('uz-UZ', { day: '2-digit', month: 'long', year: 'numeric' })
+        : null;
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            if (file.size > 5 * 1024 * 1024) {
+                setUploadError("Fayl hajmi 5MB dan oshmasligi kerak.");
+                return;
+            }
+            setSelectedFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+            setUploadError(null);
+        }
+    };
+
+    const handleSubmitReceipt = async () => {
+        if (!selectedFile) {
+            setUploadError("Iltimos, to'lov chekini yuklang.");
+            return;
+        }
+        setIsUploading(true);
+        setUploadError(null);
+        try {
+            const telegramService = await import('../services/telegramService');
+            const result = await telegramService.sendPaymentReceipt(
+                selectedFile, user, selectedPlan.price, undefined
+            );
+            if (result.success) {
+                const localAuth = await import('../services/authService');
+                localAuth.updateUserSubscription(user.phone, 'pending');
+                setUploadSuccess(true);
+                setSelectedFile(null);
+                setPreviewUrl(null);
+            } else {
+                const msg = result.message || "Xatolik yuz berdi.";
+                if (msg.includes('sozlanmagan') || msg.includes('503')) {
+                    setUploadError("To'lov xizmati hozircha texnik ishlar olib borilmoqda. +998 94 878 88 78 ga qo'ng'iroq qiling.");
+                } else {
+                    setUploadError(msg);
+                }
+            }
+        } catch {
+            setUploadError("Tizim xatoligi. Qayta urinib ko'ring.");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const handleCopyCard = () => {
+        navigator.clipboard.writeText(CARD_NUMBER.replace(/\s/g, ''));
+        alert("Karta raqami nusxalandi!");
+    };
+
     return (
-        <div className="flex flex-col h-full animate-fade-in-up p-5 pb-32 overflow-y-auto">
-            <h2 className="text-3xl font-black text-white mb-8">{t('doc_profile_title')}</h2>
+        <div className="flex flex-col h-full animate-fade-in-up p-5 pb-32 overflow-y-auto custom-scrollbar">
+            <h2 className="text-3xl font-black text-white mb-6">{t('doc_profile_title')}</h2>
             
             {/* User Info Card */}
-            <GlassCard className="p-6 flex items-center gap-6 mb-6 bg-gradient-to-r from-blue-900/40 to-slate-900/40">
-                <div className="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center text-3xl font-bold text-white shadow-xl">
+            <GlassCard className="p-5 flex items-center gap-5 mb-5 bg-gradient-to-r from-blue-900/40 to-slate-900/40">
+                <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-2xl font-bold text-white shadow-xl flex-shrink-0">
                     {user.name.charAt(0)}
                 </div>
-                <div>
-                    <h3 className="text-2xl font-bold text-white">{user.name}</h3>
-                    <p className="text-blue-300 font-medium">{user.specialties?.join(', ')}</p>
-                    <p className="text-xs text-slate-400 mt-1">{user.phone}</p>
+                <div className="min-w-0">
+                    <h3 className="text-xl font-bold text-white truncate">{user.name}</h3>
+                    <p className="text-blue-300 font-medium text-sm truncate">{user.specialties?.join(', ')}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">{user.phone}</p>
                 </div>
             </GlassCard>
 
-            {/* Obuna / Subscription */}
-            {(user.subscriptionPlan || user.subscriptionExpiry || user.trialEndsAt) && (
-                <GlassCard className="p-4 mb-6 bg-white/5 border border-white/10">
-                    <h4 className="text-sm font-bold text-slate-400 uppercase mb-2">
-                        {t('subscription_title')}
-                    </h4>
-                    {user.subscriptionPlan && (
-                        <p className="text-white font-medium">{user.subscriptionPlan.name}</p>
+            {/* ═══════ OBUNA BO'LIMI ═══════ */}
+            <div className="mb-5">
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">
+                    Obuna holati
+                </h4>
+
+                {/* Status Card */}
+                <GlassCard className={`p-5 mb-4 border ${
+                    isActive ? 'border-green-500/30 bg-green-900/10' :
+                    isPending ? 'border-yellow-500/30 bg-yellow-900/10' :
+                    'border-red-500/20 bg-red-900/10'
+                }`}>
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                            <div className={`w-3 h-3 rounded-full ${
+                                isActive ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' :
+                                isPending ? 'bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.5)] animate-pulse' :
+                                'bg-red-500'
+                            }`} />
+                            <span className={`font-bold text-sm ${
+                                isActive ? 'text-green-400' :
+                                isPending ? 'text-yellow-400' :
+                                'text-red-400'
+                            }`}>
+                                {isActive ? (isTrial ? 'Sinov muddati' : 'Faol obuna') :
+                                 isPending ? 'Tekshirilmoqda...' :
+                                 'Obuna nofaol'}
+                            </span>
+                        </div>
+                        {isActive && daysLeft > 0 && (
+                            <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                                daysLeft <= 5 ? 'bg-red-500/20 text-red-400' :
+                                daysLeft <= 10 ? 'bg-yellow-500/20 text-yellow-400' :
+                                'bg-green-500/20 text-green-400'
+                            }`}>
+                                {daysLeft} kun qoldi
+                            </span>
+                        )}
+                    </div>
+
+                    {isActive && (
+                        <div className="space-y-2">
+                            {user.subscriptionPlan && (
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-slate-400">Reja:</span>
+                                    <span className="text-white font-medium">{user.subscriptionPlan.name}</span>
+                                </div>
+                            )}
+                            {expiryDate && (
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-slate-400">Tugash sanasi:</span>
+                                    <span className="text-white font-medium">{expiryDate}</span>
+                                </div>
+                            )}
+                            {daysLeft > 0 && (
+                                <div className="mt-3">
+                                    <div className="flex justify-between text-[10px] text-slate-500 mb-1">
+                                        <span>Obuna muddati</span>
+                                        <span>{daysLeft} kun</span>
+                                    </div>
+                                    <div className="w-full bg-white/10 rounded-full h-1.5">
+                                        <div
+                                            className={`h-1.5 rounded-full transition-all ${
+                                                daysLeft <= 5 ? 'bg-red-500' :
+                                                daysLeft <= 10 ? 'bg-yellow-500' :
+                                                'bg-green-500'
+                                            }`}
+                                            style={{ width: `${Math.min(100, (daysLeft / 30) * 100)}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     )}
-                    {user.trialEndsAt && new Date(user.trialEndsAt) > new Date() && (
-                        <p className="text-green-400 text-sm mt-1">
-                            {t('subscription_trial', {
-                                days: Math.ceil(
-                                    (new Date(user.trialEndsAt).getTime() - Date.now()) /
-                                    (1000 * 60 * 60 * 24)
-                                )
-                            })}
+
+                    {isPending && (
+                        <p className="text-xs text-yellow-200/70 mt-1">
+                            Chekingiz adminlar tomonidan tekshirilmoqda. Odatda 5–10 daqiqa vaqt oladi.
                         </p>
                     )}
-                    {user.subscriptionExpiry && new Date(user.subscriptionExpiry) > new Date() && !user.trialEndsAt && (
-                        <p className="text-slate-300 text-sm mt-1">
-                            {t('subscription_expires', {
-                                date: new Date(user.subscriptionExpiry).toLocaleDateString('uz-UZ')
-                            })}
+
+                    {!isActive && !isPending && (
+                        <p className="text-xs text-slate-400 mt-1">
+                            Obuna muddati tugagan. Yangi obuna sotib oling.
                         </p>
                     )}
                 </GlassCard>
-            )}
+
+                {/* Obuna rejalarini ko'rish / yashirish */}
+                {!isPending && (
+                    <button
+                        onClick={() => setShowPayment(!showPayment)}
+                        className={`w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+                            showPayment
+                                ? 'bg-white/5 text-slate-400 border border-white/10'
+                                : isActive
+                                    ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30 hover:bg-blue-600/30'
+                                    : 'bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20'
+                        }`}
+                    >
+                        {showPayment ? 'Yopish' : isActive ? 'Obunani uzaytirish' : 'Obuna sotib olish'}
+                        <svg className={`w-4 h-4 transition-transform ${showPayment ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                )}
+
+                {/* ═══ OBUNA REJALARI + TO'LOV ═══ */}
+                {showPayment && (
+                    <div className="mt-4 space-y-4 animate-fade-in-up">
+                        {/* Rejalar */}
+                        <div>
+                            <h5 className="text-xs font-bold text-slate-400 uppercase mb-3">Obuna rejasini tanlang</h5>
+                            <div className="grid grid-cols-2 gap-2">
+                                {SUBSCRIPTION_PLANS.map((plan) => (
+                                    <button
+                                        key={plan.months}
+                                        onClick={() => setSelectedPlan(plan)}
+                                        className={`relative p-3 rounded-xl border-2 transition-all text-left ${
+                                            selectedPlan.months === plan.months
+                                                ? 'border-blue-500 bg-blue-600/20 shadow-lg shadow-blue-500/10'
+                                                : 'border-white/10 bg-white/5 hover:border-white/20'
+                                        }`}
+                                    >
+                                        {plan.popular && (
+                                            <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-black bg-gradient-to-r from-amber-500 to-orange-500 text-white px-2 py-0.5 rounded-full uppercase tracking-wider shadow-lg">
+                                                Mashhur
+                                            </span>
+                                        )}
+                                        {plan.badge && !plan.popular && (
+                                            <span className="absolute -top-2 right-2 text-[9px] font-bold bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
+                                                {plan.badge}
+                                            </span>
+                                        )}
+                                        <p className="text-white font-bold text-sm">{plan.label}</p>
+                                        <div className="flex items-baseline gap-1 mt-1">
+                                            <span className="text-xl font-black text-blue-400">{plan.price}$</span>
+                                            {plan.originalPrice && (
+                                                <span className="text-xs text-slate-500 line-through">{plan.originalPrice}$</span>
+                                            )}
+                                        </div>
+                                        <p className="text-[10px] text-slate-400 mt-0.5">
+                                            {(plan.price / plan.months).toFixed(1)}$ / oy
+                                        </p>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* To'lov karta */}
+                        <div className="bg-gradient-to-br from-blue-900/40 to-indigo-900/40 rounded-2xl p-4 border border-blue-500/20">
+                            <p className="text-[10px] font-bold text-blue-300 uppercase tracking-wider mb-2">
+                                To'lov kartasi ({selectedPlan.price}$ to'lang)
+                            </p>
+                            <div className="flex items-center justify-between bg-black/30 p-3 rounded-xl border border-white/10">
+                                <span className="text-lg font-mono font-bold text-white tracking-wider">{CARD_NUMBER}</span>
+                                <button
+                                    onClick={handleCopyCard}
+                                    className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-[10px] font-bold text-white transition-colors flex-shrink-0"
+                                >
+                                    Nusxa
+                                </button>
+                            </div>
+                            <p className="text-[10px] text-blue-200/60 mt-2">
+                                Aynan <strong className="text-white">{selectedPlan.price}$</strong> to'lang ({selectedPlan.label} uchun) va chek skrinshot'ini pastga yuklang.
+                            </p>
+                        </div>
+
+                        {/* Chek yuklash */}
+                        {uploadSuccess ? (
+                            <div className="bg-green-900/20 border border-green-500/30 rounded-2xl p-5 text-center">
+                                <div className="w-14 h-14 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <CheckCircleIcon className="w-8 h-8 text-green-400" />
+                                </div>
+                                <p className="text-green-400 font-bold">Chek yuborildi!</p>
+                                <p className="text-xs text-slate-400 mt-1">Admin tasdiqlagach obuna faollashadi (5–10 daqiqa).</p>
+                            </div>
+                        ) : (
+                            <div>
+                                <div
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className={`border-2 border-dashed rounded-2xl p-5 text-center cursor-pointer transition-all ${
+                                        selectedFile ? 'border-blue-500/50 bg-blue-900/10' : 'border-white/10 hover:border-blue-500/30 hover:bg-white/5'
+                                    }`}
+                                >
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                    />
+                                    {previewUrl ? (
+                                        <div className="flex items-center gap-3">
+                                            <img src={previewUrl} alt="Chek" className="w-16 h-16 object-cover rounded-lg" />
+                                            <div className="text-left">
+                                                <p className="text-white font-medium text-sm">Chek tanlandi</p>
+                                                <p className="text-xs text-blue-400">O'zgartirish uchun bosing</p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <UploadCloudIcon className="w-10 h-10 text-slate-500 mx-auto mb-2" />
+                                            <p className="text-sm text-slate-400 font-medium">Chekni yuklash uchun bosing</p>
+                                            <p className="text-[10px] text-slate-500 mt-1">JPG, PNG (max 5MB)</p>
+                                        </>
+                                    )}
+                                </div>
+
+                                {uploadError && (
+                                    <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl">
+                                        {uploadError}
+                                    </div>
+                                )}
+
+                                <button
+                                    onClick={handleSubmitReceipt}
+                                    disabled={isUploading || !selectedFile}
+                                    className="w-full mt-3 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-bold py-3.5 rounded-xl transition-all disabled:cursor-not-allowed flex justify-center items-center gap-2 shadow-lg shadow-blue-600/20 disabled:shadow-none"
+                                >
+                                    {isUploading ? (
+                                        <>
+                                            <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                            Yuborilmoqda...
+                                        </>
+                                    ) : (
+                                        `${selectedPlan.price}$ chekni yuborish (${selectedPlan.label})`
+                                    )}
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Yordam */}
+                        <div className="text-center pt-2">
+                            <p className="text-[10px] text-slate-500">Savollar bo'lsa:</p>
+                            <a href="tel:+998948788878" className="text-sm font-bold text-blue-400 hover:text-blue-300">+998 94 878 88 78</a>
+                        </div>
+                    </div>
+                )}
+            </div>
 
             {/* Language Settings */}
-            <div className="mb-6">
-                <h4 className="text-sm font-bold text-slate-400 uppercase mb-3 ml-1">{t('doc_settings_language')}</h4>
+            <div className="mb-5">
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">{t('doc_settings_language')}</h4>
                 <div className="bg-white/5 rounded-2xl p-2 border border-white/10">
                     <LanguageSwitcher language={language} onLanguageChange={setLanguage} />
                 </div>
@@ -419,7 +708,7 @@ const ProfileView: React.FC<{ user: User, onLogout: () => void }> = ({ user, onL
 
             {/* Stats */}
             {stats && (
-                <div className="grid grid-cols-2 gap-4 mb-8">
+                <div className="grid grid-cols-2 gap-3 mb-6">
                     <GlassCard className="p-4 text-center">
                         <p className="text-3xl font-black text-white">{stats.totalAnalyses}</p>
                         <p className="text-[10px] text-slate-400 uppercase font-bold">{t('doc_stat_patients')}</p>
