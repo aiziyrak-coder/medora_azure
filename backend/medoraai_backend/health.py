@@ -1,25 +1,50 @@
 """
-Health Check Endpoints
+Health Check Endpoints (CORS-safe for frontend health checks).
 """
 from django.http import JsonResponse
 from django.db import connection
 from django.core.cache import cache
 from django.conf import settings
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 import logging
 
 logger = logging.getLogger(__name__)
 
 
+def _add_cors(response):
+    """Ensure CORS headers so frontend never gets blocked (fallback)."""
+    origins = getattr(settings, 'CORS_ALLOWED_ORIGINS', None)
+    origin = origins[0] if origins else '*'
+    response['Access-Control-Allow-Origin'] = origin
+    return response
+
+
+@require_http_methods(['GET', 'OPTIONS'])
+@csrf_exempt
 def health_check(request):
-    """Basic health check"""
-    return JsonResponse({
+    """Basic health check; OPTIONS allowed for CORS preflight."""
+    if request.method == 'OPTIONS':
+        r = JsonResponse({})
+        r['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        r['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return _add_cors(r)
+    r = JsonResponse({
         'status': 'healthy',
         'service': 'medoraai-backend',
     })
+    return _add_cors(r)
 
 
+@require_http_methods(['GET', 'OPTIONS'])
+@csrf_exempt
 def health_detailed(request):
-    """Detailed health check with database and cache"""
+    """Detailed health check with database and cache."""
+    if request.method == 'OPTIONS':
+        r = JsonResponse({})
+        r['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        r['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return _add_cors(r)
     checks = {
         'status': 'healthy',
         'service': 'medoraai-backend',
@@ -54,4 +79,5 @@ def health_detailed(request):
     checks['checks']['allowed_hosts'] = len(settings.ALLOWED_HOSTS) > 0
     
     status_code = 200 if checks['status'] == 'healthy' else 503
-    return JsonResponse(checks, status=status_code)
+    r = JsonResponse(checks, status=status_code)
+    return _add_cors(r)

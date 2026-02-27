@@ -1,4 +1,4 @@
-const CACHE_NAME = 'konsilium-cache-v4'; // Incremented cache version
+const CACHE_NAME = 'konsilium-cache-v5';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -11,11 +11,10 @@ const urlsToCache = [
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache and caching essential assets');
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then(cache => {
+      console.log('Opened cache and caching essential assets');
+      return Promise.allSettled(urlsToCache.map(url => cache.add(url).catch(() => {})));
+    })
   );
 });
 

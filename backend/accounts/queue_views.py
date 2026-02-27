@@ -2,7 +2,7 @@
 Navbat API — barcha qurilmalarda sinxron (telefon/kompyuter).
 """
 import logging
-from django.db import models
+from django.db.models import Max
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -16,12 +16,19 @@ logger = logging.getLogger(__name__)
 
 def _get_queue_owner(request):
     """Navbat egasi: shifokor o'zi yoki registrator uchun bog'langan shifokor."""
-    user = request.user
-    if user.role == 'doctor':
-        return user
-    if user.role == 'staff' and user.linked_doctor_id:
-        return user.linked_doctor
-    return None
+    try:
+        user = request.user
+        if not user or not getattr(user, 'is_authenticated', True) or not user.is_authenticated:
+            return None
+        role = getattr(user, 'role', None)
+        if role == 'doctor':
+            return user
+        if role == 'staff' and getattr(user, 'linked_doctor_id', None):
+            return getattr(user, 'linked_doctor', None)
+        return None
+    except Exception as e:
+        logger.warning("_get_queue_owner: %s", e)
+        return None
 
 
 def _item_to_frontend(item):
@@ -74,7 +81,7 @@ def queue_add(request):
             status=status.HTTP_400_BAD_REQUEST
         )
     max_ticket = QueueItem.objects.filter(doctor=owner).aggregate(
-        max_ticket=models.Max('ticket_number')
+        max_ticket=Max('ticket_number')
     )['max_ticket'] or 0
     next_ticket = max_ticket + 1
     arrival_time = request.data.get('arrivalTime') or timezone.now().strftime('%H:%M')
