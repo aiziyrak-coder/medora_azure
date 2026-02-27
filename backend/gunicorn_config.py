@@ -5,6 +5,12 @@ Azure VM: 20.82.115.71  |  medora.ziyrak.org
 """
 
 import multiprocessing
+import os
+
+# Project log dir (no sudo required)
+_BASE = os.path.dirname(os.path.abspath(__file__))
+_LOGDIR = os.path.join(_BASE, "logs")
+os.makedirs(_LOGDIR, exist_ok=True)
 
 # ── Bind ────────────────────────────────────────────────────────────────────
 bind             = "127.0.0.1:8000"          # Nginx orqali proxy
@@ -28,8 +34,8 @@ max_requests         = 1000
 max_requests_jitter  = 100
 
 # ── Logging ─────────────────────────────────────────────────────────────────
-accesslog    = "/var/log/gunicorn/medora_access.log"
-errorlog     = "/var/log/gunicorn/medora_error.log"
+accesslog    = os.path.join(_LOGDIR, "gunicorn_access.log")
+errorlog     = os.path.join(_LOGDIR, "gunicorn_error.log")
 loglevel     = "info"
 access_log_format = (
     '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(D)s'
@@ -38,9 +44,8 @@ access_log_format = (
 # ── Process ─────────────────────────────────────────────────────────────────
 preload_app   = True                          # Xotira tejash
 daemon        = False                         # systemd boshqaradi
-pidfile       = "/var/run/gunicorn/medora.pid"
-user          = "www-data"
-group         = "www-data"
+pidfile       = os.path.join(_LOGDIR, "medora.pid")
+# user/group: leave unset when running as cdcgroup (systemd User=cdcgroup)
 
 # ── WSGI ────────────────────────────────────────────────────────────────────
 wsgi_app      = "medoraai_backend.wsgi:application"
