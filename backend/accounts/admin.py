@@ -6,6 +6,8 @@ from django.contrib import admin
 from django.contrib import messages
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db import transaction
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django.utils import timezone
 from .models import User, SubscriptionPlan, SubscriptionPayment, ActiveSession
 
@@ -90,31 +92,56 @@ class UserAdmin(BaseUserAdmin):
     )
 
     def _clear_user_tokens(self, user_ids):
-        """Remove JWT outstanding tokens for given user IDs so user delete does not fail."""
+        """Remove JWT outstanding/blacklisted tokens for given user IDs so user delete does not fail."""
+        if not user_ids:
+            return
         try:
-            from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
+            from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
             for uid in user_ids:
-                OutstandingToken.objects.filter(user_id=uid).delete()
+                # BlacklistedToken references OutstandingToken — delete blacklist first to avoid FK issues
+                qs_ot = OutstandingToken.objects.filter(user_id=uid)
+                BlacklistedToken.objects.filter(token__in=qs_ot).delete()
+                qs_ot.delete()
         except Exception as e:
             logger.warning("Token cleanup before user delete: %s", e)
 
     def delete_queryset(self, request, queryset):
-        """Bulk delete: clear JWT tokens first, then delete users."""
+        """Bulk delete: clear JWT tokens first, then delete users. Never 500 — show message on error."""
+        user_ids = list(queryset.values_list('pk', flat=True))
         try:
             with transaction.atomic():
-                user_ids = list(queryset.values_list('pk', flat=True))
                 self._clear_user_tokens(user_ids)
                 super().delete_queryset(request, queryset)
+            self.message_user(request, f"{len(user_ids)} ta foydalanuvchi o\'chirildi.", level=messages.SUCCESS)
         except Exception as e:
             logger.exception("User admin delete_queryset: %s", e)
             self.message_user(
                 request,
-                f"Foydalanuvchini o\'chirishda xatolik: {e}. Server loglarini tekshiring.",
+                f"Foydalanuvchini o\'chirishda xatolik: {e}",
                 level=messages.ERROR,
             )
 
+    def delete_view(self, request, object_id, extra_context=None):
+        """Override so any exception during delete shows message and redirect instead of 500."""
+        from django.contrib.admin.utils import unquote
+        if request.method != "POST":
+            return super().delete_view(request, object_id, extra_context)
+        obj = self.get_object(request, unquote(object_id))
+        if obj is None:
+            return super().delete_view(request, object_id, extra_context)
+        if not self.has_delete_permission(request, obj):
+            return super().delete_view(request, object_id, extra_context)
+        try:
+            with transaction.atomic():
+                self._clear_user_tokens([obj.pk])
+                super().delete_model(request, obj)
+            self.message_user(request, "Foydalanuvchi muvaffaqiyatli o\'chirildi.", level=messages.SUCCESS)
+            return HttpResponseRedirect(reverse("admin:accounts_user_changelist"))
+        except Exception as e:
+            logger.exception("User admin delete_view: %s", e)
+            self.message_user(request, f"Foydalanuvchini o\'chirishda xatolik: {e}", level=messages.ERROR)
+            return HttpResponseRedirect(reverse("admin:accounts_user_change", args=[object_id]))
+
     def delete_model(self, request, obj):
-        """Single-object delete: clear JWT tokens first, then delete user."""
-        with transaction.atomic():
-            self._clear_user_tokens([obj.pk])
-            super().delete_model(request, obj)
+        """Single-object delete: only clear tokens; actual delete done in delete_view to avoid 500."""
+        super().delete_model(request, obj)
