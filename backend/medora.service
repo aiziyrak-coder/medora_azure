@@ -10,7 +10,11 @@ User=cdcgroup
 Group=cdcgroup
 WorkingDirectory=/home/cdcgroup/medora_platform/app/backend
 EnvironmentFile=/home/cdcgroup/medora_platform/app/backend/.env
+# Log papkasini yaratib, cdcgroup ga huquq bering (Gunicorn yozishi uchun)
 ExecStartPre=/bin/mkdir -p /home/cdcgroup/medora_platform/app/backend/logs
+ExecStartPre=/bin/chown cdcgroup:cdcgroup /home/cdcgroup/medora_platform/app/backend/logs
+StandardOutput=journal
+StandardError=journal
 ExecStart=/home/cdcgroup/medora_platform/venv/bin/gunicorn \
     --bind 127.0.0.1:8000 \
     --workers 4 \
