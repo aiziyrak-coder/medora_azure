@@ -1,11 +1,9 @@
-const CACHE_NAME = 'konsilium-cache-v5';
+const CACHE_NAME = 'konsilium-cache-v6';
 const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/icon-192x192.png',
-  '/icon-512x512.png',
-  // Add other static assets if any
+  '/icon.svg',
 ];
 
 self.addEventListener('install', event => {
@@ -43,9 +41,14 @@ self.addEventListener('fetch', event => {
   
   const url = new URL(request.url);
 
-  // Use network-first for navigation and API calls
-  // This ensures the user gets the freshest data, with an offline fallback.
-  if (request.mode === 'navigate' || url.pathname.includes('/api/')) { // Assuming API calls could be identified
+  // Never cache health or API — always network-only to avoid CORS/fetch errors in SW
+  if (url.pathname.startsWith('/health') || url.pathname.includes('/api/')) {
+    event.respondWith(fetch(request).catch(() => new Response('', { status: 503, statusText: 'Service Unavailable' })));
+    return;
+  }
+
+  // Use network-first for navigation
+  if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
         .then(response => {
@@ -76,13 +79,15 @@ self.addEventListener('fetch', event => {
       if (cachedResponse) {
         return cachedResponse;
       }
-      return fetch(request).then(networkResponse => {
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(request, responseToCache);
-        });
-        return networkResponse;
-      });
+      return fetch(request)
+        .then(networkResponse => {
+          if (networkResponse.ok) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(request, responseToCache));
+          }
+          return networkResponse;
+        })
+        .catch(() => new Response('', { status: 504, statusText: 'Gateway Timeout' }));
     })
   );
 });

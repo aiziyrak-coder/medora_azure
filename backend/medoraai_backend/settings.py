@@ -10,15 +10,22 @@ from decouple import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production-!@#$%^&*()')
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
+# SECURITY WARNING: keep the secret key used in production secret!
+# In production (DEBUG=False), SECRET_KEY must be set in env; no default.
+_default_secret = 'django-insecure-change-this-in-production-!@#$%^&*()'
+SECRET_KEY = config('SECRET_KEY', default=_default_secret)
+if not DEBUG and SECRET_KEY == _default_secret:
+    raise RuntimeError(
+        'SECRET_KEY must be set in environment when DEBUG=False. '
+        'Generate one with: python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"'
+    )
+
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',
-    default='localhost,127.0.0.1,medora.ziyrak.org,20.82.115.71',
+    default='localhost,127.0.0.1,medora.ziyrak.org,medoraapi.ziyrak.org,20.82.115.71',
     cast=lambda v: [s.strip() for s in v.split(',')]
 )
 

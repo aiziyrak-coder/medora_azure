@@ -2,6 +2,7 @@
 Navbat API — barcha qurilmalarda sinxron (telefon/kompyuter).
 """
 import logging
+from django.conf import settings
 from django.db.models import Max
 from django.utils import timezone
 from rest_framework import status
@@ -17,14 +18,19 @@ logger = logging.getLogger(__name__)
 def _get_queue_owner(request):
     """Navbat egasi: shifokor o'zi yoki registrator uchun bog'langan shifokor."""
     try:
-        user = request.user
+        user = getattr(request, 'user', None)
         if not user or not getattr(user, 'is_authenticated', True) or not user.is_authenticated:
             return None
         role = getattr(user, 'role', None)
         if role == 'doctor':
-            return user
-        if role == 'staff' and getattr(user, 'linked_doctor_id', None):
-            return getattr(user, 'linked_doctor', None)
+            return user if getattr(user, 'pk', None) else None
+        if role == 'staff':
+            try:
+                linked = getattr(user, 'linked_doctor', None)
+                if linked is not None and getattr(linked, 'pk', None):
+                    return linked
+            except Exception:
+                pass
         return None
     except Exception as e:
         logger.warning("_get_queue_owner: %s", e)
@@ -60,18 +66,19 @@ def queue_list(request):
         owner = _get_queue_owner(request)
         if not owner:
             return Response({'success': True, 'data': []})
-        items = QueueItem.objects.filter(doctor=owner).order_by('ticket_number', 'created_at')
+        items = QueueItem.objects.filter(doctor_id=owner.pk).order_by('ticket_number', 'created_at')
         data = []
         for item in items:
             try:
                 data.append(_item_to_frontend(item))
             except Exception as e:
-                logger.warning("queue_list _item_to_frontend skip item %s: %s", item.pk, e)
+                logger.warning("queue_list _item_to_frontend skip item %s: %s", getattr(item, 'pk', item), e)
         return Response({'success': True, 'data': data})
     except Exception as e:
         logger.exception("queue_list error: %s", e)
+        err_detail = {'detail': str(e)} if getattr(settings, 'DEBUG', False) else {}
         return Response(
-            {'success': False, 'error': {'code': 500, 'message': 'Server xatosi', 'detail': str(e)}},
+            {'success': False, 'error': {'code': 500, 'message': 'Server xatosi', **err_detail}},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
@@ -94,23 +101,33 @@ def queue_add(request):
             {'success': False, 'error': {'code': 400, 'message': 'Ism, familiya va yosh majburiy'}},
             status=status.HTTP_400_BAD_REQUEST
         )
-    max_ticket = QueueItem.objects.filter(doctor=owner).aggregate(
-        max_ticket=Max('ticket_number')
-    )['max_ticket'] or 0
-    next_ticket = max_ticket + 1
-    arrival_time = request.data.get('arrivalTime') or timezone.now().strftime('%H:%M')
-    item = QueueItem.objects.create(
-        doctor=owner,
-        first_name=first_name,
-        last_name=last_name,
-        age=age,
-        address=(request.data.get('address') or '').strip(),
-        complaints=(request.data.get('complaints') or '').strip(),
-        status='waiting',
-        ticket_number=next_ticket,
-        arrival_time=arrival_time,
-    )
-    return Response({'success': True, 'data': _item_to_frontend(item)}, status=status.HTTP_201_CREATED)
+    try:
+        max_ticket = QueueItem.objects.filter(doctor_id=owner.pk).aggregate(
+            max_ticket=Max('ticket_number')
+        ).get('max_ticket') or 0
+        next_ticket = max_ticket + 1
+        arrival_time = request.data.get('arrivalTime') or timezone.now().strftime('%H:%M')
+        if not isinstance(arrival_time, str):
+            arrival_time = str(arrival_time) if arrival_time else timezone.now().strftime('%H:%M')
+        item = QueueItem.objects.create(
+            doctor_id=owner.pk,
+            first_name=first_name,
+            last_name=last_name,
+            age=age,
+            address=(request.data.get('address') or '').strip(),
+            complaints=(request.data.get('complaints') or '').strip(),
+            status='waiting',
+            ticket_number=next_ticket,
+            arrival_time=arrival_time[:20],
+        )
+        return Response({'success': True, 'data': _item_to_frontend(item)}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        logger.exception("queue_add error: %s", e)
+        err_detail = {'detail': str(e)} if getattr(settings, 'DEBUG', False) else {}
+        return Response(
+            {'success': False, 'error': {'code': 500, 'message': 'Navbatga qo\'shishda xatolik', **err_detail}},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @api_view(['PATCH', 'DELETE'])
