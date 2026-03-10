@@ -106,3 +106,7 @@ echo "  medora.cdcgroup.uz (local): HTTP $HTTP_FRONT (200 bo'lishi kerak; 404 bo
 
 echo ""
 echo "Tugadi. Bitta domen: https://medora.cdcgroup.uz (frontend + /api/ + /health/). Brauzerda Ctrl+Shift+R bilan yangilang."
+echo ""
+# 400 chiqsa: DNS tekshirish (medora.cdcgroup.uz -> 167.71.53.238 bo'lishi kerak)
+PUBLIC_HEALTH=$(curl -sk -o /dev/null -w "%{http_code}" --connect-timeout 5 "https://medora.cdcgroup.uz/health/" 2>/dev/null || echo "err")
+echo "  Public https://medora.cdcgroup.uz/health/ (servernan): HTTP $PUBLIC_HEALTH (200 bo'lishi kerak; 400/err bo'lsa: deploy/TROUBLESHOOT_400.md)"

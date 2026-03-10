@@ -25,4 +25,4 @@ Write-Host "=== 2. Serverda: pull + migrate + build + restart ===" -ForegroundCo
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Write-Host ""
-Write-Host "Tugadi. https://medora.cdcgroup.uz — brauzerda Ctrl+Shift+R bilan yangilang." -ForegroundColor Green
+Write-Host "Tugadi. https://medora.cdcgroup.uz - brauzerda Ctrl+Shift+R bilan yangilang." -ForegroundColor Green
