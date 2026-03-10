@@ -17,13 +17,15 @@ fi
 source venv/bin/activate
 pip install -q -r requirements.txt
 python manage.py migrate --noinput
+python manage.py create_monitoring_demo_user 2>/dev/null || true
 python manage.py collectstatic --noinput 2>/dev/null || true
 deactivate
 
-echo "=== 3. Frontend build (API: medoraai.cdcgroup.uz) ==="
+echo "=== 3. Frontend build (API: medora.cdcgroup.uz — bitta domen) ==="
 cd "$APP_DIR/frontend"
 npm install --silent 2>/dev/null || npm install
-export VITE_API_BASE_URL=https://medoraai.cdcgroup.uz/api
+# Bitta domen: medora.cdcgroup.uz (API ham shu domen orqali)
+export VITE_API_BASE_URL=https://medora.cdcgroup.uz/api
 npm run build
 
 # Nginx (www-data) /root/medoraai/dist ni o'qishi uchun huquq
@@ -100,4 +102,4 @@ HTTP_FRONT=$(curl -s -o /dev/null -w "%{http_code}" -H "Host: medora.cdcgroup.uz
 echo "  medora.cdcgroup.uz (local): HTTP $HTTP_FRONT (200 bo'lishi kerak; 404 bo'lsa DNS boshqa serverga yo'naltirilgan bo'lishi mumkin)"
 
 echo ""
-echo "Tugadi. Frontend: http://medora.cdcgroup.uz  API: http://medoraai.cdcgroup.uz  (DNS 167.71.53.238 ga yo'naltirilgan bo'lishi kerak)"
+echo "Tugadi. Bitta domen: https://medora.cdcgroup.uz (frontend + /api/ + /health/). Brauzerda Ctrl+Shift+R bilan yangilang."
