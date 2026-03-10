@@ -14,11 +14,11 @@ logger = logging.getLogger(__name__)
 class NormalizeHostMiddleware(MiddlewareMixin):
     """
     Run first: normalize Host for cdcgroup.uz so ALLOWED_HOSTS check never returns 400.
-    Nginx may send Host with port; we force a known-good host for /health/ and /api/.
+    Barcha so'rovlar (login, health, api) uchun Host ni medora.cdcgroup.uz qiladi.
     """
     def process_request(self, request):
         host = (request.META.get('HTTP_HOST') or '').strip().split(':')[0].lower()
-        if host and 'cdcgroup.uz' in host and (request.path.startswith('/health') or request.path.startswith('/api/')):
+        if host and 'cdcgroup.uz' in host:
             request.META['HTTP_HOST'] = 'medora.cdcgroup.uz'
         return None
 

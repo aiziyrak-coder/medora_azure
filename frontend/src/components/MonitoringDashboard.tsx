@@ -2152,7 +2152,7 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({ user, onLogou
                     ))}
                     {sortedCards.length === 0 && !error && (
                       <div className="text-center py-12 text-slate-500">
-                        Hozircha bemor monitorlar ro‘yxati bo‘sh. <strong>Boshqaruv</strong> bo‘limida palata, qurilma va bemor qo‘shing.
+                        Hozircha bemor monitorlar ro‘yxati bo‘sh. <strong>Boshqaruv</strong> bo‘limida palata, qurilma va bemor qo‘shing yoki serverda <code className="bg-slate-700 px-1 rounded">python manage.py create_monitoring_demo_data</code> ishlating.
                       </div>
                     )}
                   </div>
@@ -2160,7 +2160,7 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({ user, onLogou
                   <div className={`grid grid-cols-1 gap-4 ${gridColumns === 4 ? 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : gridColumns === 6 ? 'sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6' : gridColumns === 8 ? 'sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8' : 'sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-12'}`}>
                     {sortedCards.length === 0 && !error && (
                       <div className="col-span-full text-center py-12 text-slate-500">
-                        Hozircha bemor monitorlar ro‘yxati bo‘sh. <strong>Boshqaruv</strong> bo‘limida palata, qurilma va bemor qo‘shing.
+                        Hozircha bemor monitorlar ro‘yxati bo‘sh. <strong>Boshqaruv</strong> bo‘limida palata, qurilma va bemor qo‘shing yoki serverda <code className="bg-slate-700 px-1 rounded">python manage.py create_monitoring_demo_data</code> ishlating.
                       </div>
                     )}
                     {sortedCards.map((card) => (

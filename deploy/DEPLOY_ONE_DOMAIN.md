@@ -33,6 +33,17 @@ Brauzer **medoraai.cdcgroup.uz** ga so‘rov yuborayotgan bo‘lsa, serverda **e
 3. Deploy tugagach, brauzerda **qattiq yangilash**: **Ctrl+Shift+R** (yoki Cmd+Shift+R).  
    Shundan keyin so‘rovlar medoraai.cdcgroup.uz emas, medora.cdcgroup.uz ga ketadi va login ishlashi kerak.
 
+## 400 Bad Request bo‘lsa
+
+Serverda backend Host sarlavhasini qabul qilishi kerak. Tekshirish (SSH orqali):
+
+```bash
+curl -s -o /dev/null -w "%{http_code}" -H "Host: medora.cdcgroup.uz" http://127.0.0.1:8001/health/
+# 200 chiqishi kerak; 400 bo‘lsa backend yangilanmagan yoki ALLOWED_HOSTS muammo
+```
+
+Keyin backendni qayta ishga tushiring: `sudo systemctl restart medoraai-backend-8001.service`
+
 ## Demo kirish
 
 Login: **+998907000001**  

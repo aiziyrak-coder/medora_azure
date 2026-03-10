@@ -22,6 +22,7 @@ class Command(BaseCommand):
                 'name': DEMO_NAME,
                 'role': 'monitoring',
                 'subscription_status': 'active',
+                'is_active': True,
             },
         )
         if created:
@@ -32,6 +33,8 @@ class Command(BaseCommand):
             user.set_password(DEMO_PASSWORD)
             user.role = 'monitoring'
             user.name = DEMO_NAME
-            user.save(update_fields=['password', 'role', 'name'])
+            user.subscription_status = 'active'
+            user.is_active = True
+            user.save(update_fields=['password', 'role', 'name', 'subscription_status', 'is_active'])
             self.stdout.write(self.style.SUCCESS(f'Updated monitoring demo user: {DEMO_PHONE}'))
         self.stdout.write(f'  Login: {DEMO_PHONE} / {DEMO_PASSWORD}')
