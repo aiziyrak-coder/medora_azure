@@ -37,9 +37,10 @@ def custom_exception_handler(exc, context):
             details = err_body if debug else {k: v for k, v in err_body.items() if k in ('detail', 'message')}
         custom_response_data = {
             'success': False,
-            'error': {'code': response.status_code, 'message': msg, 'details': details}
+            'error': {'code': response.status_code, 'message': msg or str(exc), 'details': details}
         }
         response.data = custom_response_data
+        response['Content-Type'] = 'application/json; charset=utf-8'
         logger.error("API Error: %s", exc, exc_info=True)
     else:
         # Handle unexpected errors (500)

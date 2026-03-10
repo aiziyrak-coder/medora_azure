@@ -263,9 +263,11 @@ const handleResponse = async <T>(response: Response): Promise<ApiResponse<T>> =>
       (data?.message as string | undefined) ||
       (typeof data?.detail === 'string' ? data.detail : null) ||
       (Array.isArray(data?.detail) ? (data.detail as string[]).join('. ') : null) ||
-      (response.status === 400 ? 'Ma\'lumotlar noto\'g\'ri. Telefon yoki parolni tekshiring.' : 'Xatolik yuz berdi. Iltimos, keyinroq urinib ko\'ring.');
-    if (response.status === 400 && !errObj?.message && typeof console !== 'undefined' && console.warn) {
-      console.warn('[MedoraAI] 400 javob (server xabari ko\'rinmadi):', data);
+      (response.status === 400
+        ? "Ma'lumotlar noto'g'ri. Telefon, parol va boshqa maydonlarni tekshiring."
+        : "Xatolik yuz berdi. Iltimos, keyinroq urinib ko'ring.");
+    if (response.status === 400 && !errObj?.message && Object.keys(data).length === 0 && typeof console !== 'undefined' && console.warn) {
+      console.warn('[MedoraAI] 400 javob (server tanasi bo\'sh):', response.url);
     }
     return {
       success: false,

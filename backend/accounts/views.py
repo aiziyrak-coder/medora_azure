@@ -5,6 +5,9 @@ import json
 import logging
 from datetime import datetime, timedelta
 from django.db import IntegrityError
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 import requests
 from django.conf import settings
 from django.core.cache import cache
@@ -235,26 +238,38 @@ class CustomTokenRefreshView(TokenRefreshView):
         return response
 
 
-@api_view(['POST'])
-@permission_classes([permissions.AllowAny])
-def register(request):
-    """User registration endpoint — har doim JSON qaytaradi."""
+def _parse_register_body(request):
+    """Parse POST body manually to avoid DRF parser 400 with empty body. Always returns dict."""
+    raw = getattr(request, 'body', None) or b''
+    if isinstance(raw, bytes):
+        try:
+            raw = raw.decode('utf-8')
+        except Exception:
+            return {}
+    text = (raw or '').strip()
+    if not text:
+        return {}
     try:
-        data = {}
-        if hasattr(request, 'data') and request.data:
-            raw = request.data
-            try:
-                data = dict(raw) if not isinstance(raw, dict) else raw.copy()
-            except Exception:
-                data = {k: getattr(raw, 'get', lambda _: raw[k])(k) for k in (raw.keys() if hasattr(raw, 'keys') else [])}
-        if not data and getattr(request, 'body', None):
-            try:
-                body = request.body.decode('utf-8') if isinstance(request.body, bytes) else str(request.body)
-                if body.strip():
-                    data = json.loads(body)
-            except Exception:
-                pass
-        data = dict(data)
+        out = json.loads(text)
+        return dict(out) if isinstance(out, dict) else {}
+    except json.JSONDecodeError:
+        return {}
+
+
+def _json_http_response(payload, status_code, content_type='application/json; charset=utf-8'):
+    """Return HttpResponse with JSON body (anig Content-Length) — 400/201 body yo'qolishini oldini olish."""
+    body = json.dumps(payload, ensure_ascii=False)
+    r = HttpResponse(body, content_type=content_type, status=status_code)
+    r['Content-Length'] = str(len(body.encode('utf-8')))
+    return r
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def register(request):
+    """User registration — body faqat request.body dan, javob har doim HttpResponse (anig JSON body)."""
+    try:
+        data = _parse_register_body(request)
         if data.get('linked_doctor') in ('', None):
             data.pop('linked_doctor', None)
         if data.get('password') and not data.get('password_confirm'):
@@ -265,32 +280,35 @@ def register(request):
             data['phone'] = str(data['phone']).strip()
         if data.get('role') is not None:
             data['role'] = str(data['role']).strip().lower()
-        logger.info(f"Register attempt: role={data.get('role')}, phone={data.get('phone')}, keys={list(data.keys())}")
+        if not data:
+            return _json_http_response({
+                'success': False,
+                'error': {'code': 400, 'message': "So'rov tanasi bo'sh yoki noto'g'ri. JSON (phone, name, password, role) yuborilishi kerak.", 'details': {}}
+            }, 400)
+        logger.info("Register attempt: role=%s, phone=%s, keys=%s", data.get('role'), data.get('phone'), list(data.keys()))
         serializer = UserCreateSerializer(data=data)
         if serializer.is_valid():
             try:
                 user = serializer.save()
             except IntegrityError as e:
                 if 'phone' in str(e).lower() or 'unique' in str(e).lower():
-                    return Response({
+                    return _json_http_response({
                         'success': False,
-                        'error': {'code': status.HTTP_400_BAD_REQUEST, 'message': "Bu telefon raqami allaqachon ro'yxatdan o'tgan.", 'details': {'phone': ["Bu telefon raqami allaqachon ro'yxatdan o'tgan."]}}
-                    }, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+                        'error': {'code': 400, 'message': "Bu telefon raqami allaqachon ro'yxatdan o'tgan.", 'details': {'phone': ["Bu telefon raqami allaqachon ro'yxatdan o'tgan."]}}
+                    }, 400)
                 raise
             refresh = RefreshToken.for_user(user)
             _register_session_for_tokens(user, refresh)
-            return Response({
+            user_data = UserSerializer(user).data
+            return _json_http_response({
                 'success': True,
-                'message': 'Ro\'yxatdan o\'tish muvaffaqiyatli',
+                'message': "Ro'yxatdan o'tish muvaffaqiyatli",
                 'data': {
-                    'user': UserSerializer(user).data,
-                    'tokens': {
-                        'access': str(refresh.access_token),
-                        'refresh': str(refresh),
-                    }
+                    'user': user_data,
+                    'tokens': {'access': str(refresh.access_token), 'refresh': str(refresh)}
                 }
-            }, status=status.HTTP_201_CREATED, content_type='application/json')
-        flat_msg = 'Ma\'lumotlar noto\'g\'ri'
+            }, 201)
+        flat_msg = "Ma'lumotlar noto'g'ri"
         if serializer.errors:
             for field, errs in serializer.errors.items():
                 if isinstance(errs, list) and errs:
@@ -299,17 +317,17 @@ def register(request):
                 if isinstance(errs, str):
                     flat_msg = errs
                     break
-        logger.warning(f"Register validation failed: {serializer.errors}")
-        return Response({
+        logger.warning("Register validation failed: %s", serializer.errors)
+        return _json_http_response({
             'success': False,
-            'error': {'code': status.HTTP_400_BAD_REQUEST, 'message': flat_msg, 'details': serializer.errors}
-        }, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+            'error': {'code': 400, 'message': flat_msg, 'details': serializer.errors}
+        }, 400)
     except Exception as e:
         logger.exception("Register exception: %s", e)
-        return Response({
+        return _json_http_response({
             'success': False,
-            'error': {'code': status.HTTP_500_INTERNAL_SERVER_ERROR, 'message': 'Ro\'yxatdan o\'tishda server xatoligi. Iltimos, keyinroq urinib ko\'ring.'}
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR, content_type='application/json')
+            'error': {'code': 500, 'message': "Ro'yxatdan o'tishda server xatoligi. Iltimos, keyinroq urinib ko'ring."}
+        }, 500)
 
 
 @api_view(['GET', 'PUT', 'PATCH'])

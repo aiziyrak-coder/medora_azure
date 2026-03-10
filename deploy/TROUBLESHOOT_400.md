@@ -47,3 +47,16 @@ Agar **ikkalasi ham 200** bo‘lsa — **bizning server ishlayapti**. 400 brauze
 | Brauzerda 400          | —      | Brauzer boshqa IPga ulanmoqda (DNS/proxy) |
 
 **Eng tez-tez sabab:** domen hali **167.71.53.238** ga yo‘naltirilmagan yoki CDN/proxy boshqa serverga yo‘naltiradi. DNS ni to‘g‘rilang.
+
+## 5. Backend ishlamasa (502, frontga kira olmaslik)
+
+Agar **medoraapi.cdcgroup.uz** yoki **medoraai.cdcgroup.uz** ochilmasa yoki frontend API ga ulanmasa:
+
+1. **DNS:** `medoraapi.cdcgroup.uz` va `medoraai.cdcgroup.uz` uchun **A** yozuv **167.71.53.238** bo‘lishi kerak (medora.cdcgroup.uz bilan bir xil server).
+2. **Backend (Django) ishlayaptimi:** serverda:
+   ```bash
+   sudo systemctl status medoraai-backend-8001.service
+   curl -s http://127.0.0.1:8001/health/
+   ```
+   Agar 200 kelmasa: `sudo journalctl -u medoraai-backend-8001.service -n 50 --no-pager` — xatolikni ko‘ring. Keyin `sudo systemctl restart medoraai-backend-8001.service`.
+3. **Ishlatish:** Frontend **https://medora.cdcgroup.uz** da ochiladi; API avtomatik **https://medora.cdcgroup.uz/api/** ga boradi. Alohida API domeni kerak bo‘lsa: **https://medoraapi.cdcgroup.uz** yoki **https://medoraai.cdcgroup.uz** (ikkalasi ham 127.0.0.1:8001 ga proxy).

@@ -54,6 +54,22 @@ cp "$APP_DIR/deploy/medoraai-backend-8001.service" /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable medoraai-backend-8001.service
 systemctl restart medoraai-backend-8001.service
+sleep 3
+# Backend 8001 ishlamasa qayta urinish va xabar
+for i in 1 2; do
+  if curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8001/health/ | grep -q 200; then
+    echo "  Backend 8001 ishga tushdi."
+    break
+  fi
+  if [ "$i" -eq 1 ]; then
+    echo "  Backend 8001 birinchi marta javob bermadi, qayta ishga tushirilmoqda..."
+    systemctl restart medoraai-backend-8001.service
+    sleep 3
+  else
+    echo "  XATO: Backend 8001 ishlamadi. Tekshiring: systemctl status medoraai-backend-8001.service && journalctl -u medoraai-backend-8001.service -n 30 --no-pager"
+    exit 1
+  fi
+done
 
 echo "=== 6. Nginx (medora.cdcgroup.uz, medoraai.cdcgroup.uz) + HTTPS ==="
 if [ -d /etc/nginx/sites-available ]; then
@@ -77,8 +93,8 @@ if [ -d /etc/nginx/sites-available ]; then
     nginx -t && systemctl reload nginx
     mkdir -p "$APP_DIR/dist/.well-known/acme-challenge"
     if command -v certbot >/dev/null 2>&1; then
-      certbot certonly --webroot -w "$APP_DIR/dist" -d medora.cdcgroup.uz -d medoraai.cdcgroup.uz \
-        --non-interactive --agree-tos -m admin@cdcgroup.uz --no-eff-email 2>/dev/null || true
+      certbot certonly --webroot -w "$APP_DIR/dist" -d medora.cdcgroup.uz -d medoraai.cdcgroup.uz -d medoraapi.cdcgroup.uz \
+        --non-interactive --agree-tos -m admin@cdcgroup.uz --no-eff-email --expand 2>/dev/null || true
     else
       echo "  certbot o'rnatilmagan: apt install certbot -y"
     fi
