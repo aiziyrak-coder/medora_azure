@@ -23,14 +23,22 @@ if not DEBUG and SECRET_KEY == _default_secret:
         'Generate one with: python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"'
     )
 
-# ALLOWED_HOSTS: from env, then always add production hosts so 400 Bad Request never happens
-_def_hosts = config(
-    'ALLOWED_HOSTS',
-    default='localhost,127.0.0.1,medora.ziyrak.org,medoraapi.ziyrak.org,medora.cdcgroup.uz,medoraai.cdcgroup.uz,20.82.115.71,167.71.53.238',
-    cast=lambda v: [s.strip() for s in v.split(',') if s.strip()]
-)
-_required_hosts = ['medora.cdcgroup.uz', 'medoraai.cdcgroup.uz', '167.71.53.238']
-ALLOWED_HOSTS = list(_def_hosts) + [h for h in _required_hosts if h not in _def_hosts]
+# ALLOWED_HOSTS: production hostlar har doim boshida (400 Bad Request bartaraf)
+_required_hosts = [
+    'medora.cdcgroup.uz',
+    'medoraai.cdcgroup.uz',
+    '167.71.53.238',
+    '.cdcgroup.uz',  # any subdomain (medora, medoraai, etc.)
+]
+try:
+    _env_hosts = config(
+        'ALLOWED_HOSTS',
+        default='localhost,127.0.0.1,medora.ziyrak.org,medoraapi.ziyrak.org,20.82.115.71',
+        cast=lambda v: [s.strip() for s in str(v).split(',') if s.strip()]
+    )
+except Exception:
+    _env_hosts = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = _required_hosts + [h for h in _env_hosts if h not in _required_hosts]
 
 # Application definition
 INSTALLED_APPS = [
