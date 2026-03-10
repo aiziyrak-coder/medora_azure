@@ -11,6 +11,18 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
+class NormalizeHostMiddleware(MiddlewareMixin):
+    """
+    Run first: normalize Host for cdcgroup.uz so ALLOWED_HOSTS check never returns 400.
+    Nginx may send Host with port; we force a known-good host for /health/ and /api/.
+    """
+    def process_request(self, request):
+        host = (request.META.get('HTTP_HOST') or '').strip().split(':')[0].lower()
+        if host and 'cdcgroup.uz' in host and (request.path.startswith('/health') or request.path.startswith('/api/')):
+            request.META['HTTP_HOST'] = 'medora.cdcgroup.uz'
+        return None
+
+
 class CORSFallbackMiddleware(MiddlewareMixin):
     """Add CORS header for /health/ and /api/ if missing (e.g. error responses)."""
     def process_response(self, request, response):
