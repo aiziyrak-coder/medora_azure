@@ -1,24 +1,23 @@
 """
-WSGI config for medoraai_backend project.
-Serverni .env yoki eski settings override qilsa ham: ALLOWED_HOSTS va get_host() bu yerda majburan o'rnatiladi.
+WSGI: DisallowedHost bartaraf — get_host() va ALLOWED_HOSTS dastlabki yuklanishda o'rnatiladi.
 """
 
 import os
-
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'medoraai_backend.settings')
 
+# 1) get_host() ni PATCH qilish DARHOL — django.setup() DAN OLDIN (request moduli birinchi marta import)
+import django.http.request as _req_mod
+_safe_get_host = lambda self: (self.META.get('HTTP_HOST') or 'medora.cdcgroup.uz').split('#')[0].strip()
+_req_mod.HttpRequest.get_host = _safe_get_host
+
+# 2) Django ishga tushirish
 import django
 django.setup()
 
-# Serverni .env ALLOWED_HOSTS ni e'tiborsiz qoldirish — har doim barcha hostlar
+# 3) ALLOWED_HOSTS majburan * (serverni .env override qilishini bekor qilish)
 from django.conf import settings as _s
 _s.ALLOWED_HOSTS = ['*']
 
-# get_host() hech qachon DisallowedHost ko'tarmasligi uchun
-from django.http import HttpRequest
-HttpRequest.get_host = lambda self: (
-    (self.META.get('HTTP_HOST') or 'medora.cdcgroup.uz').split('#')[0].strip()
-)
-
+# 4) Application
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()

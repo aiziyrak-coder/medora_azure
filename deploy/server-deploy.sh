@@ -54,6 +54,8 @@ if [ -f "$APP_DIR/backend/.env" ]; then
   sed -i.bak '/^ALLOWED_HOSTS=/d' "$APP_DIR/backend/.env" 2>/dev/null || true
   echo "  .env dan ALLOWED_HOSTS o'chirildi (agar bor edi)."
 fi
+# wsgi.py da patch borligini tekshirish
+grep -q "HttpRequest.get_host = _safe_get_host\|_req_mod.HttpRequest.get_host" "$APP_DIR/backend/medoraai_backend/wsgi.py" 2>/dev/null && echo "  wsgi.py: get_host patch mavjud." || echo "  DIQQAT: wsgi.py da get_host patch yo'q!"
 
 echo "=== 5. Systemd: MedoraAI backend 8001 ==="
 cp "$APP_DIR/deploy/medoraai-backend-8001.service" /etc/systemd/system/
