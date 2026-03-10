@@ -37,8 +37,20 @@ systemctl daemon-reload
 systemctl enable medoraai-backend-8001.service
 systemctl restart medoraai-backend-8001.service
 
-echo "=== 6. Nginx (167.71.53.238 + medora.cdcgroup.uz, medoraai.cdcgroup.uz) ==="
+echo "=== 6. Nginx (medora.cdcgroup.uz, medoraai.cdcgroup.uz — eski bloklarni o'chirish) ==="
 if [ -d /etc/nginx/sites-available ]; then
+  # Eski configlar (medora.cdcgroup.uz / medoraai.cdcgroup.uz) sites-enabled dan olib tashlash — yangi config ishlashi uchun
+  for f in /etc/nginx/sites-enabled/*; do
+    [ -e "$f" ] || continue
+    target="$(readlink -f "$f" 2>/dev/null)" || target="$f"
+    if grep -q "server_name.*medora.*cdcgroup\|server_name.*medoraai.*cdcgroup" "$target" 2>/dev/null; then
+      case "$(basename "$f")" in
+        medoraai-cdcgroup) continue ;;
+      esac
+      echo "  Eski config o'chirilmoqda: $f"
+      rm -f "$f"
+    fi
+  done
   cp "$APP_DIR/deploy/nginx-medoraai-ip.conf" /etc/nginx/sites-available/medoraai-ip
   cp "$APP_DIR/deploy/nginx-cdcgroup.conf" /etc/nginx/sites-available/medoraai-cdcgroup
   ln -sf /etc/nginx/sites-available/medoraai-ip /etc/nginx/sites-enabled/medoraai-ip 2>/dev/null || true
