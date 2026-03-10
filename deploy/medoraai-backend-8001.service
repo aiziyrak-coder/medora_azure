@@ -1,0 +1,27 @@
+# MedoraAI Backend — port 8001, loyiha /root/medoraai
+# O'rnatish: sudo cp deploy/medoraai-backend-8001.service /etc/systemd/system/ && sudo systemctl daemon-reload && sudo systemctl enable --now medoraai-backend-8001
+
+[Unit]
+Description=MedoraAI Backend (Gunicorn, port 8001)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/root/medoraai/backend
+Environment=DJANGO_SETTINGS_MODULE=medoraai_backend.settings
+ExecStart=/root/medoraai/backend/venv/bin/gunicorn \
+    --bind 127.0.0.1:8001 \
+    --workers 2 \
+    --threads 4 \
+    --timeout 180 \
+    --access-logfile - \
+    --error-logfile - \
+    --log-level info \
+    medoraai_backend.wsgi:application
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

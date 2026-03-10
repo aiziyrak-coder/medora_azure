@@ -157,3 +157,23 @@ pip install -r ../monitoring_gateway/requirements.txt
 deactivate
 echo "Tugadi. Backend: cd $APP_DIR/backend && source venv/bin/activate && gunicorn --bind 127.0.0.1:8000 medoraai_backend.wsgi:application"
 ```
+
+---
+
+## 7. Port 8000 band bo‘lsa (Connection in use)
+
+Agar `gunicorn` yoki boshqa dastur 8000 portni allaqachon ishlatayotgan bo‘lsa, avval portni bo‘shating:
+
+```bash
+# 8000 portni kim ishlatayotganini ko‘rish
+sudo lsof -i :8000
+# yoki
+sudo ss -tlnp | grep 8000
+
+# PID ni topib to‘xtatish (PID — jadvaldagi ikkinchi ustun)
+sudo kill <PID>
+# yoki zo‘r bilan:
+sudo kill -9 <PID>
+```
+
+Keyin gunicorn ni qayta ishga tushiring.
