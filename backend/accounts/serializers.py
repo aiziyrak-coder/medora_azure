@@ -3,8 +3,8 @@ User Serializers
 """
 from datetime import timedelta
 from rest_framework import serializers
-from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
 from .models import User, SubscriptionPlan, SubscriptionPayment, QueueItem
 
@@ -35,9 +35,15 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'date_joined', 'last_login']
 
 
+def _validate_password_length(value):
+    """Ro'yxatdan o'tishda faqat uzunlik (Django validate_password 400 kamroq)."""
+    if len(value) < 8:
+        raise serializers.ValidationError("Parol kamida 8 ta belgidan iborat bo'lishi kerak.")
+
+
 class UserCreateSerializer(serializers.ModelSerializer):
     """Serializer for user registration (clinic, doctor, staff, monitoring)."""
-    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password = serializers.CharField(write_only=True, required=True, validators=[_validate_password_length])
     password_confirm = serializers.CharField(write_only=True, required=True)
     linked_doctor = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     specialties = serializers.ListField(

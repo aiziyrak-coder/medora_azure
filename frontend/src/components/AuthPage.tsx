@@ -11,6 +11,7 @@ import { AIModel } from '../constants/specialists';
 import { AI_SPECIALISTS } from '../constants';
 import LanguageSwitcher from './LanguageSwitcher';
 import { Language } from '../i18n/LanguageContext';
+import { PhoneInputWith998 } from './PhoneInputWith998';
 
 interface AuthPageProps {
     onLoginSuccess: (user: User) => void;
@@ -144,7 +145,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
         setMessage('');
 
         try {
-            const result = await authService.requestPasswordReset(phone);
+            let digits = phone.replace(/\D/g, '');
+            if (digits.startsWith('998')) digits = digits.slice(3);
+            const fullPhone = digits.length >= 9 ? `+998${digits.slice(0, 9)}` : phone;
+            const result = await authService.requestPasswordReset(fullPhone);
             if (result.success) {
                 setMessage(result.message);
             } else {
@@ -164,9 +168,11 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
         setMessage('');
 
         try {
+            let digits = phone.replace(/\D/g, '');
+            if (digits.startsWith('998')) digits = digits.slice(3);
+            const fullPhone = digits.length >= 9 ? `+998${digits.slice(0, 9)}` : phone;
             if (mode === 'login') {
-                // Try API first, fallback to local
-                const result = await authService.login({ phone, password });
+                const result = await authService.login({ phone: fullPhone, password });
                 if (result.success) {
                     const user = authService.getCurrentUser();
                     // Validation for correct role login
@@ -186,9 +192,13 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
                     setIsLoading(false);
                     return;
                 }
-                // Try API first, fallback to local
+                if (fullPhone.length < 12) {
+                    setError("Telefon raqam 9 ta raqamdan iborat bo'lishi kerak (90 123 45 67).");
+                    setIsLoading(false);
+                    return;
+                }
                 const result = await authService.register({ 
-                    phone, 
+                    phone: fullPhone, 
                     password, 
                     password_confirm: password,
                     name, 
@@ -461,16 +471,12 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
                                 <label htmlFor="auth-phone" className="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1">
                                     {t('auth_phone_label')}
                                 </label>
-                                <input
+                                <PhoneInputWith998
                                     id="auth-phone"
-                                    name="phone"
-                                    type="tel"
                                     value={phone}
-                                    onChange={(e) => setPhone(e.target.value)}
-                                    className="block w-full px-4 py-2.5 bg-white/10 border border-white/10 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none font-medium backdrop-blur-sm text-sm"
-                                    required
-                                    placeholder={t('auth_phone_placeholder')}
-                                    autoComplete="tel"
+                                    onChange={setPhone}
+                                    placeholder="90 123 45 67"
+                                    showHint={true}
                                 />
                             </div>
                             

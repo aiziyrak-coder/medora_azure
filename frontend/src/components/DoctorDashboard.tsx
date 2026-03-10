@@ -34,6 +34,7 @@ import StethoscopeIcon from './icons/StethoscopeIcon';
 import UploadCloudIcon from './icons/UploadCloudIcon';
 import UsersIcon from './icons/UsersIcon';
 import MonitorIcon from './icons/MonitorIcon';
+import { PhoneInputWith998 } from './PhoneInputWith998';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
 import PencilIcon from './icons/PencilIcon';
 import AlertTriangleIcon from './icons/AlertTriangleIcon';
@@ -1098,6 +1099,11 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
             setAssistantMsg("Ism va telefon raqam majburiy.");
             return;
         }
+        const phoneDigits = assistantData.phone.replace(/\D/g, '');
+        if (phoneDigits.length < 9 || !assistantData.phone.startsWith('+998')) {
+            setAssistantMsg("Telefon raqam 9 ta raqamdan iborat bo'lishi kerak (+998 90 123 45 67).");
+            return;
+        }
         if (!assistantData.password || assistantData.password.length < 8) {
             setAssistantMsg("Parol kamida 8 ta belgidan iborat bo'lishi kerak.");
             return;
@@ -1370,11 +1376,13 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                                 </div>
                                 <div>
                                     <label className="text-xs font-bold text-slate-400 uppercase ml-1">Telefon (Login)</label>
-                                    <input 
+                                    <PhoneInputWith998
                                         value={assistantData.phone}
-                                        onChange={e => setAssistantData({...assistantData, phone: e.target.value})}
-                                        className="w-full common-input bg-white/10 border-white/10 text-white focus:bg-white focus:text-slate-900"
-                                        placeholder={t('assistant_phone_placeholder')}
+                                        onChange={phone => setAssistantData({ ...assistantData, phone })}
+                                        placeholder="90 123 45 67"
+                                        showHint={false}
+                                        className="mt-1"
+                                        inputClassName="focus:bg-white focus:text-slate-900"
                                     />
                                 </div>
                                 <div>
