@@ -7,6 +7,12 @@ from datetime import timedelta
 import os
 from decouple import config
 
+# DisallowedHost bartaraf: get_host() ni settings yuklanishida patch (medoraapi.cdcgroup.uz qabul qilish)
+import django.http.request as _django_request_mod
+_django_request_mod.HttpRequest.get_host = lambda self: (
+    (self.META.get('HTTP_HOST') or 'medora.cdcgroup.uz').split('#')[0].strip()
+)
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,9 +29,8 @@ if not DEBUG and SECRET_KEY == _default_secret:
         'Generate one with: python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"'
     )
 
-# ALLOWED_HOSTS: barcha hostlar qabul qilinsin (DisallowedHost/400 bartaraf)
-# .env da ALLOWED_HOSTS bo'lsa u ishlatiladi, aks holda barcha domenlar va * qo'shiladi
-_DEFAULT_ALLOWED_HOSTS = [
+# ALLOWED_HOSTS: medoraapi.cdcgroup.uz va kerakli domenlar HAR DOIM qo'shiladi
+_REQUIRED_ALLOWED_HOSTS = [
     '*',
     'medoraapi.cdcgroup.uz',
     'medora.cdcgroup.uz',
@@ -33,8 +38,9 @@ _DEFAULT_ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
 ]
-_raw_hosts = config('ALLOWED_HOSTS', default='')
-ALLOWED_HOSTS = [s.strip() for s in _raw_hosts.split(',') if s.strip()] if _raw_hosts.strip() else _DEFAULT_ALLOWED_HOSTS
+_env_hosts = config('ALLOWED_HOSTS', default='')
+_env_list = [s.strip() for s in _env_hosts.split(',') if s.strip()]
+ALLOWED_HOSTS = list(dict.fromkeys(_REQUIRED_ALLOWED_HOSTS + _env_list))
 
 # Application definition
 INSTALLED_APPS = [
@@ -453,8 +459,4 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
-# DisallowedHost to'liq bartaraf: get_host() ni settings yuklanganida patch (medoraapi.cdcgroup.uz va barcha hostlar)
-import django.http.request as _django_request_mod
-_django_request_mod.HttpRequest.get_host = lambda self: (
-    (self.META.get('HTTP_HOST') or 'medora.cdcgroup.uz').split('#')[0].strip()
-)
+# get_host() patch settings boshida qo'yilgan (DisallowedHost bartaraf)
