@@ -21,12 +21,15 @@ class EarlyHealthMiddleware(MiddlewareMixin):
     DisallowedHost bartaraf: har so'rovda ALLOWED_HOSTS = ['*'] (server .env override bo'lsa ham).
     """
     def process_request(self, request):
-        # 1) DisallowedHost bartaraf: barcha hostlarni qabul qilish
+        # 1) DisallowedHost to'liq bartaraf: get_host() ni override qilamiz (CommonMiddleware dan oldin)
+        _meta = request.META
+        _fallback_host = 'medora.cdcgroup.uz'
+        request.get_host = lambda: (_meta.get('HTTP_HOST') or _fallback_host).split('#')[0].strip()
+        # 2) ALLOWED_HOSTS va HTTP_HOST ham o'rnatamiz (qo'shimcha)
         settings.ALLOWED_HOSTS = ['*']
-        # 2) Host ni normalizatsiya qilish (get_host() chaqilishidan oldin)
-        host = (request.META.get('HTTP_HOST') or '').strip().split(':')[0].lower()
+        host = (_meta.get('HTTP_HOST') or '').strip().split(':')[0].lower()
         if host and 'cdcgroup.uz' in host:
-            request.META['HTTP_HOST'] = 'medora.cdcgroup.uz'
+            _meta['HTTP_HOST'] = 'medora.cdcgroup.uz'
         if request.method in ('GET', 'OPTIONS') and request.path.rstrip('/') == '/health':
             r = HttpResponse(HEALTH_BODY, content_type='application/json', status=200)
             r['Access-Control-Allow-Origin'] = '*'
