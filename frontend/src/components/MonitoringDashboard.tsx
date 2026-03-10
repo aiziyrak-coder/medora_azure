@@ -1380,12 +1380,13 @@ const ManagementView: React.FC<{
                 </button>
               </div>
               <div className="mb-4 p-4 bg-slate-800/80 border border-slate-600 rounded-lg text-slate-300 text-sm">
-                <p className="font-medium text-amber-200 mb-1">Haqiqiy ma&apos;lumot olish uchun (demo/mock yo&apos;q):</p>
-                <ol className="list-decimal list-inside space-y-1 text-slate-300">
-                  <li><strong>Gateway</strong> serverda ishlashi kerak (port 9000). Deploy qilganda avtomatik ishga tushadi.</li>
-                  <li><strong>HL7 rejim (K12 sizga ulanadi):</strong> Qurilma qo&apos;shishda IP va Portni <strong>bo&apos;sh</strong> qoldiring. K12 da Sozlamalar → Tarmoq: <strong>Server IP</strong> = 167.71.53.238, <strong>Port</strong> = 6006. Saqlang.</li>
-                  <li><strong>TCP rejim:</strong> Quyida IP va Port kiriting. Gateway va qurilma bir tarmoqda bo&apos;lishi kerak.</li>
-                  <li>Qurilma qo&apos;shilgach serverda: <code className="bg-slate-700 px-1 rounded">sudo systemctl restart medoraai-gateway-9000</code></li>
+                <p className="font-medium text-amber-200 mb-1">Haqiqiy ma&apos;lumot olish uchun (100+ qurilma, serverda nano/.env kerak emas):</p>
+                <ol className="list-decimal list-inside space-y-1.5 text-slate-300">
+                  <li><strong>Gateway</strong> serverda ishlashi kerak (port 9000 va 6006). Deploy qilganda avtomatik ishga tushadi.</li>
+                  <li><strong>Har bir K12 ga statik IP bering</strong> (masalan 192.168.0.1, 192.168.0.2, … 192.168.0.100). Router yoki tarmoq sozlamalarida qurilmalarga tartib bilan statik IP qo&apos;ying.</li>
+                  <li><strong>Platformada qurilma qo&apos;shish:</strong> Seriya (masalan K12_001), <strong>IP</strong> = shu qurilmaning statik IP (masalan 192.168.0.1), <strong>Port</strong> = 6006. Saqlang — serverda hech qanday .env yoki nano o&apos;zgartirish kerak emas.</li>
+                  <li><strong>Har bir K12 da:</strong> Sozlamalar → Tarmoq: <strong>Server IP</strong> = 167.71.53.238, <strong>Port</strong> = 6006. Saqlang. Qurilma platformaga ulanadi; qurilma IP orqali avtomatik aniqlanadi.</li>
+                  <li><strong>TCP rejim</strong> (gateway qurilmaga ulanadi): IP va Portni kiriting; gateway va qurilma bir tarmoqda bo&apos;lishi kerak.</li>
                 </ol>
               </div>
               {showDeviceForm && (
@@ -1410,26 +1411,26 @@ const ManagementView: React.FC<{
                       required={!editingDeviceId}
                       readOnly={!!editingDeviceId}
                     />
-                    <p className="mt-1 text-xs text-slate-500">Gateway (HL7) dan keladigan device_id shu seriya bilan mos bo‘lishi kerak.</p>
+                    <p className="mt-1 text-xs text-slate-500">HL7 rejimda qurilma IP orqali avtomatik aniqlanadi — platformada kiritilgan IP (qurilma statik IP) va Seriya mos bo‘lishi kerak.</p>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs text-slate-400 mb-1">IP manzil (TCP ulanish)</label>
+                      <label className="block text-xs text-slate-400 mb-1">Qurilma statik IP (HL7: ulanish aniqlash; TCP: manzil)</label>
                       <input
                         type="text"
                         value={deviceHost}
                         onChange={(e) => setDeviceHost(e.target.value)}
-                        placeholder="masalan 192.168.1.10"
+                        placeholder="192.168.0.1, 192.168.0.2, …"
                         className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-slate-400 mb-1">Port</label>
+                      <label className="block text-xs text-slate-400 mb-1">Port (HL7 da odatda 6006)</label>
                       <input
                         type="text"
                         value={devicePort}
                         onChange={(e) => setDevicePort(e.target.value)}
-                        placeholder="5000"
+                        placeholder="6006"
                         className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400"
                       />
                     </div>
@@ -1987,7 +1988,7 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({ user, onLogou
                 {sortedCards.length > 0 && !vitalsHelpDismissed && !sortedCards.some((c) => c.last_vital && (c.last_vital.heart_rate != null || c.last_vital.spo2 != null)) && (
                   <div className="mb-4 p-3 rounded-xl bg-amber-900/30 border border-amber-600/50 text-amber-200 text-sm flex flex-wrap items-start gap-2">
                     <div className="flex-1 min-w-0">
-                      <strong>Vitals hali ko‘rinmayapti.</strong> Agar Server IP, Port va Qurilmalarni kiritgan bo‘lsangiz: Gateway ishlayaptimi (port 9000 va 6006)? Qurilma seriyasi monitordagi bilan bir xilmi? Bemor monitori qurilmaga biriktirilganmi? Backend (8000) va gateway loglarini tekshiring.
+                      <strong>Vitals hali ko‘rinmayapti.</strong> Qurilma platformada qo‘shilganmi (Seriya, Qurilma statik IP, Port 6006)? Har bir K12 da Server IP = 167.71.53.238, Port = 6006 qo‘yilganmi? Gateway ishlayaptimi (9000, 6006)? Bemor monitori qurilmaga biriktirilganmi? Backend va gateway loglarini tekshiring.
                     </div>
                     <button
                       type="button"

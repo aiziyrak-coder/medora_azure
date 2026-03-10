@@ -39,7 +39,7 @@ async def on_vitals(device_id: str, payload: dict) -> None:
 async def lifespan(app: FastAPI):
     """Start TCP client tasks for configured monitors and HL7 server (K12)."""
     global _hl7_server
-    monitors = await fetch_gateway_monitors()
+    monitors, hl7_client_map = await fetch_gateway_monitors()
     if not monitors:
         monitors = get_monitors()
         if not monitors:
@@ -47,8 +47,12 @@ async def lifespan(app: FastAPI):
     for m in monitors:
         t = asyncio.create_task(run_monitor_client(m, on_vitals))
         _monitor_tasks.append(t)
-    # HL7 MLLP server: K12 connects TO us (Server IP 192.168.168.254, Port 6006)
-    _hl7_server = await run_hl7_server(on_vitals, default_device_id=get_hl7_default_device_id())
+    # HL7: qurilmalar serverga ulanadi; device_id platformda kiritilgan IP orqali aniqlanadi (nano/.env kerak emas)
+    _hl7_server = await run_hl7_server(
+        on_vitals,
+        default_device_id=get_hl7_default_device_id(),
+        client_ip_to_device_id=hl7_client_map if hl7_client_map else None,
+    )
     yield
     if _hl7_server:
         _hl7_server.close()

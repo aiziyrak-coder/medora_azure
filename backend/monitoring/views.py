@@ -253,19 +253,28 @@ class IngestPermission(permissions.BasePermission):
 class GatewayMonitors(APIView):
     """
     GET /api/monitoring/gateway-monitors/ – gateway ulanish ro'yxati (X-API-Key).
-    Faqat host va port to'ldirilgan qurilmalar (TCP ulanish uchun).
+    - monitors: TCP rejim (gateway qurilmaga ulanadi) — host va port to'ldirilgan qurilmalar.
+    - hl7_client_map: qurilma serverga ulanganda client IP orqali aniqlash — har bir qurilma
+      uchun { device_id, host } (host = qurilma statik IP, masalan 192.168.0.1). Nano/.env kerak emas.
     """
     permission_classes = [IngestPermission]
     authentication_classes = []
 
     def get(self, request):
-        devices = Device.objects.filter(is_active=True).exclude(host='').exclude(port__isnull=True)
+        all_with_host = Device.objects.filter(is_active=True).exclude(host='')
+        # TCP: gateway qurilmaga ulanadi (host + port bor)
         monitors = [
             {'device_id': d.serial_number, 'host': (d.host or '').strip(), 'port': int(d.port)}
-            for d in devices
+            for d in all_with_host
             if (d.host or '').strip() and d.port
         ]
-        return Response({'success': True, 'monitors': monitors})
+        # HL7: qurilma serverga ulanadi — client IP orqali device_id aniqlash (host = qurilma statik IP)
+        hl7_client_map = [
+            {'device_id': d.serial_number, 'host': (d.host or '').strip()}
+            for d in all_with_host
+            if (d.host or '').strip()
+        ]
+        return Response({'success': True, 'monitors': monitors, 'hl7_client_map': hl7_client_map})
 
 
 class IngestVitals(APIView):

@@ -4,7 +4,7 @@ Listen on configurable host:port (default 0.0.0.0:6006). MLLP: 0x0B + message + 
 """
 import asyncio
 import logging
-from typing import Callable, Awaitable, Dict, Any
+from typing import Any, Awaitable, Callable, Dict, Optional
 
 from .parser_hl7 import parse_hl7_message, device_id_from_hl7
 from .config import get_ingest_api_key
@@ -63,11 +63,13 @@ async def _handle_hl7_client(
     writer: asyncio.StreamWriter,
     on_vitals: Callable[[str, Dict[str, Any]], Awaitable[None]],
     default_device_id: str,
+    client_ip_to_device_id: Optional[Dict[str, str]] = None,
 ) -> None:
-    """One client connection: read MLLP messages, parse HL7, call on_vitals."""
+    """One client connection: read MLLP messages, parse HL7, call on_vitals. device_id by client IP (hl7_client_map) or default."""
     peername = writer.get_extra_info("peername", ("?", 0))
-    device_id = default_device_id
-    logger.info("HL7 client connected from %s", peername)
+    client_ip = peername[0] if peername else None
+    device_id = (client_ip_to_device_id or {}).get(client_ip) or default_device_id
+    logger.info("HL7 client connected from %s -> device_id=%s", peername, device_id)
     try:
         while True:
             raw = await _read_mllp_message(reader)
@@ -96,13 +98,14 @@ async def _handle_hl7_client(
 async def run_hl7_server(
     on_vitals: Callable[[str, Dict[str, Any]], Awaitable[None]],
     default_device_id: str = "K12_01",
+    client_ip_to_device_id: Optional[Dict[str, str]] = None,
 ) -> asyncio.Server:
-    """Start HL7 MLLP TCP server. Returns the server object."""
+    """Start HL7 MLLP TCP server. client_ip_to_device_id: map client IP -> device_id (platformda qurilma IP kiritiladi, nano kerak emas)."""
     host = get_hl7_listen_host()
     port = get_hl7_listen_port()
 
     async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
-        await _handle_hl7_client(reader, writer, on_vitals, default_device_id)
+        await _handle_hl7_client(reader, writer, on_vitals, default_device_id, client_ip_to_device_id)
 
     server = await asyncio.start_server(handler, host, port)
     addrs = ", ".join(str(s.getsockname()) for s in server.sockets)
