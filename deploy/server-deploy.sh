@@ -17,7 +17,7 @@ fi
 source venv/bin/activate
 pip install -q -r requirements.txt
 python manage.py migrate --noinput
-python manage.py create_monitoring_demo_user 2>/dev/null || true
+python manage.py remove_monitoring_demo_user 2>/dev/null || true
 python manage.py create_monitoring_demo_data 2>/dev/null || true
 python manage.py collectstatic --noinput 2>/dev/null || true
 deactivate

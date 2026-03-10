@@ -44,9 +44,6 @@ curl -s -o /dev/null -w "%{http_code}" -H "Host: medora.cdcgroup.uz" http://127.
 
 Keyin backendni qayta ishga tushiring: `sudo systemctl restart medoraai-backend-8001.service`
 
-## Demo kirish
+## Monitoring kirish
 
-Login: **+998907000001**  
-Parol: **monitoring_demo**  
-
-Batafsil: [MONITORING_DEMO_LOGIN.md](./MONITORING_DEMO_LOGIN.md)
+Bemor monitoring uchun auth sahifada **Bemor monitoring** → **Ro'yxatdan o'tish** orqali hisob yarating, keyin **Kirish**. Batafsil: [MONITORING_DEMO_LOGIN.md](./MONITORING_DEMO_LOGIN.md)

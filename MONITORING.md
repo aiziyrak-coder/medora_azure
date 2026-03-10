@@ -4,10 +4,7 @@ Platformaga **Monitoring** rejimi qo‘shildi – markazlashgan bemor monitoring
 
 ## Kirish
 
-- **Kirish:** Auth sahifada **Monitoring** tugmasini tanlang.
-- **Demo:** Telefon `+998907000001`, parol `monitoring_demo`.
-
-Mahalliy (localStorage) fallback ishlatilsa, demo hisob avtomatik mavjud. Backend ishlatilsa, quyidagi qadamni bajarish kerak.
+- **Kirish:** Auth sahifada **Bemor monitoring** tugmasini tanlang → **Ro'yxatdan o'tish** orqali hisob yarating (telefon, ism, parol), keyin **Kirish** bilan tizimga kiring. Demo hisob o'chirilgan.
 
 ## Backend (Django)
 
@@ -17,13 +14,7 @@ Mahalliy (localStorage) fallback ishlatilsa, demo hisob avtomatik mavjud. Backen
    python manage.py migrate monitoring
    ```
 
-2. **Demo foydalanuvchi:** Monitoring roli uchun demo user yarating:
-   ```bash
-   python manage.py create_monitoring_demo_user
-   ```
-   Bu `+998907000001` / `monitoring_demo` hisobini yaratadi yoki yangilaydi.
-
-3. **API:** Barcha monitoring endpointlari `/api/monitoring/` ostida, JWT auth:
+2. **API:** Barcha monitoring endpointlari `/api/monitoring/` ostida, JWT auth:
    - `GET /api/monitoring/dashboard/` – grid uchun bemorlar va oxirgi vitals
    - `GET /api/monitoring/devices/status/` – qurilmalar holati
    - `POST /api/monitoring/devices/register/` – yangi monitor ro‘yxatdan o‘tkazish
@@ -32,7 +23,7 @@ Mahalliy (localStorage) fallback ishlatilsa, demo hisob avtomatik mavjud. Backen
    - `POST /api/monitoring/alarms/<id>/acknowledge/` – alarmni qabul qilish
    - `GET/POST /api/monitoring/rooms/`, `GET/POST /api/monitoring/patient-monitors/` va boshqalar
 
-4. **Ingest (gateway uchun):** `POST /api/monitoring/ingest/` – header `X-API-Key` = `MONITORING_INGEST_API_KEY`. Body: `device_id` (Device.serial_number), `heart_rate`, `spo2`, `bp_sys`, `bp_dia`, `respiration`, `temperature`, `timestamp`.
+3. **Ingest (gateway uchun):** `POST /api/monitoring/ingest/` – header `X-API-Key` = `MONITORING_INGEST_API_KEY`. Body: `device_id` (Device.serial_number), `heart_rate`, `spo2`, `bp_sys`, `bp_dia`, `respiration`, `temperature`, `timestamp`.
 
 ## Gateway (real-time TCP → Django + WebSocket)
 

@@ -96,6 +96,11 @@ class UserCreateSerializer(serializers.ModelSerializer):
             user.subscription_status = 'active'
             user.trial_ends_at = timezone.now() + timedelta(days=trial_days)
             user.save(update_fields=['subscription_status', 'trial_ends_at'])
+        # Monitoring roli: darhol faol, ro'yxatdan o'tganidan keyin kirish mumkin
+        if user.role == 'monitoring':
+            user.subscription_status = 'active'
+            user.is_active = True
+            user.save(update_fields=['subscription_status', 'is_active'])
         return user
 
 

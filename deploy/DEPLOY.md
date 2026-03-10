@@ -15,7 +15,7 @@ Bu skript:
 
 Serverda `server-deploy.sh` bajariladi:
 - **Pull** — yangi kod
-- **Backend:** venv, `pip install`, `migrate --noinput`, demo user, demo monitoring data, collectstatic, **restart backend**
+- **Backend:** venv, `pip install`, `migrate --noinput`, remove_monitoring_demo_user, demo monitoring data, collectstatic, **restart backend**
 - **Frontend:** `npm install`, `npm run build` (VITE_API_BASE_URL=https://medora.cdcgroup.uz/api)
 - **Systemd:** backend service **restart**
 - **Nginx:** config nusxalash va **reload**

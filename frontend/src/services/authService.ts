@@ -51,17 +51,6 @@ const getUsers = (): UserStore => {
             };
         }
 
-        // 4. Monitoring Demo - Bemor Monitoring Platform
-        if (!users['+998907000001']) {
-            users['+998907000001'] = {
-                phone: '+998907000001',
-                password: 'monitoring_demo',
-                name: 'Monitoring Operator',
-                role: 'monitoring',
-                subscriptionStatus: 'active'
-            };
-        }
-        
         saveUsers(users);
         return users;
     } catch (e) {

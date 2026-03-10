@@ -1,19 +1,6 @@
-# Monitoring / Demo kirish (default login)
+# Monitoring — kirish
 
-Bemor monitoring platformasi va umumiy demo kirish uchun **bitta default** foydalanuvchi:
+Bemor monitoring platformasiga **ro'yxatdan o'tish** orqali kiriladi. Demo hisob o'chirilgan.
 
-| Maydon    | Qiymat            |
-|-----------|-------------------|
-| **Login** | `+998907000001`   |
-| **Parol** | `monitoring_demo` |
-
-- **Rol:** Bemor monitoring  
-- **Platforma:** [medora.cdcgroup.uz](https://medora.cdcgroup.uz) — login sahifasida shu raqam va parolni kiriting.
-
-Bu foydalanuvchi har safar `deploy/server-deploy.sh` ishlaganda avtomatik yaratiladi yoki paroli yangilanadi (`python manage.py create_monitoring_demo_user`).
-
-Qo‘lda yaratish (serverda):
-
-```bash
-cd /root/medoraai/backend && source venv/bin/activate && python manage.py create_monitoring_demo_user
-```
+- **Kirish:** [medora.cdcgroup.uz](https://medora.cdcgroup.uz) → **Bemor monitoring** → **Ro'yxatdan o'tish** → telefon, ism, parol kiritib hisob yarating. Keyin **Kirish** orqali tizimga kiring.
+- Deploy paytida eski demo foydalanuvchi (+998907000001) avtomatik o'chiriladi: `python manage.py remove_monitoring_demo_user`.

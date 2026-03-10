@@ -233,8 +233,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
             setPhone('+998901112233'); // Demo for staff
             setPassword('staff_demo');
         } else if (selectedRole === 'monitoring') {
-            setPhone('+998907000001'); // Demo for Bemor Monitoring
-            setPassword('monitoring_demo');
+            setPhone('');
+            setPassword('');
         }
     };
 
@@ -558,7 +558,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
                         </form>
 
                         <div className="text-center pt-1">
-                            {role !== 'staff' && role !== 'monitoring' && (
+                            {role !== 'staff' && (
                                 <p className="text-xs text-slate-400 font-medium">
                                     {mode === 'login' ? t('auth_no_account_prompt') : t('auth_have_account_prompt')}{' '}
                                     <button 
