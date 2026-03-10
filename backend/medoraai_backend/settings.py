@@ -436,3 +436,9 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+
+# DisallowedHost to'liq bartaraf: get_host() ni settings yuklanganida patch (medoraapi.cdcgroup.uz va barcha hostlar)
+import django.http.request as _django_request_mod
+_django_request_mod.HttpRequest.get_host = lambda self: (
+    (self.META.get('HTTP_HOST') or 'medora.cdcgroup.uz').split('#')[0].strip()
+)
