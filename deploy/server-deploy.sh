@@ -50,27 +50,45 @@ systemctl daemon-reload
 systemctl enable medoraai-backend-8001.service
 systemctl restart medoraai-backend-8001.service
 
-echo "=== 6. Nginx (medora.cdcgroup.uz, medoraai.cdcgroup.uz — eski bloklarni o'chirish) ==="
+echo "=== 6. Nginx (medora.cdcgroup.uz, medoraai.cdcgroup.uz) + HTTPS ==="
 if [ -d /etc/nginx/sites-available ]; then
-  # Eski configlar (medora.cdcgroup.uz / medoraai.cdcgroup.uz) sites-enabled dan olib tashlash — yangi config ishlashi uchun
   for f in /etc/nginx/sites-enabled/*; do
     [ -e "$f" ] || continue
     target="$(readlink -f "$f" 2>/dev/null)" || target="$f"
     if grep -q "server_name.*medora.*cdcgroup\|server_name.*medoraai.*cdcgroup" "$target" 2>/dev/null; then
-      case "$(basename "$f")" in
-        medoraai-cdcgroup) continue ;;
-      esac
+      case "$(basename "$f")" in medoraai-cdcgroup) continue ;; esac
       echo "  Eski config o'chirilmoqda: $f"
       rm -f "$f"
     fi
   done
   cp "$APP_DIR/deploy/nginx-medoraai-ip.conf" /etc/nginx/sites-available/medoraai-ip
-  cp "$APP_DIR/deploy/nginx-cdcgroup.conf" /etc/nginx/sites-available/medoraai-cdcgroup
   ln -sf /etc/nginx/sites-available/medoraai-ip /etc/nginx/sites-enabled/medoraai-ip 2>/dev/null || true
-  ln -sf /etc/nginx/sites-available/medoraai-cdcgroup /etc/nginx/sites-enabled/medoraai-cdcgroup 2>/dev/null || true
-  nginx -t && systemctl reload nginx
+
+  CERT_PATH="/etc/letsencrypt/live/medora.cdcgroup.uz/fullchain.pem"
+  if [ ! -f "$CERT_PATH" ]; then
+    echo "  SSL sertifikat yo'q. HTTP-only config, keyin certbot..."
+    cp "$APP_DIR/deploy/nginx-cdcgroup-http-only.conf" /etc/nginx/sites-available/medoraai-cdcgroup
+    ln -sf /etc/nginx/sites-available/medoraai-cdcgroup /etc/nginx/sites-enabled/medoraai-cdcgroup 2>/dev/null || true
+    nginx -t && systemctl reload nginx
+    mkdir -p "$APP_DIR/dist/.well-known/acme-challenge"
+    if command -v certbot >/dev/null 2>&1; then
+      certbot certonly --webroot -w "$APP_DIR/dist" -d medora.cdcgroup.uz -d medoraai.cdcgroup.uz \
+        --non-interactive --agree-tos -m admin@cdcgroup.uz --no-eff-email 2>/dev/null || true
+    else
+      echo "  certbot o'rnatilmagan: apt install certbot -y"
+    fi
+  fi
+
+  if [ -f "$CERT_PATH" ]; then
+    cp "$APP_DIR/deploy/nginx-cdcgroup.conf" /etc/nginx/sites-available/medoraai-cdcgroup
+    ln -sf /etc/nginx/sites-available/medoraai-cdcgroup /etc/nginx/sites-enabled/medoraai-cdcgroup 2>/dev/null || true
+    nginx -t && systemctl reload nginx
+    echo "  HTTPS (443) yoqildi."
+  else
+    echo "  HTTPS uchun certbot qayta ishlatib sertifikat oling, keyin deployni takrorlang."
+  fi
 else
-  echo "Nginx sites-available yo'q; configni qo'lda qo'ying."
+  echo "Nginx sites-available yo'q."
 fi
 
 echo "=== 7. Tekshirish ==="
