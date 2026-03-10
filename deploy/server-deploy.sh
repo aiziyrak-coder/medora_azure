@@ -116,7 +116,10 @@ echo "=== 7. Tekshirish ==="
 sleep 2
 curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8001/health/ && echo " Backend 8001 OK" || echo " Backend 8001 javob bermadi"
 systemctl is-active --quiet medoraai-backend-8001.service && echo "medoraai-backend-8001: active" || echo "medoraai-backend-8001: FAIL"
-# medora.cdcgroup.uz localda 200 qaytarsa — nginx to'g'ri; 404 bo'lsa — config yoki root muammo
+# medoraapi.cdcgroup.uz Host bilan 8001 ga so'rov — DisallowedHost bo'lmasa 200
+HTTP_API_HOST=$(curl -s -o /dev/null -w "%{http_code}" -H "Host: medoraapi.cdcgroup.uz" http://127.0.0.1:8001/ 2>/dev/null || echo "000")
+echo "  medoraapi.cdcgroup.uz (8001 ga): HTTP $HTTP_API_HOST (200 bo'lishi kerak; 400 bo'lsa wsgi.py patch yuklanmagan)"
+# medora.cdcgroup.uz localda 200 qaytarsa — nginx to'g'ri
 HTTP_FRONT=$(curl -s -o /dev/null -w "%{http_code}" -H "Host: medora.cdcgroup.uz" http://127.0.0.1/)
 echo "  medora.cdcgroup.uz (local): HTTP $HTTP_FRONT (200 bo'lishi kerak; 404 bo'lsa DNS boshqa serverga yo'naltirilgan bo'lishi mumkin)"
 
