@@ -24,8 +24,17 @@ if not DEBUG and SECRET_KEY == _default_secret:
     )
 
 # ALLOWED_HOSTS: barcha hostlar qabul qilinsin (DisallowedHost/400 bartaraf)
-# medora.cdcgroup.uz, medoraai.cdcgroup.uz, medoraapi.cdcgroup.uz va boshqa
-ALLOWED_HOSTS = ['*']
+# .env da ALLOWED_HOSTS bo'lsa u ishlatiladi, aks holda barcha domenlar va * qo'shiladi
+_DEFAULT_ALLOWED_HOSTS = [
+    '*',
+    'medoraapi.cdcgroup.uz',
+    'medora.cdcgroup.uz',
+    'medoraai.cdcgroup.uz',
+    'localhost',
+    '127.0.0.1',
+]
+_raw_hosts = config('ALLOWED_HOSTS', default='')
+ALLOWED_HOSTS = [s.strip() for s in _raw_hosts.split(',') if s.strip()] if _raw_hosts.strip() else _DEFAULT_ALLOWED_HOSTS
 
 # Application definition
 INSTALLED_APPS = [

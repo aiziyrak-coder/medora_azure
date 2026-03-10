@@ -48,7 +48,22 @@ Agar **ikkalasi ham 200** bo‘lsa — **bizning server ishlayapti**. 400 brauze
 
 **Eng tez-tez sabab:** domen hali **167.71.53.238** ga yo‘naltirilmagan yoki CDN/proxy boshqa serverga yo‘naltiradi. DNS ni to‘g‘rilang.
 
-## 5. Backend ishlamasa (502, frontga kira olmaslik)
+## 5. DisallowedHost (Invalid HTTP_HOST: medoraapi.cdcgroup.uz)
+
+Agar Django **"Invalid HTTP_HOST header: 'medoraapi.cdcgroup.uz'. You may need to add 'medoraapi.cdcgroup.uz' to ALLOWED_HOSTS"** deb 400 qaytarsa:
+
+1. **Serverni `.env` faylida** `ALLOWED_HOSTS` ni tekshiring. Unda `medoraapi.cdcgroup.uz` bo‘lishi kerak:
+   ```bash
+   # Masalan:
+   ALLOWED_HOSTS=medoraapi.cdcgroup.uz,medora.cdcgroup.uz,medoraai.cdcgroup.uz,localhost,127.0.0.1
+   ```
+2. **Yoki** `.env` dan `ALLOWED_HOSTS` qatorini butunlay o‘chirib qo‘ying — unda settings dagi default (barcha domenlar) ishlatiladi.
+3. O‘zgarishlardan keyin backend ni qayta ishga tushiring:
+   ```bash
+   sudo systemctl restart medoraai-backend-8001.service
+   ```
+
+## 6. Backend ishlamasa (502, frontga kira olmaslik)
 
 Agar **medoraapi.cdcgroup.uz** yoki **medoraai.cdcgroup.uz** ochilmasa yoki frontend API ga ulanmasa:
 
@@ -59,4 +74,4 @@ Agar **medoraapi.cdcgroup.uz** yoki **medoraai.cdcgroup.uz** ochilmasa yoki fron
    curl -s http://127.0.0.1:8001/health/
    ```
    Agar 200 kelmasa: `sudo journalctl -u medoraai-backend-8001.service -n 50 --no-pager` — xatolikni ko‘ring. Keyin `sudo systemctl restart medoraai-backend-8001.service`.
-3. **Ishlatish:** Frontend **https://medora.cdcgroup.uz** da ochiladi; API avtomatik **https://medora.cdcgroup.uz/api/** ga boradi. Alohida API domeni kerak bo‘lsa: **https://medoraapi.cdcgroup.uz** yoki **https://medoraai.cdcgroup.uz** (ikkalasi ham 127.0.0.1:8001 ga proxy).
+3. **Ishlatish:** Frontend **https://medora.cdcgroup.uz** da ochiladi; API avtomatik **https://medora.cdcgroup.uz/api/** ga boradi. Alohida API domeni kerak bo‘lsa: **https://medoraapi.cdcgroup.uz** yoki **https://medoraai.cdcgroup.uz** (ikkalasi ham 127.0.0.1:8001 ga proxy). **medoraapi.cdcgroup.uz** dan kirish uchun `ALLOWED_HOSTS` da bu domen bo‘lishi shart (yoki ALLOWED_HOSTS ni .env da bermaslik).
