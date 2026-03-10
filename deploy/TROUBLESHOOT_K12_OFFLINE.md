@@ -73,3 +73,9 @@ Agar **ulandi** (succeeded / TcpTestSucceeded) — port ochiq. Agar timeout/refu
 | 5 | Server | `journalctl -u medoraai-gateway-9000 -f` — "HL7 client connected" chiqishi |
 
 "HL7 client connected" chiqsa va K12 ma'lumot yuborsa, platformada qurilma 1–2 daqiqada **online** bo'lishi kerak.
+
+---
+
+## 5. Gateway "Connecting to K12_001 at 192.168.x.x" va "Timeout reading"
+
+Agar logda `Connecting to K12_001 at 192.168.168.254:6006` va `Timeout reading from K12_001` ko'rsa: platformada K12_001 uchun **IP** kiritilgan (masalan 192.168.168.254). Server bulutda bo'lsa, bunday xususiy IP ga TCP ulanib bo'lmaydi. **Yechim:** Platformada **Qurilmalar** → K12_001 ni **Tahrirlash** → **Lokal IP** va **Port** ni **bo'sh** qoldiring va saqlang. Shundan keyin gateway faqat HL7 rejimda ishlaydi (K12 serverga ulanadi), "Timeout reading" ketadi va bitta qurilma bo'lsa avtomatik K12_001 hisoblanadi.

@@ -30,6 +30,29 @@ logger = logging.getLogger(__name__)
 INGEST_API_KEY = getattr(settings, 'MONITORING_INGEST_API_KEY', '')
 
 
+def _is_private_ip(host: str) -> bool:
+    """RFC 1918: 10.x, 172.16-31.x, 192.168.x — cloud serverdan TCP ulanib bo'lmaydi."""
+    if not host or not isinstance(host, str):
+        return True
+    host = host.strip()
+    if host in ('', 'localhost', '127.0.0.1'):
+        return True
+    parts = host.split('.')
+    if len(parts) != 4:
+        return True
+    try:
+        a, b, c, d = (int(x) & 0xFF for x in parts)
+        if a == 10:
+            return True
+        if a == 172 and 16 <= b <= 31:
+            return True
+        if a == 192 and b == 168:
+            return True
+    except (ValueError, TypeError):
+        return True
+    return False
+
+
 def is_monitoring_user(request):
     """Faqat monitoring yoki clinic rolida boʻlsa True."""
     user = getattr(request, 'user', None)
@@ -263,11 +286,11 @@ class GatewayMonitors(APIView):
     def get(self, request):
         all_active = Device.objects.filter(is_active=True)
         all_with_host = all_active.exclude(host='')
-        # TCP: gateway qurilmaga ulanadi (host + port bor)
+        # TCP: gateway qurilmaga ulanadi — faqat public/localhost (xususiy IP cloud dan yetilmaydi, HL7 rejimda bo'sh qoldiring)
         monitors = [
             {'device_id': d.serial_number, 'host': (d.host or '').strip(), 'port': int(d.port)}
             for d in all_with_host
-            if (d.host or '').strip() and d.port
+            if (d.host or '').strip() and d.port and not _is_private_ip((d.host or '').strip())
         ]
         # HL7: qurilma serverga ulanadi — client IP orqali device_id aniqlash (host = qurilma statik IP)
         hl7_client_map = [
