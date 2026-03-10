@@ -256,7 +256,7 @@ const AppContent: React.FC = () => {
     const [clarificationQuestions, setClarificationQuestions] = useState<string[] | null>([]);
     
     const debateScrollRef = useRef<HTMLDivElement>(null);
-    const { apiHealthy, checkNow } = useApiHealth();
+    const { apiHealthy, healthStatus, checkNow } = useApiHealth();
 
     useEffect(() => {
         if (debateScrollRef.current) {
@@ -754,7 +754,11 @@ const AppContent: React.FC = () => {
             {rationaleMessage && <RationaleModal message={rationaleMessage} patientData={patientData!} debateHistory={debateHistory} onClose={() => setRationaleMessage(null)} />}
             {isApiConfigured() && !apiHealthy && (
                 <div className="flex-none flex items-center justify-center gap-3 py-2 px-4 bg-amber-500/90 text-white text-sm font-medium z-40">
-                    <span>Server bilan bog'lanish yo'q. Ma'lumotlar mahalliy saqlanadi.</span>
+                    {healthStatus === 400 ? (
+                        <span>Domen boshqa serverga yo&apos;naltirilgan. DNS tekshiring: <code className="bg-black/20 px-1 rounded">nslookup medora.cdcgroup.uz</code> → <code className="bg-black/20 px-1 rounded">167.71.53.238</code> bo&apos;lishi kerak.</span>
+                    ) : (
+                        <span>Server bilan bog&apos;lanish yo&apos;q. Ma&apos;lumotlar mahalliy saqlanadi.</span>
+                    )}
                     <button type="button" onClick={checkNow} className="underline font-semibold hover:no-underline">Qayta tekshirish</button>
                 </div>
             )}

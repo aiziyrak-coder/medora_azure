@@ -428,17 +428,23 @@ export const apiUpload = async <T = unknown>(
   }
 };
 
+export interface HealthCheckResult {
+  ok: boolean;
+  status?: number;
+}
+
 /**
- * Check backend health (for connectivity banner / offline detection)
+ * Check backend health (for connectivity banner / offline detection).
+ * Returns ok + status so UI can show DNS hint when status is 400.
  */
-export const checkApiHealth = async (): Promise<boolean> => {
+export const checkApiHealth = async (): Promise<HealthCheckResult> => {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
     const res = await fetch(`${HOST_BASE}/health/`, { signal: controller.signal });
     clearTimeout(timeoutId);
-    return res.ok;
+    return { ok: res.ok, status: res.status };
   } catch {
-    return false;
+    return { ok: false };
   }
 };
