@@ -1,6 +1,8 @@
 # K12 offline — ma'lumot kelmayapti
 
-Qurilma platformada **K12_01** (IP/Port bo'sh), lekin **offline** qolsa, quyidagilarni tekshiring.
+Qurilma platformada (masalan **K12_001**, IP/Port bo'sh), lekin **offline** qolsa, quyidagilarni tekshiring.
+
+**Eslatma:** Bitta qurilma bo'lsa platforma avtomatik uni default qiladi — serverda .env (GATEWAY_HL7_DEFAULT_DEVICE_ID) kerak emas. K12 ekranida "Connected" / "HL7 connected" yozuvi bo'lmasligi mumkin; muhimi — K12 da **Server IP** va **Port** to'g'ri bo'lsin.
 
 ## 1. Port 6006 ochiqmi?
 
@@ -39,8 +41,9 @@ HL7 client connected from ('...', ...)
 Agar bu satr **hech chiqmasa** — K12 serverga ulana olmayapti (tarmoq, firewall, yoki K12 da Server IP/Port noto'g'ri).
 
 **K12 da tekshirish:**
-- Sozlamalar → Internet: **Server IP** = **167.71.53.238**, **Port** = **6006**, **HL7 protocol** ✓
-- Saqlang va (kerak bo'lsa) tarmoqni qayta yoqing.
+- Sozlamalar → Tarmoq (yoki Network / HL7): **Server IP** = **167.71.53.238**, **Port** = **6006**
+- Ba'zi modellarda "HL7 Server", "Remote host", "Destination" deb yoziladi — shu joyga server manzilini kiriting
+- Saqlang va (kerak bo'lsa) qurilmani qayta ishga tushiring. Ekranda "Connected" yozuvi bo'lmasligi mumkin; logda "HL7 client connected" chiqishi muhim
 
 ---
 

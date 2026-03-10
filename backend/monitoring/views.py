@@ -261,7 +261,8 @@ class GatewayMonitors(APIView):
     authentication_classes = []
 
     def get(self, request):
-        all_with_host = Device.objects.filter(is_active=True).exclude(host='')
+        all_active = Device.objects.filter(is_active=True)
+        all_with_host = all_active.exclude(host='')
         # TCP: gateway qurilmaga ulanadi (host + port bor)
         monitors = [
             {'device_id': d.serial_number, 'host': (d.host or '').strip(), 'port': int(d.port)}
@@ -274,7 +275,15 @@ class GatewayMonitors(APIView):
             for d in all_with_host
             if (d.host or '').strip()
         ]
-        return Response({'success': True, 'monitors': monitors, 'hl7_client_map': hl7_client_map})
+        default_device_id = None
+        if all_active.count() == 1:
+            default_device_id = all_active.values_list('serial_number', flat=True).first()
+        return Response({
+            'success': True,
+            'monitors': monitors,
+            'hl7_client_map': hl7_client_map,
+            'default_device_id': default_device_id,
+        })
 
 
 class IngestVitals(APIView):

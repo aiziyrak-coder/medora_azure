@@ -2,7 +2,7 @@
 Send parsed vitals to Django backend and broadcast via WebSocket.
 """
 import logging
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 import httpx
 from fastapi import WebSocket
 
@@ -56,12 +56,11 @@ def _parse_hl7_client_map(data: dict) -> Dict[str, str]:
     return {str(item.get("host", "")).strip(): str(item.get("device_id", "")).strip() for item in lst if item.get("host") and item.get("device_id")}
 
 
-async def fetch_gateway_monitors() -> Tuple[List[MonitorConfig], Dict[str, str]]:
+async def fetch_gateway_monitors() -> Tuple[List[MonitorConfig], Dict[str, str], Optional[str]]:
     """
     GET /api/monitoring/gateway-monitors/.
-    Returns (tcp_monitors, hl7_client_map_dict).
-    - tcp_monitors: gateway qurilmaga ulanadi (host+port).
-    - hl7_client_map_dict: client_ip -> device_id (qurilma serverga ulanganda, nano/.env kerak emas).
+    Returns (tcp_monitors, hl7_client_map_dict, default_device_id).
+    - default_device_id: bitta qurilma bo'lsa backend beradi; IP/HL7 ID bo'lmasa shu ishlatiladi.
     """
     base = get_backend_url()
     url = f"{base}/monitoring/gateway-monitors/"
@@ -76,10 +75,11 @@ async def fetch_gateway_monitors() -> Tuple[List[MonitorConfig], Dict[str, str]]
                 data = r.json()
                 monitors = _parse_monitors(data)
                 hl7_map = _parse_hl7_client_map(data)
-                return (monitors, hl7_map)
+                default_id = (data.get("default_device_id") or "").strip() or None
+                return (monitors, hl7_map, default_id)
     except Exception as e:
         logger.debug("Fetch gateway monitors: %s", e)
-    return ([], {})
+    return ([], {}, None)
 
 
 async def send_to_backend(device_id: str, payload: Dict[str, Any]) -> bool:
