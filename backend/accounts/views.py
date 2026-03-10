@@ -227,22 +227,31 @@ def register(request):
     """User registration endpoint — har doim JSON qaytaradi."""
     try:
         data = {}
-        try:
-            body = request.body.decode('utf-8') if request.body else '{}'
-            if body.strip():
-                data = json.loads(body)
-        except Exception:
-            pass
-        if not data and hasattr(request, 'data') and request.data:
+        if hasattr(request, 'data') and request.data:
             raw = request.data
-            data = dict(raw) if hasattr(raw, 'items') else (raw.copy() if hasattr(raw, 'copy') else {})
+            try:
+                data = dict(raw) if not isinstance(raw, dict) else raw.copy()
+            except Exception:
+                data = {k: getattr(raw, 'get', lambda _: raw[k])(k) for k in (raw.keys() if hasattr(raw, 'keys') else [])}
+        if not data and getattr(request, 'body', None):
+            try:
+                body = request.body.decode('utf-8') if isinstance(request.body, bytes) else str(request.body)
+                if body.strip():
+                    data = json.loads(body)
+            except Exception:
+                pass
+        data = dict(data)
         if data.get('linked_doctor') in ('', None):
             data.pop('linked_doctor', None)
         if data.get('password') and not data.get('password_confirm'):
             data['password_confirm'] = data['password']
         if 'specialties' not in data or data.get('specialties') is None:
             data['specialties'] = []
-        logger.info(f"Register attempt: role={data.get('role')}, phone={data.get('phone')}")
+        if data.get('phone') is not None:
+            data['phone'] = str(data['phone']).strip()
+        if data.get('role') is not None:
+            data['role'] = str(data['role']).strip().lower()
+        logger.info(f"Register attempt: role={data.get('role')}, phone={data.get('phone')}, keys={list(data.keys())}")
         serializer = UserCreateSerializer(data=data)
         if serializer.is_valid():
             try:
