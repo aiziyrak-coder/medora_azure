@@ -29,7 +29,14 @@ ALLOWED_HOSTS = config(
     cast=lambda v: [s.strip() for s in v.split(',')]
 )
 
-# Application definition
+# Application definition — drf_yasg optional (requires pkg_resources, may fail on Python 3.14)
+try:
+    import pkg_resources  # noqa: F401
+    import drf_yasg  # noqa: F401
+    _SWAGGER_AVAILABLE = True
+except Exception:
+    _SWAGGER_AVAILABLE = False
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,15 +44,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
     # Third party apps
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'django_filters',
-    'drf_yasg',
-    
+    *(['drf_yasg'] if _SWAGGER_AVAILABLE else []),
     # Local apps
     'accounts',
     'patients',
