@@ -20,6 +20,8 @@ python manage.py migrate --noinput
 python manage.py create_monitoring_demo_user 2>/dev/null || true
 python manage.py collectstatic --noinput 2>/dev/null || true
 deactivate
+# Backend restart — yangi ALLOWED_HOSTS/settings uchun (400 Bad Request bartaraf)
+systemctl restart medoraai-backend-8001.service 2>/dev/null || true
 
 echo "=== 3. Frontend build (API: medora.cdcgroup.uz — bitta domen) ==="
 cd "$APP_DIR/frontend"
