@@ -1,6 +1,7 @@
 """
 Authentication and User Management Views
 """
+import json
 import logging
 from datetime import datetime, timedelta
 import requests
@@ -222,14 +223,21 @@ class CustomTokenRefreshView(TokenRefreshView):
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def register(request):
-    """User registration endpoint"""
-    data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
-    logger.info(f"Register attempt: role={data.get('role')}, phone={data.get('phone')}, linked_doctor={data.get('linked_doctor')}")
-    if data.get('linked_doctor') in ('', None):
-        data.pop('linked_doctor', None)
-    serializer = UserCreateSerializer(data=data)
-    if serializer.is_valid():
-        try:
+    """User registration endpoint — har doim JSON qaytaradi."""
+    try:
+        if hasattr(request, 'data') and request.data:
+            data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
+        else:
+            try:
+                body = request.body.decode('utf-8') if request.body else '{}'
+                data = json.loads(body)
+            except Exception:
+                data = {}
+        if data.get('linked_doctor') in ('', None):
+            data.pop('linked_doctor', None)
+        logger.info(f"Register attempt: role={data.get('role')}, phone={data.get('phone')}")
+        serializer = UserCreateSerializer(data=data)
+        if serializer.is_valid():
             user = serializer.save()
             refresh = RefreshToken.for_user(user)
             _register_session_for_tokens(user, refresh)
@@ -243,35 +251,27 @@ def register(request):
                         'refresh': str(refresh),
                     }
                 }
-            }, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            logger.exception("Register: error after user save: %s", e)
-            return Response({
-                'success': False,
-                'error': {
-                    'code': status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    'message': 'Ro\'yxatdan o\'tishda server xatoligi. Iltimos, keyinroq urinib ko\'ring.',
-                }
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    logger.warning(f"Register validation failed: {serializer.errors}")
-    # Flatten first error so client can show it even if details are not parsed
-    flat_msg = 'Ma\'lumotlar noto\'g\'ri'
-    if serializer.errors:
-        for field, errs in serializer.errors.items():
-            if isinstance(errs, list) and errs:
-                flat_msg = errs[0] if isinstance(errs[0], str) else str(errs[0])
-                break
-            if isinstance(errs, str):
-                flat_msg = errs
-                break
-    return Response({
-        'success': False,
-        'error': {
-            'code': status.HTTP_400_BAD_REQUEST,
-            'message': flat_msg,
-            'details': serializer.errors
-        }
-    }, status=status.HTTP_400_BAD_REQUEST)
+            }, status=status.HTTP_201_CREATED, content_type='application/json')
+        flat_msg = 'Ma\'lumotlar noto\'g\'ri'
+        if serializer.errors:
+            for field, errs in serializer.errors.items():
+                if isinstance(errs, list) and errs:
+                    flat_msg = errs[0] if isinstance(errs[0], str) else str(errs[0])
+                    break
+                if isinstance(errs, str):
+                    flat_msg = errs
+                    break
+        logger.warning(f"Register validation failed: {serializer.errors}")
+        return Response({
+            'success': False,
+            'error': {'code': status.HTTP_400_BAD_REQUEST, 'message': flat_msg, 'details': serializer.errors}
+        }, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
+    except Exception as e:
+        logger.exception("Register exception: %s", e)
+        return Response({
+            'success': False,
+            'error': {'code': status.HTTP_500_INTERNAL_SERVER_ERROR, 'message': 'Ro\'yxatdan o\'tishda server xatoligi. Iltimos, keyinroq urinib ko\'ring.'}
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR, content_type='application/json')
 
 
 @api_view(['GET', 'PUT', 'PATCH'])
