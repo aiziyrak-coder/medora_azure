@@ -18,8 +18,11 @@ class EarlyHealthMiddleware(MiddlewareMixin):
     """
     Eng birinchi: GET /health/ uchun darhol 200 qaytaradi.
     Host va boshqa hech narsa tekshirilmaydi — 400 to'liq oldini oladi.
+    DisallowedHost bartaraf: har so'rovda ALLOWED_HOSTS = ['*'] (server .env override bo'lsa ham).
     """
     def process_request(self, request):
+        # Serverni .env yoki eski sozlama ALLOWED_HOSTS ni override qilsa ham, barcha hostlarni qabul qilish
+        settings.ALLOWED_HOSTS = ['*']
         if request.method in ('GET', 'OPTIONS') and request.path.rstrip('/') == '/health':
             r = HttpResponse(HEALTH_BODY, content_type='application/json', status=200)
             r['Access-Control-Allow-Origin'] = '*'
