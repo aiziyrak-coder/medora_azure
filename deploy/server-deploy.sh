@@ -125,7 +125,11 @@ else
   echo "Nginx sites-available yo'q."
 fi
 
-echo "=== 7. Monitoring Gateway (port 9000) ==="
+echo "=== 7. Monitoring Gateway (port 9000 + HL7 6006) ==="
+# K12 serverga ulanishi uchun 6006 port ochiq bo'lishi kerak
+if command -v ufw >/dev/null 2>&1; then
+  ufw allow 6006/tcp 2>/dev/null && echo "  ufw: 6006/tcp ochiq (K12 HL7 ulanishi uchun)." || true
+fi
 mkdir -p "$APP_DIR/monitoring_gateway/logs"
 if [ ! -f "$APP_DIR/monitoring_gateway/.env" ]; then
   cp "$APP_DIR/monitoring_gateway/.env.example" "$APP_DIR/monitoring_gateway/.env"

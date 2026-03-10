@@ -26,11 +26,11 @@ else
 fi
 echo ""
 
-echo "3️⃣  Ports:"
+echo "3️⃣  Ports (8001=backend, 9000=gateway HTTP, 6006=HL7 — K12 shu portga ulanadi):"
 if command -v ss >/dev/null 2>&1; then
-  ss -tulpn 2>/dev/null | grep -E ':8001|:9000' || echo "  Ports 8001/9000 not listening"
+  ss -tulpn 2>/dev/null | grep -E ':8001|:9000|:6006' || echo "  8001/9000/6006 not listening"
 elif command -v netstat >/dev/null 2>&1; then
-  netstat -tulpn 2>/dev/null | grep -E '8001|9000' || echo "  Ports 8001/9000 not listening"
+  netstat -tulpn 2>/dev/null | grep -E '8001|9000|6006' || echo "  8001/9000/6006 not listening"
 else
   echo "  ss/netstat yo'q"
 fi

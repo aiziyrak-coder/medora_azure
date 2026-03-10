@@ -114,6 +114,19 @@ class DeviceRegister(APIView):
         ser = DeviceRegisterSerializer(data=data)
         if not ser.is_valid():
             errors = ser.errors
+            # Agar "serial_number already exists" bo'lsa, o'chirilgan (inactive) qurilmani qayta tiklash
+            serial = (data.get('serial_number') or '').strip()
+            if serial and errors.get('serial_number'):
+                existing = Device.objects.filter(serial_number=serial).first()
+                if existing and not existing.is_active:
+                    existing.model = data.get('model') or existing.model
+                    existing.room_id = data.get('room') or None
+                    existing.host = data.get('host') or ''
+                    existing.port = data.get('port') or None
+                    existing.meta = data.get('meta') or {}
+                    existing.is_active = True
+                    existing.save(update_fields=['model', 'room_id', 'host', 'port', 'meta', 'is_active', 'updated_at'])
+                    return Response(DeviceSerializer(existing).data, status=status.HTTP_201_CREATED)
             parts = []
             for field, msgs in errors.items():
                 if isinstance(msgs, list):
