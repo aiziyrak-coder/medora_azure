@@ -27,6 +27,32 @@ logger = logging.getLogger(__name__)
 
 _monitor_tasks: list = []
 _hl7_server = None
+# HL7: davriy yangilash — qurilma o'chirilganda restart kerak emas
+_hl7_default_device_id: str = "K12_01"
+_hl7_client_map: dict = {}
+_refresh_task = None
+
+
+async def _refresh_gateway_monitors_loop() -> None:
+    """Har 45 soniyada backend dan qurilmalar ro'yxatini yangilash (default_device_id, hl7_client_map)."""
+    global _hl7_default_device_id, _hl7_client_map
+    while True:
+        await asyncio.sleep(45)
+        try:
+            _, hl7_map, default_id = await fetch_gateway_monitors()
+            if default_id:
+                _hl7_default_device_id = default_id
+            if hl7_map is not None:
+                _hl7_client_map = hl7_map
+            logger.debug("Gateway monitors refreshed: default=%s, map_keys=%s", _hl7_default_device_id, len(_hl7_client_map))
+        except asyncio.CancelledError:
+            break
+        except Exception as e:
+            logger.debug("Refresh gateway monitors: %s", e)
+
+
+def _get_hl7_device_id_resolver() -> tuple:
+    return (_hl7_default_device_id, _hl7_client_map)
 
 
 async def on_vitals(device_id: str, payload: dict) -> None:
@@ -38,8 +64,10 @@ async def on_vitals(device_id: str, payload: dict) -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Start TCP client tasks for configured monitors and HL7 server (K12)."""
-    global _hl7_server
+    global _hl7_server, _hl7_default_device_id, _hl7_client_map, _refresh_task
     monitors, hl7_client_map, api_default_device_id = await fetch_gateway_monitors()
+    _hl7_default_device_id = api_default_device_id or get_hl7_default_device_id()
+    _hl7_client_map = hl7_client_map or {}
     if not monitors:
         monitors = get_monitors()
         if not monitors:
@@ -47,14 +75,20 @@ async def lifespan(app: FastAPI):
     for m in monitors:
         t = asyncio.create_task(run_monitor_client(m, on_vitals))
         _monitor_tasks.append(t)
-    # HL7: bitta qurilma bo'lsa backend default_device_id beradi; aks holda env yoki K12_01
-    default_id = api_default_device_id or get_hl7_default_device_id()
     _hl7_server = await run_hl7_server(
         on_vitals,
-        default_device_id=default_id,
-        client_ip_to_device_id=hl7_client_map if hl7_client_map else None,
+        default_device_id=_hl7_default_device_id,
+        client_ip_to_device_id=_hl7_client_map or None,
+        get_device_id_resolver=_get_hl7_device_id_resolver,
     )
+    _refresh_task = asyncio.create_task(_refresh_gateway_monitors_loop())
     yield
+    if _refresh_task:
+        _refresh_task.cancel()
+        try:
+            await _refresh_task
+        except asyncio.CancelledError:
+            pass
     if _hl7_server:
         _hl7_server.close()
         await _hl7_server.wait_closed()

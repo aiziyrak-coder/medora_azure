@@ -99,13 +99,21 @@ async def run_hl7_server(
     on_vitals: Callable[[str, Dict[str, Any]], Awaitable[None]],
     default_device_id: str = "K12_01",
     client_ip_to_device_id: Optional[Dict[str, str]] = None,
+    get_device_id_resolver: Optional[Callable[[], tuple]] = None,
 ) -> asyncio.Server:
-    """Start HL7 MLLP TCP server. client_ip_to_device_id: map client IP -> device_id (platformda qurilma IP kiritiladi, nano kerak emas)."""
+    """Start HL7 MLLP TCP server. If get_device_id_resolver is set, it is called on each connection for (default_id, ip_map)."""
     host = get_hl7_listen_host()
     port = get_hl7_listen_port()
 
+    def _resolve() -> tuple:
+        if get_device_id_resolver:
+            r = get_device_id_resolver()
+            return (r[0], r[1]) if len(r) >= 2 else (default_device_id, client_ip_to_device_id or {})
+        return (default_device_id, client_ip_to_device_id or {})
+
     async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
-        await _handle_hl7_client(reader, writer, on_vitals, default_device_id, client_ip_to_device_id)
+        default_id, ip_map = _resolve()
+        await _handle_hl7_client(reader, writer, on_vitals, default_id, ip_map or None)
 
     server = await asyncio.start_server(handler, host, port)
     addrs = ", ".join(str(s.getsockname()) for s in server.sockets)

@@ -96,7 +96,13 @@ async def send_to_backend(device_id: str, payload: Dict[str, Any]) -> bool:
             )
             if r.status_code in (200, 201):
                 return True
-            logger.warning("Backend ingest %s: %s %s", device_id, r.status_code, r.text)
+            err = r.text
+            try:
+                body = r.json()
+                err = body.get("error") or err
+            except Exception:
+                pass
+            logger.warning("Backend ingest %s: %s — %s (qurilma topilmadi yoki bemor biriktirilmagan)", device_id, r.status_code, err)
             return False
     except Exception as e:
         logger.warning("Backend ingest failed %s: %s", device_id, e)
