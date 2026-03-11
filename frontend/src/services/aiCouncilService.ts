@@ -1,5 +1,4 @@
-
-import OpenAI from "openai";
+import { GoogleGenAI } from '@google/genai';
 import type {
     PatientData,
     Diagnosis,
@@ -30,44 +29,29 @@ import { handleError, getUserFriendlyError } from '../utils/errorHandler';
 import { retry } from '../utils/retry';
 import { getUzbekistanContextForAI } from '../constants/uzbekistanHealthcare';
 
-// --- AZURE AI FOUNDRY INITIALIZATION ---
-const getAzureConfig = () => {
-  const endpoint = import.meta.env.VITE_AZURE_OPENAI_ENDPOINT || '';
-  const apiKey = import.meta.env.VITE_AZURE_OPENAI_API_KEY || '';
-  const apiVersion = import.meta.env.VITE_AZURE_API_VERSION || '2024-12-01-preview';
-  return { endpoint, apiKey, apiVersion };
-};
+// --- GEMINI AI (single provider) ---
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
+const validKey = !!(GEMINI_API_KEY && GEMINI_API_KEY !== 'your-gemini-api-key-here');
 
-const azureCfg = getAzureConfig();
-const validKey = !!(azureCfg.endpoint && azureCfg.apiKey && azureCfg.apiKey !== 'your-azure-key-here');
-
-let _azureClient: OpenAI | null = null;
-function getAI(): OpenAI {
+let _geminiClient: GoogleGenAI | null = null;
+function getGemini(): GoogleGenAI {
   if (!validKey) {
-    throw new Error('Azure AI xizmati hozircha sozlanmagan. Iltimos, VITE_AZURE_OPENAI_ENDPOINT va VITE_AZURE_OPENAI_API_KEY ni .env faylga kiriting.');
+    throw new Error('Gemini AI xizmati sozlanmagan. Iltimos, VITE_GEMINI_API_KEY ni .env faylga kiriting.');
   }
-  if (!_azureClient) {
-    _azureClient = new OpenAI({
-      apiKey: azureCfg.apiKey,
-      baseURL: `${azureCfg.endpoint}/openai/deployments`,
-      defaultHeaders: { 'api-key': azureCfg.apiKey },
-      defaultQuery: { 'api-version': azureCfg.apiVersion },
-      dangerouslyAllowBrowser: true,
-    });
+  if (!_geminiClient) {
+    _geminiClient = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
   }
-  return _azureClient;
+  return _geminiClient;
 }
 
-// Azure deployment names (VITE_ env vars orqali yoki default)
-const DEPLOY_FAST = import.meta.env.VITE_AZURE_DEPLOY_MINI || 'medora-mini';
-const DEPLOY_PRO = import.meta.env.VITE_AZURE_DEPLOY_GPT4O || 'medora-gpt4o';
+const MODEL_FAST = 'gemini-1.5-flash';
+const MODEL_PRO = 'gemini-1.5-pro';
 
-/** Map old Gemini model names → Azure deployments */
-function mapModel(geminiModel: string): string {
-  const m = geminiModel.toLowerCase();
-  if (m.includes('flash-lite') || m.includes('mini') || m.includes('flash')) return DEPLOY_FAST;
-  if (m.includes('pro') || m.includes('preview')) return DEPLOY_PRO;
-  return DEPLOY_PRO;
+/** Map model label to Gemini model name */
+function mapModel(modelLabel: string): string {
+  const m = (modelLabel || '').toLowerCase();
+  if (m.includes('flash') || m.includes('mini')) return MODEL_FAST;
+  return MODEL_PRO;
 }
 
 const langMap: Record<Language, string> = {
@@ -260,90 +244,65 @@ const getRelevantHistoryContext = (currentComplaints: string): string => {
 };
 
 /**
- * Core Azure OpenAI call – replaces callGemini.
- * Supports text & multimodal (images via base64 inlineData).
+ * Core Gemini API call. Supports text & multimodal (images via base64 inlineData).
  */
 const callGemini = async (
     prompt: string | { parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> },
-    model: string = 'medora-gpt4o',
+    model: string = MODEL_PRO,
     responseSchema?: unknown,
-    _useSearch: boolean = false,    // Azure supports no Google Search grounding
+    _useSearch: boolean = false,
     systemInstruction: string = '',
     shouldRetry: boolean = true,
     maxOutputTokens?: number
 ): Promise<unknown> => {
-    const deployment = mapModel(model);
+    const geminiModel = mapModel(model);
     const wantJson = !!responseSchema;
+    const sys = systemInstruction || "Siz professional tibbiy AI yordamchisiz. O'zbekiston SSV klinik protokollariga muvofiq javob bering.";
 
-    const buildMessages = (): OpenAI.Chat.ChatCompletionMessageParam[] => {
-        const sysContent = systemInstruction || (
-            "Siz professional tibbiy AI yordamchisiz. O'zbekiston SSV klinik protokollariga muvofiq javob bering."
-        );
-        const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-            { role: 'system', content: sysContent },
-        ];
-
-        // Build user message: text-only or multimodal
+    const buildContents = (): string | Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> => {
         if (typeof prompt === 'string') {
-            const userText = wantJson
-                ? `${prompt}\n\nMuhim: Javobni FAQAT toza JSON formatida qaytaring.`
-                : prompt;
-            messages.push({ role: 'user', content: userText });
-        } else {
-            // Multimodal: { parts: [{text}, {inlineData}] }
-            const contentParts: OpenAI.Chat.ChatCompletionContentPart[] = [];
-            for (const part of prompt.parts) {
-                if ('text' in part) {
-                    const t = wantJson
-                        ? `${part.text}\n\nMuhim: Javobni FAQAT toza JSON formatida qaytaring.`
-                        : part.text;
-                    contentParts.push({ type: 'text', text: t });
-                } else if ('inlineData' in part) {
-                    // Azure OpenAI GPT-4o supports base64 images
-                    contentParts.push({
-                        type: 'image_url',
-                        image_url: {
-                            url: `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`,
-                        },
-                    });
-                }
-            }
-            messages.push({ role: 'user', content: contentParts });
+            const userText = wantJson ? `${prompt}\n\nMuhim: Javobni FAQAT toza JSON formatida qaytaring.` : prompt;
+            return `${sys}\n\n${userText}`;
         }
-        return messages;
+        const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [
+            { text: sys + '\n\n' + (wantJson ? 'Muhim: Javobni FAQAT toza JSON formatida qaytaring.\n\n' : '') },
+        ];
+        for (const part of prompt.parts) {
+            if ('text' in part) parts.push({ text: part.text });
+            else if ('inlineData' in part) parts.push({ inlineData: part.inlineData });
+        }
+        return parts;
     };
 
     const executeCall = async (): Promise<unknown> => {
-        const messages = buildMessages();
-        const reqParams: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming = {
-            model: deployment,
-            messages,
+        const contents = buildContents();
+        const ai = getGemini();
+        const config: { temperature?: number; maxOutputTokens?: number; responseMimeType?: string } = {
             temperature: 0.15,
-            max_tokens: maxOutputTokens ?? 4096,
+            maxOutputTokens: maxOutputTokens ?? 4096,
         };
-        if (wantJson) {
-            reqParams.response_format = { type: 'json_object' };
-        }
+        if (wantJson) config.responseMimeType = 'application/json';
 
-        const response = await getAI().chat.completions.create(reqParams);
-        const text = response.choices[0]?.message?.content ?? '';
+        const response = await ai.models.generateContent({
+            model: geminiModel,
+            contents: typeof contents === 'string' ? contents : [{ role: 'user', parts: contents }],
+            config,
+        });
+        const text = (response.text ?? '').trim();
 
-        if (wantJson) {
-            // Strip markdown fences if present
-            let cleaned = text.trim();
+        if (wantJson && text) {
+            let cleaned = text;
             if (cleaned.startsWith('```')) {
                 cleaned = cleaned.replace(/^```[a-z]*\n?/, '').replace(/```\s*$/, '').trim();
             }
-            const jsonStart = Math.min(
-                ...['{', '['].map(ch => cleaned.indexOf(ch)).filter(i => i >= 0)
-            );
-            const candidate = jsonStart >= 0 ? cleaned.slice(jsonStart) : cleaned;
+            const jsonStart = Math.min(...['{', '['].map(ch => cleaned.indexOf(ch)).filter(i => i >= 0), Infinity);
+            const candidate = jsonStart !== Infinity ? cleaned.slice(jsonStart) : cleaned;
             try {
                 return JSON.parse(candidate);
             } catch {
                 const repaired = tryRepairTruncatedJson(candidate);
                 if (repaired == null) {
-                    logger.error('Failed to parse JSON from Azure:', candidate?.slice(0, 500));
+                    logger.error('Failed to parse JSON from Gemini:', candidate?.slice(0, 500));
                     const err = new Error("AI xizmatidan noto'g'ri javob olindi. Iltimos, qayta urinib ko'ring.");
                     (err as Error & { cause?: string }).cause = 'parse_json';
                     throw err;
@@ -351,8 +310,6 @@ const callGemini = async (
                 return repaired;
             }
         }
-
-        // _useSearch is not supported on Azure – return plain text
         return text;
     };
 
@@ -369,45 +326,24 @@ const callGemini = async (
                 ],
             });
         } catch (error) {
-            logger.error(`Error calling Azure OpenAI (deployment=${deployment}) after retries:`, error);
+            logger.error(`Error calling Gemini (model=${geminiModel}) after retries:`, error);
             throw new Error(getUserFriendlyError(error, 'AI xizmati bilan muammo yuz berdi.'));
         }
     }
-
     try {
         return await executeCall();
     } catch (error) {
-        logger.error(`Error calling Azure OpenAI (deployment=${deployment}):`, error);
+        logger.error(`Error calling Gemini (model=${geminiModel}):`, error);
         throw new Error(getUserFriendlyError(error, 'AI xizmati bilan muammo yuz berdi.'));
     }
 };
 
-/**
- * Build OpenAI messages array from system instruction and multimodal prompt parts.
- * Used for streaming calls.
- */
+/** Build multimodal prompt for Gemini (used by stream fallback). */
 const buildMultimodalMessages = (
-    systemInstr: string,
+    _systemInstr: string,
     prompt: { parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> },
-    wantJson: boolean
-): OpenAI.Chat.ChatCompletionMessageParam[] => {
-    const contentParts: OpenAI.Chat.ChatCompletionContentPart[] = [];
-    for (const part of prompt.parts) {
-        if ('text' in part) {
-            const t = wantJson ? `${part.text}\n\nMuhim: Javobni FAQAT toza JSON formatida qaytaring.` : part.text;
-            contentParts.push({ type: 'text', text: t });
-        } else if ('inlineData' in part) {
-            contentParts.push({
-                type: 'image_url',
-                image_url: { url: `data:${part.inlineData.mimeType};base64,${part.inlineData.data}` },
-            });
-        }
-    }
-    return [
-        { role: 'system', content: systemInstr },
-        { role: 'user', content: contentParts },
-    ];
-};
+    _wantJson: boolean
+): { parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> } => prompt;
 
 // Helper to construct multimodal prompts (Text + Images)
 const buildMultimodalPrompt = (introText: string, data: PatientData) => {
@@ -567,7 +503,7 @@ export const generateFastDoctorConsultation = async (
     } as FinalReport;
 };
 
-/** Strim: javob kelishi bilan matnni onChunk orqali yuboradi, oxirida FinalReport qaytaradi */
+/** Strim: Gemini orqali javob, onChunk ga to'liq matn bir marta yuboriladi, oxirida FinalReport. */
 export const generateFastDoctorConsultationStream = async (
     patientData: PatientData,
     specialties: string[],
@@ -579,24 +515,11 @@ export const generateFastDoctorConsultationStream = async (
     const multimodalPrompt = buildMultimodalPrompt(promptText, patientData);
     let fullText = '';
     try {
-        const messages = buildMultimodalMessages(systemInstr, multimodalPrompt, true);
-        const stream = await getAI().chat.completions.create({
-            model: DEPLOY_FAST,
-            messages,
-            temperature: 0.15,
-            max_tokens: 1024,
-            response_format: { type: 'json_object' },
-            stream: true,
-        });
-        for await (const chunk of stream) {
-            const t = chunk.choices[0]?.delta?.content ?? '';
-            if (t) {
-                fullText += t;
-                onChunk(fullText);
-            }
-        }
+        const result = await callGemini(multimodalPrompt, MODEL_FAST, { __json: true }, false, systemInstr, true, 1024);
+        fullText = typeof result === 'string' ? result : JSON.stringify(result);
+        onChunk(fullText);
     } catch (e) {
-        logger.error('Stream error, falling back to non-stream:', e);
+        logger.error('Gemini stream fallback error:', e);
         return generateFastDoctorConsultation(patientData, specialties, language);
     }
     const cleaned = fullText.replace(/^```json\s*|```\s*$/g, '').trim();

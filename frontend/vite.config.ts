@@ -11,11 +11,6 @@ export default defineConfig(({ mode }) => {
     mode === 'production' ? 'https://medoraapi.ziyrak.org/api' : 'http://localhost:8000/api'
   );
   const geminiKey = env.VITE_GEMINI_API_KEY || env.GEMINI_API_KEY || '';
-  const azureEndpoint   = env.VITE_AZURE_OPENAI_ENDPOINT   || '';
-  const azureApiKey     = env.VITE_AZURE_OPENAI_API_KEY   || '';
-  const azureApiVersion = env.VITE_AZURE_API_VERSION     || '2024-12-01-preview';
-  const deployGpt4o     = env.VITE_AZURE_DEPLOY_GPT4O    || 'medora-gpt4o';
-  const deployMini      = env.VITE_AZURE_DEPLOY_MINI     || 'medora-mini';
 
   console.log(`[Vite][${mode}] API: ${apiUrl}`);
 
@@ -34,11 +29,6 @@ export default defineConfig(({ mode }) => {
     define: {
       'import.meta.env.VITE_API_BASE_URL': JSON.stringify(apiUrl),
       'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(geminiKey),
-      'import.meta.env.VITE_AZURE_OPENAI_ENDPOINT': JSON.stringify(azureEndpoint),
-      'import.meta.env.VITE_AZURE_OPENAI_API_KEY': JSON.stringify(azureApiKey),
-      'import.meta.env.VITE_AZURE_API_VERSION': JSON.stringify(azureApiVersion),
-      'import.meta.env.VITE_AZURE_DEPLOY_GPT4O': JSON.stringify(deployGpt4o),
-      'import.meta.env.VITE_AZURE_DEPLOY_MINI': JSON.stringify(deployMini),
     },
     resolve: { alias: { '@': path.resolve(__dirname, './src') } },
     build: {
@@ -49,7 +39,7 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: {
             'react-vendor': ['react', 'react-dom'],
-            'ai-vendor': ['@google/genai', 'openai'],
+            'ai-vendor': ['@google/genai'],
             'doc-vendor': ['jspdf', 'docx'],
           },
         },

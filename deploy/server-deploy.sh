@@ -27,6 +27,11 @@ cd "$APP_DIR/frontend"
 npm install --silent 2>/dev/null || npm install
 # Bitta domen: medora.cdcgroup.uz (API ham shu domen orqali)
 export VITE_API_BASE_URL=https://medora.cdcgroup.uz/api
+# Gemini: backend/.env dan GEMINI_API_KEY ni frontend build uchun beramiz
+if [ -f "$APP_DIR/backend/.env" ]; then
+  GEMINI_API_KEY=$(grep -E '^GEMINI_API_KEY=' "$APP_DIR/backend/.env" 2>/dev/null | cut -d= -f2-)
+  [ -n "$GEMINI_API_KEY" ] && export VITE_GEMINI_API_KEY="$GEMINI_API_KEY"
+fi
 npm run build
 
 # Nginx (www-data) /root/medoraai/dist ni o'qishi uchun huquq

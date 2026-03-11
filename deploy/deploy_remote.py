@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """SSH orqali serverga ulanib deploy qilish (parol bilan)."""
-import sys
+import base64
 import os
+import sys
 
 try:
     import paramiko
@@ -14,6 +15,7 @@ USER = "root"
 PASSWORD = "Ziyrak2025Ai"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PUBKEY_PATH = os.path.join(SCRIPT_DIR, "deploy_key.pub")
+BACKEND_ENV = "/root/medoraai/backend/.env"
 
 def main():
     pubkey = open(PUBKEY_PATH).read().strip()
@@ -36,6 +38,19 @@ def main():
     out.channel.recv_exit_status()
     if b"KEY_ADDED" in out.read() or b"KEY_ADDED" in err.read():
         print("Kalit qo'shildi.")
+    # Ixtiyoriy: MEDORA_GEMINI_KEY env orqali server .env ga GEMINI_API_KEY yozish (Gitga push qilinmaydi)
+    gemini_key = os.environ.get("MEDORA_GEMINI_KEY", "").strip()
+    if gemini_key:
+        key_b64 = base64.b64encode(gemini_key.encode()).decode()
+        cmd_env = (
+            f"grep -v '^GEMINI_API_KEY=' {BACKEND_ENV} 2>/dev/null > /tmp/medora_env; "
+            f"echo -n 'GEMINI_API_KEY=' >> /tmp/medora_env; echo '{key_b64}' | base64 -d >> /tmp/medora_env; "
+            f"echo >> /tmp/medora_env; mv /tmp/medora_env {BACKEND_ENV}; echo GEMINI_ENV_SET"
+        )
+        _, o, e = client.exec_command(cmd_env)
+        o.channel.recv_exit_status()
+        if b"GEMINI_ENV_SET" in o.read() or b"GEMINI_ENV_SET" in e.read():
+            print("Serverda GEMINI_API_KEY .env ga yozildi.")
     print("Deploy bajarilmoqda (git pull + server-deploy.sh)...")
     _, out, err = client.exec_command(cmd_deploy, get_pty=True)
     out.channel.settimeout(300)

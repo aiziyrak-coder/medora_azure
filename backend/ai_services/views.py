@@ -15,11 +15,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .azure_utils import (
-    generate_clarifying_questions as azure_clarifying,
-    recommend_specialists          as azure_recommend,
-    generate_diagnoses             as azure_diagnoses,
-)
+from . import gemini_utils
 from .multi_agent_system     import run_consilium
 from .doctor_support         import (
     doctor_consult, doctor_consult_stream,
@@ -43,11 +39,8 @@ def _pd(request):
     return request.data.get("patient_data") or {}
 
 
-def _azure_ok() -> bool:
-    return bool(
-        getattr(settings, "AZURE_OPENAI_ENDPOINT", None)
-        and getattr(settings, "AZURE_OPENAI_API_KEY", None)
-    )
+def _gemini_ok() -> bool:
+    return bool(getattr(settings, "GEMINI_API_KEY", None))
 
 
 def _err(code: int, msg: str):
@@ -55,8 +48,8 @@ def _err(code: int, msg: str):
                     status=code)
 
 
-def _azure_not_configured():
-    return _err(503, "Azure AI xizmati sozlanmagan")
+def _ai_not_configured():
+    return _err(503, "AI xizmati sozlanmagan. Iltimos, GEMINI_API_KEY ni .env faylga kiriting.")
 
 
 def _run_filter(patient_data: dict) -> Response | None:
@@ -100,8 +93,8 @@ def run_consilium_view(request):
 
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor shikoyatlari kiritilmagan")
-    if not _azure_ok():
-        return _azure_not_configured()
+    if not _gemini_ok():
+        return _ai_not_configured()
 
     # Physiology / Logic Gate filter
     blocked = _run_filter(patient_data)
@@ -150,8 +143,8 @@ def doctor_support_view(request):
 
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor shikoyatlari kiritilmagan")
-    if not _azure_ok():
-        return _azure_not_configured()
+    if not _gemini_ok():
+        return _ai_not_configured()
     if task_type not in _VALID_TASKS:
         return _err(400, f"Noto'g'ri task_type: {task_type}")
 
@@ -182,8 +175,8 @@ def doctor_support_stream_view(request):
 
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor shikoyatlari kiritilmagan")
-    if not _azure_ok():
-        return _azure_not_configured()
+    if not _gemini_ok():
+        return _ai_not_configured()
 
     blocked = _run_filter(patient_data)
     if blocked:
@@ -215,10 +208,10 @@ def generate_clarifying_questions(request):
     patient_data = _pd(request)
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor shikoyatlari kiritilmagan")
-    if not _azure_ok():
-        return _azure_not_configured()
+    if not _gemini_ok():
+        return _ai_not_configured()
     try:
-        return Response({"success": True, "data": azure_clarifying(patient_data)})
+        return Response({"success": True, "data": gemini_utils.generate_clarifying_questions(patient_data)})
     except Exception as exc:
         logger.exception("Clarifying questions error: %s", exc)
         return _err(500, "Savollar yaratishda xatolik")
@@ -230,8 +223,8 @@ def recommend_specialists(request):
     patient_data = _pd(request)
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor ma'lumotlari kiritilmagan")
-    if not _azure_ok():
-        return _azure_not_configured()
+    if not _gemini_ok():
+        return _ai_not_configured()
     try:
         recs = azure_recommend(patient_data)
         return Response({"success": True, "data": {"recommendations": recs}})
@@ -246,15 +239,15 @@ def generate_diagnoses(request):
     patient_data = _pd(request)
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor ma'lumotlari kiritilmagan")
-    if not _azure_ok():
-        return _azure_not_configured()
+    if not _gemini_ok():
+        return _ai_not_configured()
 
     blocked = _run_filter(patient_data)
     if blocked:
         return blocked
 
     try:
-        return Response({"success": True, "data": azure_diagnoses(patient_data)})
+        return Response({"success": True, "data": gemini_utils.generate_diagnoses(patient_data)})
     except Exception as exc:
         logger.exception("Generate diagnoses error: %s", exc)
         return _err(500, "Tashxis yaratishda xatolik")
@@ -271,8 +264,8 @@ def generate_autonomous_protocol(request):
     language     = request.data.get("language", "uz-L")
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor ma'lumotlari kiritilmagan")
-    if not _azure_ok():
-        return _azure_not_configured()
+    if not _gemini_ok():
+        return _ai_not_configured()
     try:
         return Response({"success": True, "data": autonomous_generator.generate_autonomous_protocol(patient_data, language)})
     except Exception as exc:
@@ -287,8 +280,8 @@ def make_clinical_decision(request):
     language     = request.data.get("language", "uz-L")
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor ma'lumotlari kiritilmagan")
-    if not _azure_ok():
-        return _azure_not_configured()
+    if not _gemini_ok():
+        return _ai_not_configured()
     try:
         return Response({"success": True, "data": clinical_decision_engine.make_autonomous_decision(patient_data, language)})
     except Exception as exc:
