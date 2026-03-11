@@ -73,6 +73,10 @@ echo "=== 6. Nginx ==="
 if [ -d /etc/nginx/sites-available ]; then
   cp "$APP_DIR/deploy/nginx-medoraai-ip.conf" /etc/nginx/sites-available/medoraai 2>/dev/null || true
   ln -sf /etc/nginx/sites-available/medoraai /etc/nginx/sites-enabled/medoraai 2>/dev/null || true
+  if [ -f "$APP_DIR/deploy/nginx-cdcgroup.conf" ]; then
+    cp "$APP_DIR/deploy/nginx-cdcgroup.conf" /etc/nginx/sites-available/medoraai-cdcgroup 2>/dev/null || true
+    ln -sf /etc/nginx/sites-available/medoraai-cdcgroup /etc/nginx/sites-enabled/medoraai-cdcgroup 2>/dev/null || true
+  fi
   nginx -t && systemctl reload nginx
   echo "  Nginx reload qilindi."
 fi
