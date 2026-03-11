@@ -346,8 +346,8 @@ const callGemini = async (
         const mobile = isMobile();
         try {
             return await retry(executeWithModelFallback, {
-                maxRetries: mobile ? 4 : 2,
-                initialDelay: mobile ? 3000 : 2000,
+                maxRetries: mobile ? 2 : 1,
+                initialDelay: mobile ? 1200 : 800,
                 retryableErrors: [
                     'network', 'timeout', 'fetch', 'connection', '503', 'unavailable', 'overloaded',
                     'parse_json', "noto'g'ri", 'javob', 'invalid json', 'failed to parse',
@@ -745,7 +745,7 @@ export const runCouncilDebate = async (
     const orchestratorIntro: ChatMessage = { id: `sys-intro-${Date.now()}`, author: AIModel.SYSTEM, content: introContent, isSystemMessage: true };
     onProgress({ type: 'message', message: orchestratorIntro });
     debateHistory.push(orchestratorIntro);
-    await sleep(700);
+    await sleep(250);
 
     const DEBATE_ROUNDS = 3;
     let currentTopicPrompt = `Summarize the initial state: Patient data and initial diagnoses: ${JSON.stringify(diagnoses)}. Ask specialists for their initial evaluation and Red Flags. Output Language: ${langMap[language]}.`;
@@ -774,7 +774,7 @@ export const runCouncilDebate = async (
              onProgress({ type: 'user_question', question: cleanQuestion });
              let userInput = null;
              while (!userInput) {
-                await sleep(1000); 
+                await sleep(350);
                 userInput = getUserIntervention();
              }
              const userMessage = { id: `user-${Date.now()}`, author: AIModel.SYSTEM, content: `User Answer: ${userInput}`, isUserIntervention: true, isSystemMessage: true };
@@ -786,7 +786,7 @@ export const runCouncilDebate = async (
              debateHistory.push(orchestratorMessage);
         }
         
-        await sleep(1500);
+        await sleep(500);
 
         // Specialists Turn
         for (const spec of specialistsConfig) {
@@ -808,11 +808,11 @@ export const runCouncilDebate = async (
             const specialistMultimodalPrompt = buildMultimodalPrompt(textPrompt, patientData);
             
             try {
-                const responseText = await callGemini(specialistMultimodalPrompt, DEPLOY_PRO, undefined, false, systemInstr) as string;
+                const responseText = await callGemini(specialistMultimodalPrompt, DEPLOY_FAST, undefined, false, systemInstr) as string;
                 const specialistMessage: ChatMessage = { id: `${spec.role}-${Date.now()}`, author: spec.role, content: responseText };
                 onProgress({ type: 'message', message: specialistMessage });
                 debateHistory.push(specialistMessage);
-                await sleep(1000);
+                await sleep(300);
             } catch (e) {
                 // error handling
             }
@@ -843,7 +843,7 @@ export const runCouncilDebate = async (
         'en': 'Preparing final report...'
     };
     onProgress({ type: 'status', message: finalizingMessages[language] });
-    await sleep(2000);
+    await sleep(600);
 
     const finalReportSchema = {
         type: 'object',
@@ -1122,17 +1122,17 @@ export const runResearchCouncilDebate = async (
 ): Promise<void> => {
     const systemInstr = getSystemInstruction(language);
     onProgress({ type: 'status', message: `Research Topic: "${diseaseName}". Gathering data...` });
-    await sleep(2000);
+    await sleep(600);
 
     const specialists = [AIModel.GPT, AIModel.LLAMA, AIModel.CLAUDE];
     for (const model of specialists) {
         const translatedIntro = await callGemini(`Translate to ${langMap[language]}: "I am ${model}, ready to analyze the latest research on ${diseaseName}."`, DEPLOY_FAST, undefined, false, systemInstr);
         onProgress({ type: 'message', message: { id: `${model}-${Date.now()}`, author: model, content: translatedIntro as string, isThinking: false } });
-        await sleep(500);
+        await sleep(150);
     }
     
     onProgress({ type: 'status', message: 'Discussing innovative strategies...' });
-    await sleep(2000);
+    await sleep(500);
     
     const prompt = `Provide detailed research report on "${diseaseName}". Use web search for latest data. Return ONLY valid JSON (no markdown, no extra text). The JSON must have these fields: diseaseName, summary, epidemiology {prevalence, incidence, keyRiskFactors[]}, pathophysiology, emergingBiomarkers [{name, type, description}], clinicalGuidelines [{guidelineTitle, source, recommendations [{category, details[]}]}], potentialStrategies [{name, mechanism, evidence, pros[], cons[], riskBenefit {risk, benefit}, developmentRoadmap [{stage, duration, cost}], molecularTarget {name, pdbId}, ethicalConsiderations[], requiredCollaborations[], companionDiagnosticNeeded}], pharmacogenomics {relevantGenes [{gene, mutation, impact}], targetSubgroup}, patentLandscape {competingPatents [{patentId, title, assignee}], whitespaceOpportunities[]}, relatedClinicalTrials [{trialId, title, status, url}], strategicConclusion, sources [{title, uri}]. LANGUAGE: ${langMap[language]}.`;
 

@@ -126,7 +126,7 @@ Masalan: agar shikoyat "bosh og'rig'i" bo'lsa — davomiyligi, qanday og'riq, qa
 Javobni faqat JSON massiv: ["Savol 1?", "Savol 2?"]. O'zbek tilida (Lotin)."""
     raw = None
     last_exc = None
-    for model in (GEMINI_PRO, GEMINI_FLASH):
+    for model in (GEMINI_FLASH, GEMINI_PRO):
         for use_json in (False, True):
             try:
                 raw = _call_gemini(
@@ -170,7 +170,7 @@ Har biri uchun qisqa sabab bering. Javobni aniq quyidagi formatda JSON qaytaring
 {{ "recommendations": [ {{ "model": "Nom exactly from list", "reason": "Sabab" }} ] }}
 O'zbek tilida (Lotin)."""
     last_exc = None
-    for model_name in (GEMINI_PRO, GEMINI_FLASH):
+    for model_name in (GEMINI_FLASH, GEMINI_PRO):
         for use_json in (True, False):
             try:
                 raw = _call_gemini(
@@ -214,7 +214,7 @@ Har biri uchun: name (o'zbekcha), probability (0–100), justification, evidence
 Javobni faqat JSON massiv qilib qaytaring, masalan:
 [ {{ "name": "...", "probability": 70, "justification": "...", "evidenceLevel": "High", "reasoningChain": ["...", "..."], "uzbekProtocolMatch": "..." }} ]
 O'zbek tilida (Lotin)."""
-    for model_name in (GEMINI_PRO, GEMINI_FLASH):
+    for model_name in (GEMINI_FLASH, GEMINI_PRO):
         for use_json in (True, False):
             try:
                 raw = _call_gemini(
