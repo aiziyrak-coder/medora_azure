@@ -236,6 +236,14 @@ export interface FinalReport {
   uzbekistanLegislativeNote?: string; // Specific legal context
 }
 
+/** Returns reasoningChain as a string array (handles API returning string or non-array). */
+export function getReasoningChainArray(d: { reasoningChain?: unknown }): string[] {
+  const rc = d?.reasoningChain;
+  if (Array.isArray(rc)) return rc.filter((s): s is string => typeof s === 'string');
+  if (typeof rc === 'string' && rc.trim()) return [rc.trim()];
+  return [];
+}
+
 /** Ensures consensusDiagnosis is always an array of Diagnosis; normalizes API/Gemini shape (e.g. "diagnosis" -> "name"). */
 export function normalizeConsensusDiagnosis(raw: unknown): Diagnosis[] {
   if (Array.isArray(raw)) {

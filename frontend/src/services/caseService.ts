@@ -27,9 +27,9 @@ export const addCaseToLibrary = (record: AnalysisRecord) => {
         id: record.id,
         finalDiagnosis: consensus[0]?.name || 'Noma\'lum',
         tags: [
-            ...consensus.map(d => d.name.toLowerCase()),
-            ...(record.selectedSpecialists || []).map(s => s.toLowerCase()),
-            ...(record.patientData?.complaints || '').toLowerCase().split(' ').slice(0, 5)
+            ...consensus.map(d => (d?.name ?? '').toLowerCase()).filter(Boolean),
+            ...(record.selectedSpecialists || []).map(s => (s ?? '').toLowerCase()).filter(Boolean),
+            ...(record.patientData?.complaints ? String(record.patientData.complaints).toLowerCase().split(' ').slice(0, 5) : [])
         ].filter((value, index, self) => self.indexOf(value) === index),
         outcome: `Tashxis ehtimolligi ${consensus[0]?.probability ?? 0}% bilan yakunlandi.`
     };

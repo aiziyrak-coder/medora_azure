@@ -218,30 +218,37 @@ ANIQLIK: probability ni dalil kuchiga mos qo'ying; ma'lumot yetishmasa pastroq b
 Javobni faqat JSON massiv qilib qaytaring, masalan:
 [ {{ "name": "...", "probability": 70, "justification": "...", "evidenceLevel": "High", "reasoningChain": ["...", "..."], "uzbekProtocolMatch": "..." }} ]
 O'zbek tilida (Lotin)."""
-    for model_name in (GEMINI_PRO, GEMINI_FLASH):
-        for use_json in (True, False):
-            try:
-                raw = _call_gemini(
-                    prompt, model_name,
-                    response_mime_type="application/json" if use_json else None,
-                )
-                raw = (raw or "").replace("```json", "").replace("```", "").strip()
-                data = json.loads(raw)
-                if not isinstance(data, list):
-                    data = [data] if isinstance(data, dict) else []
-                out = []
-                for d in data[:8]:
-                    name = (d.get("name") or "Tashxis").strip()
-                    prob = max(0, min(100, int(d.get("probability", 50))))
-                    out.append({
-                        "name": name,
-                        "probability": prob,
-                        "justification": (d.get("justification") or "")[:500],
-                        "evidenceLevel": (d.get("evidenceLevel") or "Moderate")[:50],
-                        "reasoningChain": d.get("reasoningChain") or [],
-                        "uzbekProtocolMatch": (d.get("uzbekProtocolMatch") or "")[:300],
-                    })
-                return out
-            except Exception as e:
-                logger.warning("Gemini generate_diagnoses (model=%s, json=%s) failed: %s", model_name, use_json, e)
+    # Try Flash first with JSON only to stay under proxy/gunicorn timeout (~30s)
+    for use_json in (True, False):
+        try:
+            raw = _call_gemini(
+                prompt, GEMINI_FLASH,
+                response_mime_type="application/json" if use_json else None,
+            )
+            raw = (raw or "").replace("```json", "").replace("```", "").strip()
+            data = json.loads(raw)
+            if not isinstance(data, list):
+                data = [data] if isinstance(data, dict) else []
+            out = []
+            for d in data[:8]:
+                name = (d.get("name") or "Tashxis").strip()
+                prob = max(0, min(100, int(d.get("probability", 50))))
+                rc = d.get("reasoningChain")
+                if isinstance(rc, list):
+                    reasoning_chain = [str(x).strip() for x in rc if str(x).strip()]
+                elif isinstance(rc, str) and rc.strip():
+                    reasoning_chain = [rc.strip()]
+                else:
+                    reasoning_chain = []
+                out.append({
+                    "name": name,
+                    "probability": prob,
+                    "justification": (d.get("justification") or "")[:500],
+                    "evidenceLevel": (d.get("evidenceLevel") or "Moderate")[:50],
+                    "reasoningChain": reasoning_chain,
+                    "uzbekProtocolMatch": (d.get("uzbekProtocolMatch") or "")[:300],
+                })
+            return out
+        except Exception as e:
+            logger.warning("Gemini generate_diagnoses (flash, json=%s) failed: %s", use_json, e)
     return []

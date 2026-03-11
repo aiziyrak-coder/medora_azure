@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import type { FinalReport, PatientData } from '../types';
-import { normalizeConsensusDiagnosis } from '../types';
+import { normalizeConsensusDiagnosis, getReasoningChainArray } from '../types';
 import ClipboardListIcon from './icons/ClipboardListIcon';
 import BrainCircuitIcon from './icons/BrainCircuitIcon';
 import ShieldWarningIcon from './icons/ShieldWarningIcon';
@@ -171,16 +171,19 @@ const FinalReportCard: React.FC<{ report: FinalReport, patientData: Partial<Pati
                             )}
 
                             {/* Deep Reasoning Chain */}
-                            {diag.reasoningChain && diag.reasoningChain.length > 0 && (
+                            {(() => {
+                                const chain = getReasoningChainArray(diag);
+                                return chain.length > 0 && (
                                 <div className="mt-3 p-3 bg-slate-50 rounded-lg border-l-4 border-blue-400">
                                     <p className="text-xs font-bold text-slate-500 uppercase mb-1">Mantiqiy Zanjir (Reasoning):</p>
                                     <ol className="list-decimal list-inside text-sm text-text-secondary space-y-1">
-                                        {diag.reasoningChain.map((step, i) => (
+                                        {chain.map((step, i) => (
                                             <li key={i}>{step}</li>
                                         ))}
                                     </ol>
                                 </div>
-                            )}
+                                );
+                            })()}
 
                             <p className="text-sm text-text-secondary mt-3 font-medium">Asoslash: {diag.justification}</p>
                         </div>

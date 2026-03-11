@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import type { User, PatientData, FinalReport, PatientQueueItem, AnalysisRecord, UserStats } from '../types';
+import { getReasoningChainArray } from '../types';
 import { useTranslation } from '../hooks/useTranslation';
 import * as aiService from '../services/aiCouncilService';
 import * as authService from '../services/apiAuthService';
@@ -152,15 +153,18 @@ const DiagnosisTab: React.FC<{ report: FinalReport }> = ({ report }) => {
                         </div>
                     </div>
                     
-                    {primaryDiag.reasoningChain && primaryDiag.reasoningChain.length > 0 && (
+                    {(() => {
+                        const chain = getReasoningChainArray(primaryDiag);
+                        return chain.length > 0 && (
                         <div className="mt-4 pl-4 border-l-2 border-white/10 space-y-3">
-                            {primaryDiag.reasoningChain.map((step, idx) => (
+                            {chain.map((step, idx) => (
                                 <p key={idx} className="text-sm text-slate-300 leading-relaxed font-light">
                                     {step}
                                 </p>
                             ))}
                         </div>
-                    )}
+                        );
+                    })()}
 
                     {primaryDiag.uzbekProtocolMatch && (
                         <div className="mt-5 inline-flex items-center gap-2 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">

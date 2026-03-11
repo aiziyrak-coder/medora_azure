@@ -68,13 +68,13 @@ const TeamRecommendationView: React.FC<TeamRecommendationViewProps> = ({ recomme
         const allSpecialists = Object.values(AIModel).filter(m => m !== AIModel.SYSTEM);
         return allSpecialists.filter(model => {
             const specInfo = AI_SPECIALISTS[model];
-            const searchLower = searchTerm.toLowerCase();
-            // Type assertion is safe here - translation function has fallback to return key if not found
+            if (!specInfo) return false;
+            const searchLower = (searchTerm ?? '').toLowerCase();
             const specialtyTranslation = t(`specialty_${model.toLowerCase()}` as TranslationKey);
             return (
-                specInfo.name.toLowerCase().includes(searchLower) ||
-                specInfo.specialty.toLowerCase().includes(searchLower) ||
-                specialtyTranslation.toLowerCase().includes(searchLower)
+                (specInfo.name ?? '').toLowerCase().includes(searchLower) ||
+                (specInfo.specialty ?? '').toLowerCase().includes(searchLower) ||
+                (specialtyTranslation ?? '').toLowerCase().includes(searchLower)
             );
         }).sort((a, b) => {
             // Sort: Selected first, then Recommended, then Alphabetical
