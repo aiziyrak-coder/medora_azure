@@ -252,12 +252,11 @@ def recommend_specialists(request):
     try:
         recs = gemini_utils.recommend_specialists(patient_data)
         if not recs:
-            return _err(503, "AI tavsiya qaytarmadi. GEMINI_API_KEY ni tekshiring.")
+            return _err(503, "AI tavsiya qaytarmadi. GEMINI_API_KEY ni .env da tekshiring.")
         return Response({"success": True, "data": {"recommendations": recs}})
     except Exception as exc:
         logger.exception("Recommend specialists error: %s", exc)
-        msg = str(exc) if str(exc).strip() else "Mutaxassislar tavsiyasida xatolik"
-        return _err(500, msg)
+        return _err(503, "AI tavsiya vaqtincha mavjud emas. GEMINI_API_KEY ni tekshiring.")
 
 
 @api_view(["POST"])
@@ -276,12 +275,11 @@ def generate_diagnoses(request):
     try:
         data = gemini_utils.generate_diagnoses(patient_data)
         if not data:
-            return _err(503, "AI tashxis qaytarmadi. GEMINI_API_KEY va modelni tekshiring.")
+            return _err(503, "AI tashxis qaytarmadi. GEMINI_API_KEY ni .env da tekshiring.")
         return Response({"success": True, "data": data})
     except Exception as exc:
         logger.exception("Generate diagnoses error: %s", exc)
-        msg = str(exc) if str(exc).strip() else "Tashxis yaratishda xatolik"
-        return _err(500, msg)
+        return _err(503, "AI tashxis vaqtincha mavjud emas. GEMINI_API_KEY ni tekshiring.")
 
 
 # ---------------------------------------------------------------------------

@@ -462,14 +462,7 @@ const AppContent: React.FC = () => {
         else setAppView(view);
     };
 
-    const defaultClarifyingQuestions: string[] = [
-        "Shikoyatlar qachondan boshlandi?",
-        "Allergiya yoki dori-darmonlarga nojo'ya ta'sir bormi?",
-        "Hozirgi yoki so'nggi davolanish qanday bo'ldi?",
-        "Qon bosimi, puls, harorat o'lchadingizmi?",
-        "Oila a'zolarida shunga o'xshash kasallik bormi?",
-    ];
-
+    /** Savollar faqat AI orqali shikoyatdan generatsiya qilinadi; oldindan kiritilgan ro'yxat ishlatilmaydi. */
     const handleDataSubmit = async (data: PatientData) => {
         setPatientData(data);
         setError(null);
@@ -488,14 +481,12 @@ const AppContent: React.FC = () => {
         } catch (e) {
             try {
                 questions = await aiService.generateClarifyingQuestions(data, language);
-                setError(null);
-            } catch (fallbackErr) {
+            } catch {
                 setError(t('clarification_question_error'));
             }
         }
-        const finalQuestions = questions.length ? questions : defaultClarifyingQuestions;
-        setClarificationQuestions(finalQuestions);
-        if (finalQuestions.length) setError(null);
+        setClarificationQuestions(questions);
+        if (questions.length) setError(null);
         setIsProcessing(false);
     };
     

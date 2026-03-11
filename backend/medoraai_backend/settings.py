@@ -284,8 +284,23 @@ AZURE_DEPLOY_LLAMA = config('AZURE_DEPLOY_LLAMA', default='AiDoktor-llama')
 AZURE_DEPLOY_MISTRAL = config('AZURE_DEPLOY_MISTRAL', default='AiDoktor-mistral')
 AZURE_DEPLOY_MINI = config('AZURE_DEPLOY_MINI', default='AiDoktor-mini')
 
-# AI: faqat Gemini (kalit .env dan, bo'sh joy/newline olib tashlanadi)
-GEMINI_API_KEY   = (config('GEMINI_API_KEY', default='') or '').strip()
+# AI: faqat Gemini (kalit .env dan; backend/.env dan aniq o'qish fallback)
+def _load_gemini_key():
+    key = (config('GEMINI_API_KEY', default='') or '').strip()
+    if key:
+        return key
+    env_file = BASE_DIR / '.env'
+    if env_file.exists():
+        try:
+            with open(env_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip().startswith('GEMINI_API_KEY='):
+                        key = line.split('=', 1)[1].strip().strip('"').strip("'").strip()
+                        return key
+        except Exception:
+            pass
+    return ''
+GEMINI_API_KEY = _load_gemini_key()
 AI_MODEL_DEFAULT = config('AI_MODEL_DEFAULT', default='gemini-1.5-pro')
 
 # в”Ђв”Ђ Production Security Settings в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ

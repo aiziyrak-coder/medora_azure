@@ -117,13 +117,12 @@ def generate_clarifying_questions(patient_data):
     prompt = f"""Siz tibbiy yordamchi AI siz. Bemor ma'lumotlari:
 {text}
 
-Quyidagilarga asoslangan holda 3–5 ta QISQA, ANIQ aniqlashtiruvchi savol yozing.
-PRIORITY 1: Allergiya, joriy dori-darmonlar, homiladorlik/emizish (agar mavzu bo'lsa).
-PRIORITY 2: Vital belgilar (qon bosimi, puls, harorat), asosiy lab qiymatlari.
-PRIORITY 3: Simptomlar davomiyligi, oldingi o'xshash epizodlar, oila anamnezi.
+MAJBURIY: Savollar FAQAT bemor SHIKOYATI (complaints) va yuqoridagi klinik ma'lumotlardan kelib chiqishi kerak.
+Umumiy yoki oldindan tayyorlangan savollar BERMANG. Har bir savol shikoyat/simptomlar bilan bevosita bog'liq bo'lsin.
+Masalan: agar shikoyat "bosh og'rig'i" bo'lsa — davomiyligi, qanday og'riq, qachon kuchayadi va h.k. shikoyatga oid savollar.
 
-Mavjud ma'lumotlar uchun savol bermang. Javobni faqat JSON massiv sifatida qaytaring, masalan: ["Savol 1?", "Savol 2?"].
-O'zbek tilida (Lotin)."""
+3–5 ta qisqa, aniq savol yozing. Mavjud ma'lumotlar uchun savol bermang.
+Javobni faqat JSON massiv: ["Savol 1?", "Savol 2?"]. O'zbek tilida (Lotin)."""
     raw = None
     for model in (GEMINI_FLASH, GEMINI_PRO):
         for use_json in (False, True):
@@ -153,42 +152,52 @@ O'zbek tilida (Lotin)."""
 
 
 def recommend_specialists(patient_data):
-    """Recommend 5-8 specialists. Returns list of {model, reason}."""
-    try:
-        text = _patient_text(patient_data)
-        names_str = ", ".join(SPECIALIST_NAMES[:40])
-        prompt = f"""Bemor ma'lumotlari:
+    """Recommend 5-8 specialists. Returns list of {model, reason}; [] on failure (no raise)."""
+    client = _get_client()
+    if not client:
+        return []
+    text = _patient_text(patient_data)
+    names_str = ", ".join(SPECIALIST_NAMES[:40])
+    prompt = f"""Bemor ma'lumotlari:
 {text}
 
 Ushbu klinik holat uchun 5–6 ta mutaxassis tanlang. Faqat quyidagi nomlardan: {names_str}.
 Har biri uchun qisqa sabab bering. Javobni aniq quyidagi formatda JSON qaytaring:
 {{ "recommendations": [ {{ "model": "Nom exactly from list", "reason": "Sabab" }} ] }}
 O'zbek tilida (Lotin)."""
-        raw = _call_gemini(prompt, GEMINI_FLASH, response_mime_type="application/json")
-        raw = (raw or "").replace("```json", "").replace("```", "").strip()
-        data = json.loads(raw)
-        recs = (data or {}).get("recommendations") or []
-        out = []
-        for r in recs:
-            model = (r.get("model") or "").strip()
-            if model not in SPECIALIST_NAMES:
-                for n in SPECIALIST_NAMES:
-                    if n.lower() in model.lower() or model.lower() in n.lower():
-                        model = n
-                        break
-            if model in SPECIALIST_NAMES:
-                out.append({"model": model, "reason": (r.get("reason") or "Holatga mos.")[:200]})
-        return out[:8]
-    except Exception as e:
-        logger.exception("Gemini recommend_specialists failed: %s", e)
-        raise RuntimeError(str(e) or "Mutaxassislar tavsiyasida AI xatolik") from e
+    for model_name in (GEMINI_FLASH, GEMINI_PRO):
+        for use_json in (True, False):
+            try:
+                raw = _call_gemini(
+                    prompt, model_name,
+                    response_mime_type="application/json" if use_json else None,
+                )
+                raw = (raw or "").replace("```json", "").replace("```", "").strip()
+                data = json.loads(raw)
+                recs = (data or {}).get("recommendations") or []
+                out = []
+                for r in recs:
+                    model = (r.get("model") or "").strip()
+                    if model not in SPECIALIST_NAMES:
+                        for n in SPECIALIST_NAMES:
+                            if n.lower() in model.lower() or model.lower() in n.lower():
+                                model = n
+                                break
+                    if model in SPECIALIST_NAMES:
+                        out.append({"model": model, "reason": (r.get("reason") or "Holatga mos.")[:200]})
+                return out[:8] if out else []
+            except Exception as e:
+                logger.warning("Gemini recommend_specialists (model=%s, json=%s) failed: %s", model_name, use_json, e)
+    return []
 
 
 def generate_diagnoses(patient_data):
-    """Generate 3-8 differential diagnoses with probabilities."""
-    try:
-        text = _patient_text(patient_data)
-        prompt = f"""Bemor ma'lumotlari:
+    """Generate 3-8 differential diagnoses with probabilities. Returns [] on failure."""
+    client = _get_client()
+    if not client:
+        return []
+    text = _patient_text(patient_data)
+    prompt = f"""Bemor ma'lumotlari:
 {text}
 
 3–5 ta eng ehtimol differensial tashxis. O'ZBEKISTON SSV klinik protokollari kontekstida.
@@ -196,24 +205,30 @@ Har biri uchun: name (o'zbekcha), probability (0–100), justification, evidence
 Javobni faqat JSON massiv qilib qaytaring, masalan:
 [ {{ "name": "...", "probability": 70, "justification": "...", "evidenceLevel": "High", "reasoningChain": ["...", "..."], "uzbekProtocolMatch": "..." }} ]
 O'zbek tilida (Lotin)."""
-        raw = _call_gemini(prompt, GEMINI_PRO, response_mime_type="application/json")
-        raw = (raw or "").replace("```json", "").replace("```", "").strip()
-        data = json.loads(raw)
-        if not isinstance(data, list):
-            data = [data] if isinstance(data, dict) else []
-        out = []
-        for d in data[:8]:
-            name = (d.get("name") or "Tashxis").strip()
-            prob = max(0, min(100, int(d.get("probability", 50))))
-            out.append({
-                "name": name,
-                "probability": prob,
-                "justification": (d.get("justification") or "")[:500],
-                "evidenceLevel": (d.get("evidenceLevel") or "Moderate")[:50],
-                "reasoningChain": d.get("reasoningChain") or [],
-                "uzbekProtocolMatch": (d.get("uzbekProtocolMatch") or "")[:300],
-            })
-        return out
-    except Exception:
-        logger.exception("Gemini generate_diagnoses failed")
-        return []
+    for model_name in (GEMINI_PRO, GEMINI_FLASH):
+        for use_json in (True, False):
+            try:
+                raw = _call_gemini(
+                    prompt, model_name,
+                    response_mime_type="application/json" if use_json else None,
+                )
+                raw = (raw or "").replace("```json", "").replace("```", "").strip()
+                data = json.loads(raw)
+                if not isinstance(data, list):
+                    data = [data] if isinstance(data, dict) else []
+                out = []
+                for d in data[:8]:
+                    name = (d.get("name") or "Tashxis").strip()
+                    prob = max(0, min(100, int(d.get("probability", 50))))
+                    out.append({
+                        "name": name,
+                        "probability": prob,
+                        "justification": (d.get("justification") or "")[:500],
+                        "evidenceLevel": (d.get("evidenceLevel") or "Moderate")[:50],
+                        "reasoningChain": d.get("reasoningChain") or [],
+                        "uzbekProtocolMatch": (d.get("uzbekProtocolMatch") or "")[:300],
+                    })
+                return out
+            except Exception as e:
+                logger.warning("Gemini generate_diagnoses (model=%s, json=%s) failed: %s", model_name, use_json, e)
+    return []
