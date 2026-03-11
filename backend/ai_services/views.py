@@ -256,7 +256,8 @@ def recommend_specialists(request):
         return Response({"success": True, "data": {"recommendations": recs}})
     except Exception as exc:
         logger.exception("Recommend specialists error: %s", exc)
-        return _err(503, "AI tavsiya vaqtincha mavjud emas. GEMINI_API_KEY ni tekshiring.")
+        msg = str(exc).strip() if str(exc).strip() else "AI tavsiya vaqtincha mavjud emas."
+        return _err(503, msg)
 
 
 @api_view(["POST"])

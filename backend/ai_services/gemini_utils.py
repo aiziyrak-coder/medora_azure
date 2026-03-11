@@ -157,10 +157,9 @@ Javobni faqat JSON massiv: ["Savol 1?", "Savol 2?"]. O'zbek tilida (Lotin)."""
 
 
 def recommend_specialists(patient_data):
-    """Recommend 5-8 specialists. Returns list of {model, reason}; [] on failure (no raise)."""
-    client = _get_client()
-    if not client:
-        return []
+    """Recommend 5-8 specialists. Raises if key missing or all Gemini attempts fail."""
+    if _get_client() is None:
+        raise RuntimeError("Gemini API kaliti sozlanmagan. GEMINI_API_KEY ni backend/.env ga kiriting.")
     text = _patient_text(patient_data)
     names_str = ", ".join(SPECIALIST_NAMES[:40])
     prompt = f"""Bemor ma'lumotlari:
@@ -170,6 +169,7 @@ Ushbu klinik holat uchun 5–6 ta mutaxassis tanlang. Faqat quyidagi nomlardan: 
 Har biri uchun qisqa sabab bering. Javobni aniq quyidagi formatda JSON qaytaring:
 {{ "recommendations": [ {{ "model": "Nom exactly from list", "reason": "Sabab" }} ] }}
 O'zbek tilida (Lotin)."""
+    last_exc = None
     for model_name in (GEMINI_PRO, GEMINI_FLASH):
         for use_json in (True, False):
             try:
@@ -190,9 +190,13 @@ O'zbek tilida (Lotin)."""
                                 break
                     if model in SPECIALIST_NAMES:
                         out.append({"model": model, "reason": (r.get("reason") or "Holatga mos.")[:200]})
-                return out[:8] if out else []
+                if out:
+                    return out[:8]
             except Exception as e:
+                last_exc = e
                 logger.warning("Gemini recommend_specialists (model=%s, json=%s) failed: %s", model_name, use_json, e)
+    if last_exc is not None:
+        raise last_exc
     return []
 
 

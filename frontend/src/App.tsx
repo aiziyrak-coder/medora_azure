@@ -515,23 +515,25 @@ const AppContent: React.FC = () => {
         setAppView('team_recommendation');
         setIsProcessing(true);
         setStatusMessage(t('team_recommendation_creating'));
+        let teamBackendError: string | null = null;
         try {
-            // Try API first (real Gemini on backend)
             const { recommendSpecialists } = await import('./services/apiAiService');
             const response = await recommendSpecialists(enrichedPatientData);
             if (response.success && response.data?.recommendations?.length) {
                 setRecommendedTeam(response.data.recommendations);
             } else {
+                if (response.success === false && response.error?.message) {
+                    teamBackendError = response.error.message;
+                }
                 throw new Error('API failed');
             }
         } catch (e) {
-            // Fallback to frontend Gemini
             try {
                 const team = await aiService.recommendSpecialists(enrichedPatientData, language);
                 setRecommendedTeam(team.recommendations);
+                setError(null);
             } catch (fallbackError) {
-                setError(t('team_recommendation_auto_error'));
-                // Minimal default: faqat umumiy mutaxassislar (6 ta)
+                setError(teamBackendError || t('team_recommendation_auto_error'));
                 const defaultSpecialists = [AIModel.INTERNAL_MEDICINE, AIModel.FAMILY_MEDICINE, AIModel.EMERGENCY, AIModel.GEMINI, AIModel.CLAUDE, AIModel.GPT];
                 setRecommendedTeam(defaultSpecialists.map(model => ({ model, reason: 'Standart jamoa' })));
             }
