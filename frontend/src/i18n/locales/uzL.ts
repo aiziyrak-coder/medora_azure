@@ -91,7 +91,7 @@ export const uzL: TranslationSet = {
 
   // Auth Page & Marketing
   auth_marketing_title: 'Klinik tafakkur inqilobi.',
-  auth_marketing_desc: 'Farg'ona JSTI вЂ” bu shunchaki raqamli yordamchi emas, bu tibbiyotning yangi davri. Biz minglab klinik protokollar, global tibbiy tadqiqotlar va xalqaro ekspertiza bazasini yagona intellektual ekotizimga birlashtirdik. Tizim har bir bemorga individual yondashib, murakkab diagnostik jumboqlarni yechishda, davolash taktikasini optimallashtirishda va tibbiy xatolarni minimallashtirishda shifokorning eng ishonchli hamkoriga aylanadi.',
+  auth_marketing_desc: 'Farg\'ona JSTI вЂ” bu shunchaki raqamli yordamchi emas, bu tibbiyotning yangi davri. Biz minglab klinik protokollar, global tibbiy tadqiqotlar va xalqaro ekspertiza bazasini yagona intellektual ekotizimga birlashtirdik. Tizim har bir bemorga individual yondashib, murakkab diagnostik jumboqlarni yechishda, davolash taktikasini optimallashtirishda va tibbiy xatolarni minimallashtirishda shifokorning eng ishonchli hamkoriga aylanadi.',
   auth_mode_select: 'Rejimni tanlang:',
   auth_mode_clinic: 'Klinika',
   auth_mode_clinic_desc: 'Tashkilotlar va konsilium uchun.',
@@ -556,7 +556,7 @@ export const uzL: TranslationSet = {
   // Legal & marketing extended content
   legal_terms_title: 'Foydalanish Shartlari va Ommaviy Oferta',
   legal_terms_p1: '1. Umumiy qoidalar: Ushbu platforma faqat tibbiy maвЂ™lumotga ega boвЂlgan mutaxassislar (shifokorlar, rezidentlar, talabalar) uchun moвЂljallangan yordamchi vositadir.',
-  legal_terms_p2: '2. MasвЂ™uliyatni cheklash: "Farg'ona JSTI" tizimi (Farg'ona jamoat salomatligi tibbiyot instituti) (keyingi oвЂrinlarda "Tizim") tomonidan taqdim etilgan har qanday tashxis, davolash rejasi yoki tavsiya faqat axborot xarakteriga ega. Tizim shifokor oвЂrnini bosmaydi. Yakuniy klinik qaror uchun toвЂliq javobgarlik foydalanuvchi (shifokor) zimmasidadir.',
+  legal_terms_p2: '2. MasвЂ™uliyatni cheklash: "Farg\'ona JSTI" tizimi (Farg\'ona jamoat salomatligi tibbiyot instituti) (keyingi oвЂrinlarda "Tizim") tomonidan taqdim etilgan har qanday tashxis, davolash rejasi yoki tavsiya faqat axborot xarakteriga ega. Tizim shifokor oвЂrnini bosmaydi. Yakuniy klinik qaror uchun toвЂliq javobgarlik foydalanuvchi (shifokor) zimmasidadir.',
   legal_terms_p3: '3. MaвЂ™lumotlar xavfsizligi: Biz foydalanuvchi kiritgan bemor maвЂ™lumotlarini (F.I.Sh va boshqa shaxsiy identifikatorlar) anonimlashtirishga harakat qilamiz, ammo internet tarmogвЂida xavfsizlik uchun mutlaq kafolat berilmaydi.',
   legal_terms_p4: '4. Rozilik: Tizimdan foydalanish orqali siz sunвЂ™iy intellekt tomonidan yuzaga kelishi mumkin boвЂlgan xatoliklar (gallyutsinatsiyalar) ehtimolini tushunasiz va qabul qilasiz.',
 
