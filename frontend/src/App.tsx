@@ -470,19 +470,31 @@ const AppContent: React.FC = () => {
         setAppView('clarification');
         setStatusMessage(t('clarification_generating_questions'));
         let questions: string[] = [];
+        let backendErrorMessage: string | null = null;
         try {
             const { generateClarifyingQuestions } = await import('./services/apiAiService');
             const response = await generateClarifyingQuestions(data);
             if (response.success && response.data?.length) {
                 questions = response.data;
             } else {
-                questions = await aiService.generateClarifyingQuestions(data, language);
+                if (response.success === false && response.error?.message) {
+                    backendErrorMessage = response.error.message;
+                    setError(backendErrorMessage);
+                }
+                try {
+                    questions = await aiService.generateClarifyingQuestions(data, language);
+                    if (questions.length) setError(null);
+                } catch {
+                    setError(backendErrorMessage || t('clarification_question_error'));
+                }
             }
         } catch (e) {
+            const errMsg = e instanceof Error ? e.message : null;
             try {
                 questions = await aiService.generateClarifyingQuestions(data, language);
+                if (questions.length) setError(null);
             } catch {
-                setError(t('clarification_question_error'));
+                setError(backendErrorMessage || errMsg || t('clarification_question_error'));
             }
         }
         setClarificationQuestions(questions);

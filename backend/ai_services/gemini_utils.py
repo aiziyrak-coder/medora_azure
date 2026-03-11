@@ -110,9 +110,10 @@ def _call_gemini(prompt, model_name=GEMINI_FLASH, response_mime_type=None):
 
 def generate_clarifying_questions(patient_data):
     """
-    Generate 3-8 clarifying questions. Returns [] on failure so frontend does not get 500.
-    Tries with JSON mode first; falls back to plain text and parses JSON from it.
+    Generate 3-8 clarifying questions. Raises if API key missing or all Gemini attempts fail.
     """
+    if _get_client() is None:
+        raise RuntimeError("Gemini API kaliti sozlanmagan. Serverni boshqaruvchi GEMINI_API_KEY ni backend/.env ga kiritsin.")
     text = _patient_text(patient_data)
     prompt = f"""Siz tibbiy yordamchi AI siz. Bemor ma'lumotlari:
 {text}
@@ -124,6 +125,7 @@ Masalan: agar shikoyat "bosh og'rig'i" bo'lsa — davomiyligi, qanday og'riq, qa
 3–5 ta qisqa, aniq savol yozing. Mavjud ma'lumotlar uchun savol bermang.
 Javobni faqat JSON massiv: ["Savol 1?", "Savol 2?"]. O'zbek tilida (Lotin)."""
     raw = None
+    last_exc = None
     for model in (GEMINI_FLASH, GEMINI_PRO):
         for use_json in (False, True):
             try:
@@ -133,9 +135,12 @@ Javobni faqat JSON massiv: ["Savol 1?", "Savol 2?"]. O'zbek tilida (Lotin)."""
                 )
                 break
             except Exception as e:
+                last_exc = e
                 logger.warning("Gemini clarifying_questions (model=%s, use_json=%s) failed: %s", model, use_json, e)
         if raw:
             break
+    if not raw and last_exc is not None:
+        raise last_exc
     if not raw:
         return []
     raw = (raw or "").replace("```json", "").replace("```", "").strip()
