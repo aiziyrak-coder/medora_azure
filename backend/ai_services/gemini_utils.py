@@ -70,6 +70,21 @@ def _patient_text(patient_data):
     return "\n".join(parts)
 
 
+def _response_text(response):
+    """Extract text from generate_content response (SDK compatibility)."""
+    text = getattr(response, "text", None)
+    if text and str(text).strip():
+        return str(text).strip()
+    candidates = getattr(response, "candidates", None) or []
+    if candidates:
+        content = getattr(candidates[0], "content", None)
+        if content:
+            parts = getattr(content, "parts", None) or []
+            if parts and hasattr(parts[0], "text"):
+                return (parts[0].text or "").strip()
+    return ""
+
+
 def _call_gemini(prompt, model_name=GEMINI_FLASH, response_mime_type=None):
     """Call Gemini via google-genai Client. Returns response text."""
     client = _get_client()
@@ -87,19 +102,19 @@ def _call_gemini(prompt, model_name=GEMINI_FLASH, response_mime_type=None):
     except Exception as e:
         logger.exception("Gemini API xatosi: %s", e)
         raise
-    text = getattr(response, "text", None) or ""
-    if not (text and text.strip()):
+    text = _response_text(response)
+    if not text:
         raise ValueError("Gemini bo'sh javob qaytardi")
-    return text.strip()
+    return text
 
 
 def generate_clarifying_questions(patient_data):
     """
     Generate 3-8 clarifying questions. Returns [] on failure so frontend does not get 500.
+    Tries with JSON mode first; falls back to plain text and parses JSON from it.
     """
-    try:
-        text = _patient_text(patient_data)
-        prompt = f"""Siz tibbiy yordamchi AI siz. Bemor ma'lumotlari:
+    text = _patient_text(patient_data)
+    prompt = f"""Siz tibbiy yordamchi AI siz. Bemor ma'lumotlari:
 {text}
 
 Quyidagilarga asoslangan holda 3–5 ta QISQA, ANIQ aniqlashtiruvchi savol yozing.
@@ -109,20 +124,32 @@ PRIORITY 3: Simptomlar davomiyligi, oldingi o'xshash epizodlar, oila anamnezi.
 
 Mavjud ma'lumotlar uchun savol bermang. Javobni faqat JSON massiv sifatida qaytaring, masalan: ["Savol 1?", "Savol 2?"].
 O'zbek tilida (Lotin)."""
-        raw = _call_gemini(prompt, GEMINI_FLASH, response_mime_type="application/json")
-        raw = (raw or "").replace("```json", "").replace("```", "").strip()
+    raw = None
+    for use_json in (True, False):
+        try:
+            raw = _call_gemini(
+                prompt, GEMINI_FLASH,
+                response_mime_type="application/json" if use_json else None,
+            )
+            break
+        except Exception as e:
+            logger.warning("Gemini clarifying_questions (use_json=%s) failed: %s", use_json, e)
+            if use_json:
+                continue
+            return []
+    if not raw:
+        return []
+    raw = (raw or "").replace("```json", "").replace("```", "").strip()
+    try:
         data = json.loads(raw)
-        if isinstance(data, list):
-            return [str(q) for q in data if q][:8]
-        if isinstance(data, dict) and "questions" in data:
-            return [str(q) for q in data["questions"] if q][:8]
-        return []
     except json.JSONDecodeError:
-        logger.warning("Gemini clarifying_questions: invalid JSON")
+        logger.warning("Gemini clarifying_questions: invalid JSON, raw=%s", raw[:300])
         return []
-    except Exception:
-        logger.exception("Gemini clarifying_questions failed")
-        return []
+    if isinstance(data, list):
+        return [str(q) for q in data if q][:8]
+    if isinstance(data, dict) and "questions" in data:
+        return [str(q) for q in data["questions"] if q][:8]
+    return []
 
 
 def recommend_specialists(patient_data):

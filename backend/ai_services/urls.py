@@ -3,6 +3,7 @@ AI Services URLs — Azure AI Foundry
 """
 from django.urls import path
 from .views import (
+    test_gemini,
     # New
     run_consilium_view,
     doctor_support_view,
@@ -24,6 +25,7 @@ from .views import (
 app_name = "ai_services"
 
 urlpatterns = [
+    path("test-gemini/", test_gemini, name="test_gemini"),
     # ── Multi-Agent Consilium ──────────────────────────────
     path("consilium/",          run_consilium_view,         name="consilium"),
     path("council-debate/",     run_council_debate,         name="council_debate"),  # backwards-compat

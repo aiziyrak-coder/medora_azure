@@ -12,7 +12,7 @@ from django.conf import settings
 from django.http import StreamingHttpResponse
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from . import gemini_utils
@@ -196,6 +196,29 @@ def doctor_support_stream_view(request):
     response["Cache-Control"] = "no-cache"
     response["X-Accel-Buffering"] = "no"
     return response
+
+
+# ---------------------------------------------------------------------------
+# Debug: test Gemini (GET /api/ai/test-gemini/) — haqiqiy xatolikni ko'rish
+# ---------------------------------------------------------------------------
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def test_gemini(request):
+    """Test Gemini API; returns ok + message or error detail for debugging."""
+    key = (getattr(settings, "GEMINI_API_KEY", None) or "").strip()
+    if not key:
+        return Response({"ok": False, "error": "GEMINI_API_KEY .env da yo'q yoki bo'sh"}, status=503)
+    try:
+        from .gemini_utils import _get_client, _call_gemini, GEMINI_FLASH
+        client = _get_client()
+        if not client:
+            return Response({"ok": False, "error": "Client yaratib bo'lmadi (import/key)"}, status=503)
+        text = _call_gemini("Javobingiz: salom. Faqat shu so'zni yozing.", GEMINI_FLASH, response_mime_type=None)
+        return Response({"ok": True, "message": "Gemini ishlayapti", "sample": (text or "")[:200]})
+    except Exception as e:
+        logger.exception("test_gemini: %s", e)
+        return Response({"ok": False, "error": str(e)}, status=500)
 
 
 # ---------------------------------------------------------------------------
