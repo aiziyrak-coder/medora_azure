@@ -236,6 +236,20 @@ export interface FinalReport {
   uzbekistanLegislativeNote?: string; // Specific legal context
 }
 
+/** Ensures consensusDiagnosis is always an array of Diagnosis; normalizes API/Gemini shape (e.g. "diagnosis" -> "name"). */
+export function normalizeConsensusDiagnosis(raw: unknown): Diagnosis[] {
+  if (Array.isArray(raw)) {
+    return raw.map((item: Record<string, unknown>) => ({
+      name: String(item?.name ?? item?.diagnosis ?? ''),
+      probability: Number(item?.probability ?? 0),
+      justification: String(item?.justification ?? item?.reasoningChain ?? ''),
+      evidenceLevel: String(item?.evidenceLevel ?? 'Moderate'),
+      reasoningChain: Array.isArray(item?.reasoningChain) ? (item.reasoningChain as string[]) : (typeof item?.reasoningChain === 'string' ? [item.reasoningChain] : []),
+      uzbekProtocolMatch: String(item?.uzbekProtocolMatch ?? ''),
+    }));
+  }
+  return [];
+}
 
 export type ProgressUpdate =
   | { type: 'status'; message: string }

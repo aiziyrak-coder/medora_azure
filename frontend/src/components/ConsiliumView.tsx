@@ -4,6 +4,7 @@
  */
 import React, { useState, useRef, useEffect } from 'react';
 import type { PatientData, FinalReport } from '../types';
+import { normalizeConsensusDiagnosis } from '../types';
 import { runConsilium, type ConsiliumResult, type DebateMessage } from '../services/apiAiService';
 import { useTranslation } from '../i18n/LanguageContext';
 
@@ -133,9 +134,9 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
     try {
       // Simulate phase transitions while waiting for response
       const p1Timeout = setTimeout(() =>
-        setPhases(p => ({ ...p, independent: 'done', debate: 'running' })), 8000);
+        setPhases(p => ({ ...p, independent: 'done', debate: 'running' })), 2500);
       const p2Timeout = setTimeout(() =>
-        setPhases(p => ({ ...p, debate: 'done', consensus: 'running' })), 20000);
+        setPhases(p => ({ ...p, debate: 'done', consensus: 'running' })), 8000);
 
       const resp = await runConsilium(patientData, language);
 
@@ -149,16 +150,17 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
       setPhases({ independent: 'done', debate: 'done', consensus: 'done' });
       setResult(resp.data);
 
-      // Convert to FinalReport format for parent
+      // Convert to FinalReport format for parent (normalize in case API returns different shape)
       const fr = resp.data.final_report;
+      const consensusDiagnosis = normalizeConsensusDiagnosis(fr?.consensusDiagnosis);
       onReport({
-        consensusDiagnosis:        fr.consensusDiagnosis,
-        rejectedHypotheses:        fr.rejectedHypotheses,
-        treatmentPlan:             fr.treatmentPlan,
-        medicationRecommendations: fr.medicationRecommendations as FinalReport['medicationRecommendations'],
-        recommendedTests:          fr.recommendedTests,
-        unexpectedFindings:        fr.unexpectedFindings,
-        uzbekistanLegislativeNote: fr.uzbekistanLegislativeNote,
+        consensusDiagnosis,
+        rejectedHypotheses:        Array.isArray(fr.rejectedHypotheses) ? fr.rejectedHypotheses : [],
+        treatmentPlan:             Array.isArray(fr.treatmentPlan) ? fr.treatmentPlan : [],
+        medicationRecommendations: (Array.isArray(fr.medicationRecommendations) ? fr.medicationRecommendations : []) as FinalReport['medicationRecommendations'],
+        recommendedTests:          Array.isArray(fr.recommendedTests) ? fr.recommendedTests : [],
+        unexpectedFindings:        typeof fr.unexpectedFindings === 'string' ? fr.unexpectedFindings : '',
+        uzbekistanLegislativeNote: typeof fr.uzbekistanLegislativeNote === 'string' ? fr.uzbekistanLegislativeNote : '',
         criticalFinding:           fr.criticalFinding,
       } as FinalReport);
     } catch (err) {
@@ -256,7 +258,7 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
                 ))}
               </div>
 
-              {result.final_report.debateHistory.map(msg => (
+              {(Array.isArray(result.final_report?.debateHistory) ? result.final_report.debateHistory : []).map(msg => (
                 <DebateCard key={msg.id} msg={msg} />
               ))}
 
@@ -276,7 +278,7 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
               {/* Consensus Diagnosis */}
               <div className="rounded-2xl bg-emerald-950/30 border border-emerald-500/30 p-4">
                 <h3 className="font-bold text-emerald-300 mb-2">вњ… Konsensus Tashxis</h3>
-                {result.final_report.consensusDiagnosis.slice(0, 3).map((d, i) => (
+                {(normalizeConsensusDiagnosis(result.final_report?.consensusDiagnosis)).slice(0, 3).map((d, i) => (
                   <div key={i} className="mb-2">
                     <div className="flex items-center justify-between">
                       <span className="text-white font-medium">{d.name}</span>
@@ -297,7 +299,7 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
               )}
 
               {/* Medications */}
-              {result.final_report.medicationRecommendations.length > 0 && (
+              {Array.isArray(result.final_report?.medicationRecommendations) && result.final_report.medicationRecommendations.length > 0 && (
                 <div className="rounded-2xl bg-slate-800/60 border border-slate-600/30 p-4">
                   <h3 className="font-bold text-white mb-2">рџ’Љ Dori-darmonlar</h3>
                   {result.final_report.pharmacologyWarnings?.length > 0 && (

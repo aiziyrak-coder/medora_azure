@@ -4,6 +4,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import * as telegramService from '../services/telegramService';
 import * as apiSubscription from '../services/apiSubscriptionService';
 import * as authService from '../services/authService';
+import { INSTITUTE_NAME_FULL } from '../constants/brand';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
 import CheckCircleIcon from './icons/CheckCircleIcon';
 import UploadCloudIcon from './icons/UploadCloudIcon';
@@ -27,7 +28,7 @@ const BANK_ACCOUNT = {
     accountNumber: '20214000901234567890',
     mfo: '00447',
     inn: '123456789',
-    receiver: 'Farg\'ona jamoat salomatligi tibbiyot instituti',
+    receiver: INSTITUTE_NAME_FULL,
 };
 
 /** Shifokor uchun default reja (API dan kelmasa) */

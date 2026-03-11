@@ -236,12 +236,13 @@ export const recommendSpecialists = async (
     { patient_data: patientData },
   );
   if (response.success && response.data) {
+    const recs = Array.isArray(response.data.recommendations) ? response.data.recommendations : [];
     return {
       ...response,
       data: {
-        recommendations: response.data.recommendations.map((rec) => ({
-          model:  rec.model as AIModel,
-          reason: rec.reason,
+        recommendations: recs.map((rec: { model?: string; reason?: string }) => ({
+          model:  (rec?.model ?? 'Gemini') as AIModel,
+          reason: typeof rec?.reason === 'string' ? rec.reason : '',
         })),
       },
     };

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import type { AnalysisRecord, UserStats, CMETopic } from '../types';
+import { normalizeConsensusDiagnosis } from '../types';
 import PlusCircleIcon from './icons/PlusCircleIcon';
 import DocumentReportIcon from './icons/DocumentReportIcon';
 import ChevronRightIcon from './icons/ChevronRightIcon';
@@ -121,7 +122,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userName, onNewAnalysis, onViewHi
                                                     </span>
                                                     <span className="text-sm text-text-secondary truncate font-medium flex items-center gap-1">
                                                         <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                                                        {record.finalReport.consensusDiagnosis[0]?.name || t('unknown_diagnosis')}
+                                                        {normalizeConsensusDiagnosis(record.finalReport?.consensusDiagnosis)[0]?.name || t('unknown_diagnosis')}
                                                     </span>
                                                 </div>
                                             </div>

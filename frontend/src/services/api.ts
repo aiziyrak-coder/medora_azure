@@ -89,7 +89,7 @@ const retryFetch = async <T>(
   url: string,
   options: RequestInit,
   retries = 2,
-  delay = 600
+  delay = 300
 ): Promise<Response> => {
   for (let i = 0; i < retries; i++) {
     try {

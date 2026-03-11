@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf";
 import type { FinalReport, PatientData, ChatMessage } from '../types';
+import { normalizeConsensusDiagnosis } from '../types';
 import { AI_SPECIALISTS } from "../constants";
 
 // Extend jsPDF internal type for pages property
@@ -131,7 +132,7 @@ export const generatePdfReport = (
     addHeader("Konsilium Konsensusi");
 
     addSectionTitle("Eng Ehtimolli Tashxis(lar)");
-    report.consensusDiagnosis.forEach(diag => {
+    normalizeConsensusDiagnosis(report.consensusDiagnosis).forEach(diag => {
         addKeyValue("Tashxis", `${diag.name} (${diag.probability}%)`);
         addKeyValue("Dalillilik Darajasi", diag.evidenceLevel || "N/A");
         addKeyValue("Asoslash", diag.justification);

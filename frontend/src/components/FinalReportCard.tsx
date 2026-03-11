@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import type { FinalReport, PatientData } from '../types';
+import { normalizeConsensusDiagnosis } from '../types';
 import ClipboardListIcon from './icons/ClipboardListIcon';
 import BrainCircuitIcon from './icons/BrainCircuitIcon';
 import ShieldWarningIcon from './icons/ShieldWarningIcon';
@@ -154,7 +155,7 @@ const FinalReportCard: React.FC<{ report: FinalReport, patientData: Partial<Pati
                 )}
                 
                 <Section title="Konsensus Tashxis" icon={<ClipboardListIcon className="w-6 h-6 text-purple-600"/>}>
-                    {report.consensusDiagnosis.map((diag, index) => (
+                    {normalizeConsensusDiagnosis(report.consensusDiagnosis).map((diag, index) => (
                         <div key={index} className="p-4 bg-white/80 rounded-xl border border-border-color shadow-sm mb-3">
                             <div className="flex justify-between font-bold text-base text-text-primary">
                                 <span className="text-lg text-blue-900">{diag.name}</span>

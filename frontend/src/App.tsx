@@ -1,6 +1,7 @@
 
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import type { PatientData, ChatMessage, FinalReport, ProgressUpdate, User, AnalysisRecord, Diagnosis, DetectedMedication, DiagnosisFeedback, CriticalFinding, CMETopic, UserStats, AppView, PrognosisReport } from './types';
+import { normalizeConsensusDiagnosis } from './types';
 import * as aiService from './services/aiCouncilService';
 import * as authService from './services/apiAuthService';
 import * as authServiceLocal from './services/authService';
@@ -43,6 +44,7 @@ import CopyrightIcon from './components/icons/CopyrightIcon';
 import MonitorIcon from './components/icons/MonitorIcon'; 
 
 import { AIModel } from './constants/specialists';
+import { INSTITUTE_NAME_FULL, INSTITUTE_NAME_SHORT } from './constants/brand';
 
 const ScrollWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <div className="h-full overflow-y-auto px-4 py-6 custom-scrollbar">
@@ -58,7 +60,7 @@ const MobileBlocker: React.FC<{ onLogout: () => void }> = ({ onLogout }) => (
         </div>
         <h2 className="text-2xl font-bold text-white mb-4">Qurilma mos kelmadi</h2>
         <p className="text-slate-300 text-lg leading-relaxed max-w-md">
-            Hurmatli foydalanuvchi, <strong>Farg'ona JSTI</strong> (Farg'ona jamoat salomatligi tibbiyot instituti) tizimining to'liq funksionalidan foydalanish uchun, iltimos, 
+            Hurmatli foydalanuvchi, <strong>{INSTITUTE_NAME_SHORT}</strong> ({INSTITUTE_NAME_FULL}) tizimining to'liq funksionalidan foydalanish uchun, iltimos, 
             <span className="text-blue-400 font-bold"> Kompyuter</span> yoki <span className="text-blue-400 font-bold">Planshet</span> orqali kiring.
         </p>
         <div className="mt-8 p-4 bg-slate-800/50 rounded-xl border border-white/10">
@@ -551,13 +553,15 @@ const AppContent: React.FC = () => {
             const { generateInitialDiagnoses } = await import('./services/apiAiService');
             const response = await generateInitialDiagnoses(patientData);
             const apiErrorMsg = response.success === false ? (response.error?.message || '') : '';
-            if (response.success && response.data?.length) {
+            const hasData = response.success && Array.isArray(response.data) && response.data.length > 0;
+            if (hasData) {
                 setDifferentialDiagnoses(response.data);
+                setError(null);
                 setStatusMessage(t('ddx_feedback_prompt'));
             } else {
                 try {
                     const diagnoses = await aiService.generateInitialDiagnoses(patientData, language);
-                    setDifferentialDiagnoses(diagnoses);
+                    setDifferentialDiagnoses(Array.isArray(diagnoses) ? diagnoses : []);
                     setError(null);
                     setStatusMessage(t('ddx_feedback_prompt'));
                 } catch (fallbackErr) {
@@ -657,7 +661,11 @@ const AppContent: React.FC = () => {
     
     const handleUpdateReport = useCallback((updatedReport: Partial<FinalReport>) => {
         if (!currentAnalysisRecord || !currentUser) return;
-        const newFinalReport = { ...currentAnalysisRecord.finalReport, ...updatedReport };
+        const merged = { ...currentAnalysisRecord.finalReport, ...updatedReport };
+        const newFinalReport: FinalReport = {
+            ...merged,
+            consensusDiagnosis: normalizeConsensusDiagnosis(merged.consensusDiagnosis ?? (currentAnalysisRecord.finalReport as FinalReport)?.consensusDiagnosis),
+        } as FinalReport;
         setFinalReport(newFinalReport);
         const updatedRecord = { ...currentAnalysisRecord, finalReport: newFinalReport as FinalReport };
         setCurrentAnalysisRecord(updatedRecord);
@@ -681,7 +689,7 @@ const AppContent: React.FC = () => {
         setFinalReport(record.finalReport);
         const specs = record.selectedSpecialists?.map(role => ({ role, backEndModel: "Gemini 3.0 Pro" })) || [];
         setSelectedSpecialistsConfig(specs);
-        setDifferentialDiagnoses(record.finalReport.consensusDiagnosis);
+        setDifferentialDiagnoses(normalizeConsensusDiagnosis(record.finalReport?.consensusDiagnosis));
         setAppView('live_analysis');
         setIsProcessing(false); 
         setStatusMessage("Arxivdan yuklandi. Munozarani davom ettirishingiz mumkin.");

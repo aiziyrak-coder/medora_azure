@@ -20,6 +20,7 @@ import type {
     PrognosisReport,
     RelatedResearch,
 } from '../types';
+import { normalizeConsensusDiagnosis } from '../types';
 import { AIModel } from "../constants/specialists";
 import { AI_SPECIALISTS } from "../constants";
 import { Language } from "../i18n/LanguageContext";
@@ -130,6 +131,8 @@ const getSystemInstruction = (language: Language): string => {
     3. Gallyutsinatsiyadan saqlaning: faqat kiritilgan ma'lumot va umumiy tibbiy bilimga tayanib javob bering; taxmin qilmaslik kerak bo'lsa "Qo'shimcha tekshiruv kerak" deb yozing.
     4. Overconfidence dan saqlaning: dalil yetarli bo'lmasa yoki shubha bo'lsa, "Qo'shimcha tekshiruv kerak" yoki "Tasdiqlash uchun laboratoriya/rentgen kerak" deb aniq yozing; taxminiy tashxisni yakuniy deb bermang.
     5. criticalFinding: hayotga xavf yoki shoshilinch davolash kerak bo'lsa, finding, implication va urgency ni aniq to'ldiring.
+    AMALIY YORDAM (majburiy): Javoblaringiz shifokor darhol qo'llashi mumkin bo'lsin. Dori nomi + aniq doza + kuniga necha marta + davomiyligi; davolash rejasi 1-qadam, 2-qadam tarzida; SSV protokol nomi yoki yo'nalishi keltiring; "darhol qilish kerak" va "keyinroq/kuzatuv" ni ajrating. Umumiy so'zlar o'rniga konkret, amaliy tavsiyalar bering.
+    ANIQLIK (majburiy): (1) Faqat kiritilgan ma'lumot va klinik dalillarga asoslangan xulosa chiqaring; ma'lumot yetishmasa "Tasdiqlash uchun ... tekshiruv kerak" deb aniq yozing. (2) Har bir tashxis uchun probability ni dalil kuchiga mos qo'ying; shubha bo'lsa pastroq bering. (3) reasoningChain va justification da "nima uchun shunday" savoliga aniq javob bo'lsin; umumiy iboralardan saqlaning. (4) SSV protokol havolasini aniq keltiring (yo'nalish yoki protokol nomi). (5) Taxminiy tashxisni yakuniy deb yozmang; differensial tashxisda eng ehtimolini birinchi qo'ying va dalil asosini ko'rsating.
     `;
 };
 
@@ -304,9 +307,10 @@ const callGemini = async (
         const useModel = modelId ?? geminiModel;
         const contents = buildContents();
         const ai = getGemini();
-        const config: { temperature?: number; maxOutputTokens?: number; responseMimeType?: string } = {
-            temperature: 0.15,
-            maxOutputTokens: maxOutputTokens ?? 4096,
+        const isPro = (geminiModel === MODEL_PRO || geminiModel === DEPLOY_PRO);
+    const config: { temperature?: number; maxOutputTokens?: number; responseMimeType?: string } = {
+            temperature: 0.1,
+            maxOutputTokens: maxOutputTokens ?? (isPro ? 8192 : 4096),
         };
         if (wantJson) config.responseMimeType = 'application/json';
 
@@ -439,7 +443,9 @@ const buildFastDoctorPrompt = (introText: string, data: PatientData) => {
 /** Tez tahlil: qisqa tizim вЂ” tez qaytish uchun */
 const getFastDoctorSystemInstruction = (language: Language): string => {
     const til = langMap[language];
-    return `Tibbiy AI. Javob: ${til}, faqat JSON. Tashxis asosi, reja, dori (qanday ichish). O'zbekiston dorilari, SSV.`;
+    return `Siz shifokor uchun amaliy tibbiy yordamchisiz. Javob: ${til}, FAQAT JSON.
+QOIDALAR: Tashxis nomi aniq; justification 2-3 jumla dalilli (nega shunday tashxis); treatmentPlan 3-5 aniq qadam (1-qadam, 2-qadam); medications: O'zbekistonda mavjud savdo nomi (Nimesil, Sumamed, Metformin, Enalapril va h.k.) + doza + kuniga necha marta + davomiylik; uzbekProtocolMatch: qaysi SSV protokoliga mos (aniq nomi yoki yo'nalishi). criticalFinding faqat shoshilinch bo'lsa. Barcha tavsiyalar shifokor darhol qo'llashi mumkin bo'lsin.
+ANIQLIK: Faqat berilgan ma'lumotga tayaning; probability ni dalil kuchiga mos qo'ying; reasoningChain har qadamda "nima uchun" javob bersin. SSV protokol havolasini aniq yozing.`;
 };
 
 export const generateFastDoctorConsultation = async (
@@ -493,19 +499,20 @@ export const generateFastDoctorConsultation = async (
 
     const multimodalPrompt = buildFastDoctorPrompt(promptText, patientData);
 
-    const DOCTOR_FAST_MODEL = DEPLOY_FAST;
+    const usePro = (specialties?.length ?? 0) > 0;
+    const DOCTOR_MODEL = usePro ? DEPLOY_PRO : DEPLOY_FAST;
     const runWithTokens = (maxTok: number) =>
-        callGemini(multimodalPrompt, DOCTOR_FAST_MODEL, finalReportSchema, false, systemInstr, true, maxTok) as Promise<Record<string, unknown>>;
+        callGemini(multimodalPrompt, DOCTOR_MODEL, finalReportSchema, false, systemInstr, true, maxTok) as Promise<Record<string, unknown>>;
 
     let result: Record<string, unknown>;
     try {
-        result = await runWithTokens(1024);
+        result = await runWithTokens(1280);
     } catch (firstErr) {
         const msg = firstErr instanceof Error ? firstErr.message : String(firstErr);
         const isParseOrIncomplete = /parse_json|noto'g'ri|javob|invalid json|to'liq kelmadi/i.test(msg) || (firstErr as Error & { cause?: string })?.cause === 'parse_json';
         if (isParseOrIncomplete) {
-            logger.warn('Doktor tahlil: birinchi javob kesilgan/noto\'g\'ri, 1280 token bilan qayta urinilmoqda');
-            result = await runWithTokens(1280);
+            logger.warn('Doktor tahlil: qayta urinilmoqda (1536 token)');
+            result = await runWithTokens(1536);
         } else {
             throw firstErr;
         }
@@ -631,6 +638,125 @@ export const getDynamicSuggestions = async (complaintText: string, language: Lan
     return callGemini(prompt, DEPLOY_FAST, schema, false, systemInstr);
 };
 
+/** Doctor Support via Gemini (frontend). Returns shape compatible with apiAiService.DoctorSupportResult. */
+export const runDoctorSupportViaGemini = async (
+    patientData: PatientData,
+    options: { query?: string; taskType?: string; language?: string } = {},
+): Promise<Record<string, unknown>> => {
+    const taskType = options.taskType || 'quick_consult';
+    const language = (options.language || 'uz-L') as Language;
+    const query = options.query || '';
+    const systemInstr = getSystemInstruction(language);
+    const langLabel = langMap[language];
+    const patientText = [
+        `Bemor: ${patientData.firstName || ''} ${patientData.lastName || ''}, ${patientData.age || ''} yosh, ${patientData.gender || ''}.`,
+        `Shikoyatlar: ${patientData.complaints || ''}`,
+        patientData.history ? `Anamnez: ${patientData.history}` : '',
+        patientData.objectiveData ? `Ob'ektiv: ${patientData.objectiveData}` : '',
+        patientData.labResults ? `Lab: ${patientData.labResults}` : '',
+        patientData.allergies ? `Allergiya: ${patientData.allergies}` : '',
+        patientData.currentMedications ? `Dori-darmonlar: ${patientData.currentMedications}` : '',
+        patientData.additionalInfo ? `Qo'shimcha: ${patientData.additionalInfo}` : '',
+    ].filter(Boolean).join('\n');
+
+    const taskPrompts: Record<string, { prompt: string; schema: Record<string, unknown> }> = {
+        quick_consult: {
+            prompt: `Shifokorga qisqa, aniq maslahat bering. Asosiy tashxis (dalil asosida), zaruriy tekshiruvlar, darhol choralar. probability ni dalil kuchiga mos qo'ying. Til: ${langLabel}.`,
+            schema: {
+                type: 'object',
+                properties: {
+                    summary: { type: 'string' },
+                    primary_diagnosis: { type: 'string' },
+                    probability: { type: 'number' },
+                    immediate_actions: { type: 'array', items: { type: 'string' } },
+                    medications: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, dosage: { type: 'string' }, frequency: { type: 'string' }, duration: { type: 'string' }, instructions: { type: 'string' } } } },
+                    recommended_tests: { type: 'array', items: { type: 'string' } },
+                    follow_up: { type: 'string' },
+                    critical_alert: { type: 'object', properties: { present: { type: 'boolean' }, message: { type: 'string' } } },
+                },
+            },
+        },
+        diagnosis: {
+            prompt: `3–5 ta differensial tashxis bering. Har biri: name, probability (%) — dalil kuchiga mos, justification — nega shunday, evidence_level, reasoning_chain — har qadam "nima uchun", uzbek_protocol — aniq SSV protokol nomi/yo'nalishi. red_flags agar bor. Eng ehtimolini birinchi qo'ying. Til: ${langLabel}.`,
+            schema: {
+                type: 'object',
+                properties: {
+                    diagnoses: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, probability: { type: 'number' }, justification: { type: 'string' }, evidence_level: { type: 'string' }, reasoning_chain: { type: 'array', items: { type: 'string' } }, uzbek_protocol: { type: 'string' } } } },
+                    red_flags: { type: 'array', items: { type: 'string' } },
+                },
+            },
+        },
+        treatment_plan: {
+            prompt: `SSV protokoliga mos davolash rejasi: treatment_plan (aniq qadamlar), medications (name, dosage, frequency, duration, timing, instructions), non_pharmacological, monitoring, uzbek_protocol_ref — aniq protokol havolasi. Til: ${langLabel}.`,
+            schema: {
+                type: 'object',
+                properties: {
+                    treatment_plan: { type: 'array', items: { type: 'string' } },
+                    medications: { type: 'array', items: { type: 'object' } },
+                    non_pharmacological: { type: 'array', items: { type: 'string' } },
+                    monitoring: { type: 'array', items: { type: 'string' } },
+                    uzbek_protocol_ref: { type: 'string' },
+                },
+            },
+        },
+        drug_check: {
+            prompt: `Dorilarni tahlil qiling: o'zaro ta'sirlar, dozalar, O'zbekistonda mavjudligi. interactions (drugs, severity, description), overall_safety, recommendations. Til: ${langLabel}.`,
+            schema: {
+                type: 'object',
+                properties: {
+                    drugs_analyzed: { type: 'array', items: { type: 'object' } },
+                    interactions: { type: 'array', items: { type: 'object', properties: { drugs: { type: 'array', items: { type: 'string' } }, severity: { type: 'string' }, description: { type: 'string' } } } },
+                    overall_safety: { type: 'string' },
+                    recommendations: { type: 'array', items: { type: 'string' } },
+                },
+            },
+        },
+        lab_interpretation: {
+            prompt: `Lab natijalarini O'zbekiston standartlari bo'yicha izohlang. interpretations (parameter, value, unit, reference, status, clinical_significance), summary, urgent_findings. Til: ${langLabel}.`,
+            schema: {
+                type: 'object',
+                properties: {
+                    interpretations: { type: 'array', items: { type: 'object' } },
+                    summary: { type: 'string' },
+                    urgent_findings: { type: 'array', items: { type: 'string' } },
+                },
+            },
+        },
+        follow_up: {
+            prompt: `Kuzatuv rejasi: return_visit, red_flag_symptoms, monitoring_at_home, repeat_tests, lifestyle_advice, emergency_contact (103). Til: ${langLabel}.`,
+            schema: {
+                type: 'object',
+                properties: {
+                    return_visit: { type: 'string' },
+                    red_flag_symptoms: { type: 'array', items: { type: 'string' } },
+                    monitoring_at_home: { type: 'array', items: { type: 'string' } },
+                    repeat_tests: { type: 'array', items: { type: 'string' } },
+                    lifestyle_advice: { type: 'array', items: { type: 'string' } },
+                    emergency_contact: { type: 'string' },
+                },
+            },
+        },
+    };
+
+    const { prompt: taskPrompt, schema } = taskPrompts[taskType] || taskPrompts.quick_consult;
+    const userContent = `BEMOR:\n${patientText}\n\n${query ? `SHIFOKOR SO'ROVI:\n${query}\n\n` : ''}${taskPrompt}\n\nJavobni FAQAT toza JSON formatida bering.`;
+
+    const usePro = taskType === 'diagnosis' || taskType === 'treatment_plan';
+    const model = usePro ? DEPLOY_PRO : DEPLOY_FAST;
+    const maxTok = usePro ? 4096 : 3000;
+
+    try {
+        const raw = await callGemini(userContent, model, schema, false, systemInstr, true, maxTok) as Record<string, unknown>;
+        if (!raw || typeof raw !== 'object') {
+            return { _task_type: taskType, _language: language, error: 'AI javob qayta ishlashda xatolik' };
+        }
+        return { ...raw, _task_type: taskType, _language: language };
+    } catch (e) {
+        logger.warning('runDoctorSupportViaGemini error', e);
+        return { _task_type: taskType, _language: language, error: e instanceof Error ? e.message : 'AI xizmati vaqtincha ishlamadi' };
+    }
+};
+
 export const generateClarifyingQuestions = async (data: PatientData, language: Language): Promise<string[]> => {
     const systemInstr = getSystemInstruction(language);
     const prompt = buildMultimodalPrompt(
@@ -648,8 +774,14 @@ export const generateClarifyingQuestions = async (data: PatientData, language: L
         data
     );
     const schema = { type: 'array', items: { type: 'string' } };
-    const result = await callGemini(prompt, DEPLOY_FAST, schema, false, systemInstr) as string[];
-    return result.length > 0 ? result : [];
+    try {
+        const result = await callGemini(prompt, DEPLOY_PRO, schema, false, systemInstr, true, 2048);
+        const arr = Array.isArray(result) ? (result as string[]).filter((q): q is string => typeof q === 'string') : [];
+        return arr.length > 0 ? arr : [];
+    } catch (e) {
+        logger.warning('generateClarifyingQuestions error', e);
+        return [];
+    }
 };
 
 export const recommendSpecialists = async (data: PatientData, language: Language): Promise<{ recommendations: { model: AIModel; reason: string }[] }> => {
@@ -677,7 +809,18 @@ export const recommendSpecialists = async (data: PatientData, language: Language
         },
         required: ['recommendations'],
     };
-    return callGemini(prompt, DEPLOY_FAST, schema, false, systemInstr);
+    try {
+        const result = await callGemini(prompt, DEPLOY_PRO, schema, false, systemInstr, true, 2048) as { recommendations?: Array<{ model?: string; reason?: string }> };
+        const recs = Array.isArray(result?.recommendations) ? result.recommendations : [];
+        const mapped = recs.map(r => ({
+            model: (r?.model && Object.values(AIModel).includes(r.model as AIModel) ? r.model : AIModel.GEMINI) as AIModel,
+            reason: typeof r?.reason === 'string' ? r.reason : '',
+        })).filter(r => r.model && r.reason);
+        return { recommendations: mapped.length > 0 ? mapped : [{ model: AIModel.GEMINI as AIModel, reason: 'Standart jamoa' }] };
+    } catch (e) {
+        logger.warning('recommendSpecialists error', e);
+        return { recommendations: [{ model: AIModel.GEMINI as AIModel, reason: 'Standart jamoa' }] };
+    }
 };
 
 export const generateInitialDiagnoses = async (data: PatientData, language: Language): Promise<Diagnosis[]> => {
@@ -685,10 +828,11 @@ export const generateInitialDiagnoses = async (data: PatientData, language: Lang
     const prompt = buildMultimodalPrompt(
         `Analyze the patient data. Generate 3-5 most likely differential diagnoses. O'ZBEKISTON KONTEKSTI MAJBURIY.
         MANDATORY FIELDS:
-        1. "name": Diagnosis name in ${langMap[language]}.
-        2. "justification": Scientific reasoning.
-        3. "reasoningChain": Step-by-step logic.
-        4. "uzbekProtocolMatch": SSV klinik protokoliga muvofiqlik (masalan: "Arterial gipertenziya bo'yicha SSV klinik protokoliga muvofiq" yoki "SSV tasdiqlangan milliy klinik protokollariga muvofiq"). Agar tegishli SSV protokol yo'nalishi bo'lsa, ko'rsating.
+        1. "name": Diagnosis name in ${langMap[language]} (aniq, o'zbekcha).
+        2. "justification": Scientific reasoning — nega shunday tashxis; dalil asosida (umumiy iboralardan saqlaning).
+        3. "reasoningChain": Step-by-step logic — har qadamda "nima uchun" javob; simptom → ehtimol sabab → tashxis.
+        4. "uzbekProtocolMatch": SSV klinik protokoliga muvofiqlik — aniq protokol nomi yoki yo'nalishi (masalan: "Arterial gipertenziya bo'yicha SSV klinik protokoliga muvofiq"). Agar tegishli SSV protokol yo'nalishi bo'lsa, ko'rsating.
+        ANIQLIK: probability ni dalil kuchiga mos qo'ying; ma'lumot yetishmasa pastroq bering. Eng ehtimolini birinchi qo'ying. Taxminiy tashxisni yakuniy deb yozmang.
         Output Language: ${langMap[language]}.`,
         data
     );
@@ -709,7 +853,7 @@ export const generateInitialDiagnoses = async (data: PatientData, language: Lang
         },
     };
     try {
-        const raw = await callGemini(prompt, DEPLOY_PRO, schema, false, systemInstr);
+        const raw = await callGemini(prompt, DEPLOY_PRO, schema, false, systemInstr, true, 4096);
         const arr = Array.isArray(raw) ? raw : [];
         return arr.map((item: Record<string, unknown>) => ({
             name: String(item?.name ?? ''),
@@ -758,7 +902,7 @@ const generatePrognosisUpdate = async (debateHistory: ChatMessage[], patientData
         }
     };
     try {
-        const raw = await callGemini(prompt, DEPLOY_FAST, schema, false, systemInstr);
+        const raw = await callGemini(prompt, DEPLOY_PRO, schema, false, systemInstr, true, 1024);
         return normalizePrognosisReport(raw);
     } catch (e) {
         return null;
@@ -791,16 +935,16 @@ export const runCouncilDebate = async (
 
     // Orchestrator Intro
     const introContentPrompt = `Generate a short intro message for the Council Chair (System) starting the medical council debate. Mention: the goal is to find the best diagnosis and treatment in accordance with Uzbekistan SSV (Sog'liqni Saqlash Vazirligi) approved clinical protocols and legislation; only drugs registered and available in Uzbekistan will be recommended. Output Language: ${langMap[language]}.`;
-    const introContent = await callGemini(introContentPrompt, DEPLOY_FAST, undefined, false, systemInstr) as string;
+    const introContent = await callGemini(introContentPrompt, DEPLOY_PRO, undefined, false, systemInstr, true, 1024) as string;
     
     const orchestratorIntro: ChatMessage = { id: `sys-intro-${Date.now()}`, author: AIModel.SYSTEM, content: introContent, isSystemMessage: true };
     onProgress({ type: 'message', message: orchestratorIntro });
     debateHistory.push(orchestratorIntro);
-    await sleep(120);
+    await sleep(12);
 
     const DEBATE_ROUNDS = 3;
     let currentTopicPrompt = `Summarize the initial state: Patient data and initial diagnoses: ${JSON.stringify(diagnoses)}. Ask specialists for their initial evaluation and Red Flags. Output Language: ${langMap[language]}.`;
-    let currentTopic = await callGemini(currentTopicPrompt, DEPLOY_FAST, undefined, false, systemInstr) as string;
+    let currentTopic = await callGemini(currentTopicPrompt, DEPLOY_PRO, undefined, false, systemInstr, true, 1024) as string;
 
     for (let round = 1; round <= DEBATE_ROUNDS; round++) {
         const roundMessages: Record<Language, string> = {
@@ -825,7 +969,7 @@ export const runCouncilDebate = async (
              onProgress({ type: 'user_question', question: cleanQuestion });
              let userInput = null;
              while (!userInput) {
-                await sleep(180);
+                await sleep(18);
                 userInput = getUserIntervention();
              }
              const userMessage = { id: `user-${Date.now()}`, author: AIModel.SYSTEM, content: `User Answer: ${userInput}`, isUserIntervention: true, isSystemMessage: true };
@@ -837,7 +981,7 @@ export const runCouncilDebate = async (
              debateHistory.push(orchestratorMessage);
         }
         
-        await sleep(280);
+        await sleep(22);
 
         // Specialists Turn
         for (const spec of specialistsConfig) {
@@ -863,7 +1007,7 @@ export const runCouncilDebate = async (
                 const specialistMessage: ChatMessage = { id: `${spec.role}-${Date.now()}`, author: spec.role, content: responseText };
                 onProgress({ type: 'message', message: specialistMessage });
                 debateHistory.push(specialistMessage);
-                await sleep(180);
+                await sleep(15);
             } catch (e) {
                 // error handling
             }
@@ -882,7 +1026,7 @@ export const runCouncilDebate = async (
                 LANGUAGE: ${langMap[language]}.
                 History: ${JSON.stringify(debateHistory)}
             `;
-            currentTopic = await callGemini(summarizationPrompt, DEPLOY_FAST, undefined, false, systemInstr) as string;
+            currentTopic = await callGemini(summarizationPrompt, DEPLOY_PRO, undefined, false, systemInstr, true, 1024) as string;
         }
     }
 
@@ -894,7 +1038,7 @@ export const runCouncilDebate = async (
         'en': 'Preparing final report...'
     };
     onProgress({ type: 'status', message: finalizingMessages[language] });
-    await sleep(350);
+    await sleep(22);
 
     const finalReportSchema = {
         type: 'object',
@@ -932,14 +1076,19 @@ export const runCouncilDebate = async (
         4. criticalFinding: hayotga xavf yoki shoshilinch davolash kerak bo'lsa to'ldiring (finding, implication, urgency — barchasi o'zbekcha); yo'q bo'lsa bo'sh qoldiring.
         5. recommendedTests: yetishmayotgan muhim tekshiruvlar (O'zbekiston LITS va standartlariga mos).
         6. uzbekistanLegislativeNote: "O'zbekiston Respublikasi sog'liqni saqlash qonunchiligi va SSV tasdiqlangan klinik protokollariga muvofiq" yoki tegishli qisqacha eslatma.
+        ANIQLIK: consensusDiagnosis da probability ni dalil kuchiga mos qo'ying; reasoningChain har qadamda "nima uchun" javob bersin; uzbekProtocolMatch aniq protokol nomi/yo'nalishi. Taxminiy tashxisni yakuniy deb yozmang.
         Debate history: ${JSON.stringify(debateHistory)}
     `;
     
     const finalReportMultimodalPrompt = buildMultimodalPrompt(finalReportTextPrompt, patientData);
 
     try {
-        const finalReport = await callGemini(finalReportMultimodalPrompt, DEPLOY_PRO, finalReportSchema, false, systemInstr) as FinalReport;
-        
+        const rawReport = await callGemini(finalReportMultimodalPrompt, DEPLOY_PRO, finalReportSchema, false, systemInstr, true, 8192) as FinalReport;
+        const finalReport: FinalReport = {
+            ...rawReport,
+            consensusDiagnosis: normalizeConsensusDiagnosis(rawReport.consensusDiagnosis),
+        };
+
         if (finalReport.criticalFinding && finalReport.criticalFinding.finding) {
             onProgress({ type: 'critical_finding', data: finalReport.criticalFinding });
         }
@@ -1152,7 +1301,7 @@ export const explainRationale = async (message: ChatMessage, patientData: Patien
 export const suggestCmeTopics = async (history: AnalysisRecord[], language: Language): Promise<CMETopic[]> => {
     if (history.length === 0) return [];
     const systemInstr = getSystemInstruction(language);
-    const prompt = `Suggest 2-3 CME topics based on history. Return JSON array [{topic, relevance}]. LANGUAGE: ${langMap[language]}. History: ${JSON.stringify(history.map(r => r.finalReport.consensusDiagnosis[0]?.name))}.`;
+    const prompt = `Suggest 2-3 CME topics based on history. Return JSON array [{topic, relevance}]. LANGUAGE: ${langMap[language]}. History: ${JSON.stringify(history.map(r => (Array.isArray(r.finalReport?.consensusDiagnosis) ? r.finalReport.consensusDiagnosis : [])[0]?.name))}.`;
     const schema = {
         type: 'array',
         items: {
@@ -1174,17 +1323,17 @@ export const runResearchCouncilDebate = async (
 ): Promise<void> => {
     const systemInstr = getSystemInstruction(language);
     onProgress({ type: 'status', message: `Research Topic: "${diseaseName}". Gathering data...` });
-    await sleep(350);
+    await sleep(18);
 
     const specialists = [AIModel.GPT, AIModel.LLAMA, AIModel.CLAUDE];
     for (const model of specialists) {
         const translatedIntro = await callGemini(`Translate to ${langMap[language]}: "I am ${model}, ready to analyze the latest research on ${diseaseName}."`, DEPLOY_FAST, undefined, false, systemInstr);
         onProgress({ type: 'message', message: { id: `${model}-${Date.now()}`, author: model, content: translatedIntro as string, isThinking: false } });
-        await sleep(80);
+        await sleep(10);
     }
     
     onProgress({ type: 'status', message: 'Discussing innovative strategies...' });
-    await sleep(280);
+    await sleep(18);
     
     const prompt = `Provide detailed research report on "${diseaseName}". Use web search for latest data. Return ONLY valid JSON (no markdown, no extra text). The JSON must have these fields: diseaseName, summary, epidemiology {prevalence, incidence, keyRiskFactors[]}, pathophysiology, emergingBiomarkers [{name, type, description}], clinicalGuidelines [{guidelineTitle, source, recommendations [{category, details[]}]}], potentialStrategies [{name, mechanism, evidence, pros[], cons[], riskBenefit {risk, benefit}, developmentRoadmap [{stage, duration, cost}], molecularTarget {name, pdbId}, ethicalConsiderations[], requiredCollaborations[], companionDiagnosticNeeded}], pharmacogenomics {relevantGenes [{gene, mutation, impact}], targetSubgroup}, patentLandscape {competingPatents [{patentId, title, assignee}], whitespaceOpportunities[]}, relatedClinicalTrials [{trialId, title, status, url}], strategicConclusion, sources [{title, uri}]. LANGUAGE: ${langMap[language]}.`;
 

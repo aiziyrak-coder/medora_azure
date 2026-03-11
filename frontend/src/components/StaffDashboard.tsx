@@ -18,6 +18,7 @@ import QRCode from 'qrcode'; // Import QR library
 import { useTranslation } from '../hooks/useTranslation';
 import LanguageSwitcher from './LanguageSwitcher';
 import { logger } from '../utils/logger';
+import { INSTITUTE_NAME_SHORT } from '../constants/brand';
 
 interface StaffDashboardProps {
     user: User;
@@ -109,7 +110,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ user, onLogout }) => {
                     </head>
                     <body>
                         <div class="ticket">
-                            <h2>Farg'ona JSTI</h2>
+                            <h2>{INSTITUTE_NAME_SHORT}</h2>
                             <p>Klinik Navbat Cheki</p>
                             <br/>
                             <h1>#${item.ticketNumber}</h1>

@@ -6,6 +6,7 @@
  */
 import React, { useState, useCallback, useEffect } from 'react';
 import type { PatientData, FinalReport } from '../../types';
+import { INSTITUTE_NAME_SHORT } from '../../constants/brand';
 import type { ConsultationDiagnosis, SpeechLanguage } from '../../services/speechService';
 import { createJarvisSession, endJarvisSession } from '../../services/speechService';
 import { ConsultationMonitor } from './ConsultationMonitor';
@@ -172,7 +173,7 @@ export const JarvisDashboard: React.FC<Props> = ({
           рџ¤–
         </div>
         <div>
-          <h2 className="text-base font-bold text-white">Farg'ona JSTI — Jarvis</h2>
+          <h2 className="text-base font-bold text-white">{INSTITUTE_NAME_SHORT} — Jarvis</h2>
           <p className="text-xs text-slate-400">Azure Speech В· GPT-4o</p>
         </div>
         {sessionId && (

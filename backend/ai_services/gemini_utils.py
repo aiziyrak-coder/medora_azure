@@ -85,12 +85,12 @@ def _response_text(response):
     return ""
 
 
-def _call_gemini(prompt, model_name=GEMINI_FLASH, response_mime_type=None):
+def _call_gemini(prompt, model_name=GEMINI_FLASH, response_mime_type=None, max_output_tokens=8192):
     """Call Gemini via google-genai Client. Returns response text."""
     client = _get_client()
     if not client:
         raise RuntimeError("Gemini API key sozlanmagan. GEMINI_API_KEY ni .env ga kiriting.")
-    config = {"temperature": 0.1}
+    config = {"temperature": 0.1, "max_output_tokens": max_output_tokens}
     if response_mime_type:
         config["response_mime_type"] = response_mime_type
     try:
@@ -123,10 +123,12 @@ Umumiy yoki oldindan tayyorlangan savollar BERMANG. Har bir savol shikoyat/simpt
 Masalan: agar shikoyat "bosh og'rig'i" bo'lsa — davomiyligi, qanday og'riq, qachon kuchayadi va h.k. shikoyatga oid savollar.
 
 3–5 ta qisqa, aniq savol yozing. Mavjud ma'lumotlar uchun savol bermang.
+AMALIY: Har bir savol shifokor keyingi qadamni aniq qilishiga yordam bersin (davomiylik, og'riq xususiyati, qachon kuchayadi va h.k.).
+ANIQLIK: Savollar faqat shikoyat va klinik kontekstga bevosita bog'liq bo'lsin; umumiy yoki shablon savollar bermang.
 Javobni faqat JSON massiv: ["Savol 1?", "Savol 2?"]. O'zbek tilida (Lotin)."""
     raw = None
     last_exc = None
-    for model in (GEMINI_FLASH, GEMINI_PRO):
+    for model in (GEMINI_PRO, GEMINI_FLASH):
         for use_json in (False, True):
             try:
                 raw = _call_gemini(
@@ -166,11 +168,11 @@ def recommend_specialists(patient_data):
 {text}
 
 Ushbu klinik holat uchun 5–6 ta mutaxassis tanlang. Faqat quyidagi nomlardan: {names_str}.
-Har biri uchun qisqa sabab bering. Javobni aniq quyidagi formatda JSON qaytaring:
+Har biri uchun qisqa, aniq sabab bering (shikoyat yoki holatga nima uchun shu mutaxassis kerak). Javobni aniq quyidagi formatda JSON qaytaring:
 {{ "recommendations": [ {{ "model": "Nom exactly from list", "reason": "Sabab" }} ] }}
 O'zbek tilida (Lotin)."""
     last_exc = None
-    for model_name in (GEMINI_FLASH, GEMINI_PRO):
+    for model_name in (GEMINI_PRO, GEMINI_FLASH):
         for use_json in (True, False):
             try:
                 raw = _call_gemini(
@@ -211,10 +213,12 @@ def generate_diagnoses(patient_data):
 
 3–5 ta eng ehtimol differensial tashxis. O'ZBEKISTON SSV klinik protokollari kontekstida.
 Har biri uchun: name (o'zbekcha), probability (0–100), justification, evidenceLevel (High/Moderate/Low), reasoningChain (qisqa qadamlar massivi), uzbekProtocolMatch.
+AMALIY: justification va reasoningChain dalilli va qisqa bo'lsin; uzbekProtocolMatch da SSV protokol nomi yoki yo'nalishi keltiring (masalan: Arterial gipertenziya bo'yicha SSV protokoliga muvofiq).
+ANIQLIK: probability ni dalil kuchiga mos qo'ying; ma'lumot yetishmasa pastroq bering. Eng ehtimolini birinchi qo'ying. reasoningChain da har qadam "nima uchun" javob bersin. Taxminiy tashxisni yakuniy deb yozmang.
 Javobni faqat JSON massiv qilib qaytaring, masalan:
 [ {{ "name": "...", "probability": 70, "justification": "...", "evidenceLevel": "High", "reasoningChain": ["...", "..."], "uzbekProtocolMatch": "..." }} ]
 O'zbek tilida (Lotin)."""
-    for model_name in (GEMINI_FLASH, GEMINI_PRO):
+    for model_name in (GEMINI_PRO, GEMINI_FLASH):
         for use_json in (True, False):
             try:
                 raw = _call_gemini(

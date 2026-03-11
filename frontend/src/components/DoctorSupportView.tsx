@@ -16,6 +16,8 @@ import {
   TASK_LAB_INTERPRET,
   TASK_FOLLOW_UP,
 } from '../services/apiAiService';
+import { runDoctorSupportViaGemini } from '../services/aiCouncilService';
+import { isApiConfigured } from '../config/api';
 
 interface Props {
   patientData: PatientData;
@@ -214,11 +216,15 @@ export const DoctorSupportView: React.FC<Props> = ({ patientData, language, onEr
     setResult(null);
     setStreamText('');
     try {
-      const resp = await runDoctorSupport(patientData, { query, taskType, language });
-      if (!resp.success || !resp.data) {
-        throw new Error((resp as { error?: { message?: string } }).error?.message || 'Xatolik');
+      if (isApiConfigured()) {
+        const resp = await runDoctorSupport(patientData, { query, taskType, language });
+        if (resp.success && resp.data) {
+          setResult(resp.data);
+          return;
+        }
       }
-      setResult(resp.data);
+      const geminiResult = await runDoctorSupportViaGemini(patientData, { query, taskType, language });
+      setResult(geminiResult as DoctorSupportResult);
     } catch (err) {
       onError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -231,27 +237,45 @@ export const DoctorSupportView: React.FC<Props> = ({ patientData, language, onEr
     setResult(null);
     setStreamText('');
 
-    const cancel = runDoctorSupportStream(
-      patientData,
-      { query, taskType, language },
-      (text)  => setStreamText(text),
-      (full) => {
+    if (isApiConfigured()) {
+      const cancel = runDoctorSupportStream(
+        patientData,
+        { query, taskType, language },
+        (text)  => setStreamText(text),
+        (full) => {
+          setStreaming(false);
+          try {
+            const cleaned = full.replace(/^```json\s*|```\s*$/g, '').trim();
+            const parsed  = JSON.parse(cleaned) as DoctorSupportResult;
+            setResult(parsed);
+            setStreamText('');
+          } catch {
+            setResult({ _task_type: taskType, _language: language, error: 'JSON parse xatosi' });
+          }
+        },
+        (err) => {
+          setStreaming(false);
+          runDoctorSupportViaGemini(patientData, { query, taskType, language })
+            .then((geminiResult) => {
+              setResult(geminiResult as DoctorSupportResult);
+            })
+            .catch(() => onError(err));
+        },
+      );
+      cancelStreamRef.current = cancel;
+      return;
+    }
+
+    runDoctorSupportViaGemini(patientData, { query, taskType, language })
+      .then((geminiResult) => {
         setStreaming(false);
-        try {
-          const cleaned = full.replace(/^```json\s*|```\s*$/g, '').trim();
-          const parsed  = JSON.parse(cleaned) as DoctorSupportResult;
-          setResult(parsed);
-          setStreamText('');
-        } catch {
-          setResult({ _task_type: taskType, _language: language, error: 'JSON parse xatosi' });
-        }
-      },
-      (err) => {
+        setResult(geminiResult as DoctorSupportResult);
+      })
+      .catch((err) => {
         setStreaming(false);
-        onError(err);
-      },
-    );
-    cancelStreamRef.current = cancel;
+        onError(err instanceof Error ? err.message : String(err));
+      });
+    cancelStreamRef.current = () => { setStreaming(false); };
   }, [patientData, query, taskType, language, onError]);
 
   const handleStop = () => {
@@ -265,7 +289,7 @@ export const DoctorSupportView: React.FC<Props> = ({ patientData, language, onEr
       <div>
         <h2 className="text-xl font-bold text-white">вљЎ Doktor Yordamchi</h2>
         <p className="text-sm text-slate-400 mt-0.5">
-          GPT-4o В· O'zbekiston SSV Protokollari В· Tezkor tahlil
+          Gemini · O'zbekiston SSV Protokollari · Tezkor tahlil
         </p>
       </div>
 

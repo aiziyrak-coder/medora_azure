@@ -1,5 +1,6 @@
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
 import type { FinalReport, PatientData, ChatMessage } from '../types';
+import { normalizeConsensusDiagnosis } from '../types';
 import { AI_SPECIALISTS } from '../constants';
 import { logger } from '../utils/logger';
 
@@ -48,7 +49,7 @@ export const generateDocxReport = async (
 
         createHeading1("Konsilium Konsensusi"),
         createHeading2("Eng Ehtimolli Tashxis(lar)"),
-        ...report.consensusDiagnosis.flatMap(diag => [
+        ...normalizeConsensusDiagnosis(report.consensusDiagnosis).flatMap(diag => [
             createKeyValue("Tashxis", `${diag.name} (${diag.probability}%)`),
             createKeyValue("Dalillilik Darajasi", diag.evidenceLevel || "N/A"),
             createKeyValue("Asoslash", diag.justification),

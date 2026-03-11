@@ -232,7 +232,7 @@ def generate_clarifying_questions(request):
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor shikoyatlari kiritilmagan")
     if not _gemini_ok():
-        return _ai_not_configured()
+        return Response({"success": True, "data": [], "warning": "AI backend da sozlanmagan."})
     try:
         questions = gemini_utils.generate_clarifying_questions(patient_data)
         return Response({"success": True, "data": questions})
@@ -249,7 +249,7 @@ def recommend_specialists(request):
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor ma'lumotlari kiritilmagan")
     if not _gemini_ok():
-        return _ai_not_configured()
+        return Response({"success": True, "data": {"recommendations": []}, "warning": "AI backend da sozlanmagan."})
     try:
         recs = gemini_utils.recommend_specialists(patient_data)
         if not recs:
@@ -267,7 +267,7 @@ def generate_diagnoses(request):
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor ma'lumotlari kiritilmagan")
     if not _gemini_ok():
-        return _ai_not_configured()
+        return Response({"success": True, "data": [], "warning": "AI backend da sozlanmagan."})
 
     blocked = _run_filter(patient_data)
     if blocked:

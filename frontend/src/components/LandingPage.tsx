@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import LanguageSwitcher from './LanguageSwitcher';
 import { Language } from '../i18n/LanguageContext';
+import { INSTITUTE_NAME_FULL, INSTITUTE_NAME_SHORT } from '../constants/brand';
 import BrainCircuitIcon from './icons/BrainCircuitIcon';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
 import GlobeIcon from './icons/GlobeIcon';
@@ -147,9 +148,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide }) => {
             {/* --- NAVBAR --- */}
             <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-slate-900/90 backdrop-blur-xl border-b border-white/10 py-3 shadow-lg' : 'bg-transparent py-4 md:py-6'}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                        {/* Icon removed based on request */}
-                        <span className="text-2xl font-black tracking-tighter text-white">Farg'ona JSTI</span>
+                    <div className="flex flex-col gap-0.5">
+                        <span className="text-xl md:text-2xl font-black tracking-tighter text-white">{INSTITUTE_NAME_SHORT}</span>
+                        <span className="text-[10px] md:text-xs font-medium text-slate-400 tracking-wide hidden sm:block">{INSTITUTE_NAME_FULL}</span>
                     </div>
                     
                     {/* Desktop Menu */}
@@ -186,11 +187,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide }) => {
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none animate-pulse"></div>
                 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-bold uppercase tracking-wider mb-8 animate-fade-in-up backdrop-blur-md">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-bold uppercase tracking-wider mb-4 animate-fade-in-up backdrop-blur-md">
                         <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
                         {t('landing_hero_badge')}
                     </div>
-                    
+                    <p className="text-sm md:text-base text-slate-400 font-semibold mb-6 animate-fade-in-up" style={{ animationDelay: '0.05s' }}>
+                        {INSTITUTE_NAME_FULL}
+                    </p>
                     <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tighter leading-[1.1] mb-8 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
                         {t('landing_hero_title_1')} <br className="hidden md:block"/>
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">{t('landing_hero_title_2')}</span>
@@ -236,6 +239,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide }) => {
             <section id="features" className="py-24 md:py-32 bg-slate-900 relative">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-16 md:mb-20">
+                        <p className="text-sm font-bold text-blue-400/90 mb-3 uppercase tracking-wider">{INSTITUTE_NAME_FULL}</p>
                         <h2 className="text-3xl md:text-5xl font-bold mb-6">{t('landing_features_title')}</h2>
                         <p className="text-slate-400 max-w-2xl mx-auto text-base md:text-lg">
                             {t('landing_features_desc')}
@@ -423,6 +427,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide }) => {
                 <div className="absolute inset-0 bg-blue-600/20"></div>
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-transparent to-slate-900"></div>
                 <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
+                    <p className="text-sm md:text-base font-bold text-blue-200/90 mb-4 uppercase tracking-wider">{INSTITUTE_NAME_FULL}</p>
                     <h2 className="text-4xl md:text-6xl font-black mb-6 md:mb-8 tracking-tight">{t('landing_cta_bottom_title')}</h2>
                     <p className="text-lg md:text-xl text-blue-100 mb-10 md:mb-12 font-light max-w-2xl mx-auto">
                         {t('landing_cta_bottom_desc')}
@@ -440,9 +445,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide }) => {
             <footer className="py-12 md:py-16 bg-slate-950 border-t border-white/10 text-sm text-slate-400">
                 <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 text-center md:text-left">
                     <div>
-                        <div className="flex items-center justify-center md:justify-start gap-2 mb-6">
-                            <BrainCircuitIcon className="w-8 h-8 text-blue-500" />
-                            <span className="text-2xl font-bold text-white tracking-tight">Farg'ona JSTI</span>
+                        <div className="flex flex-col gap-1 mb-6">
+                            <div className="flex items-center justify-center md:justify-start gap-2">
+                                <BrainCircuitIcon className="w-8 h-8 text-blue-500" />
+                                <span className="text-2xl font-bold text-white tracking-tight">{INSTITUTE_NAME_SHORT}</span>
+                            </div>
+                            <p className="text-sm font-semibold text-blue-300/90">{INSTITUTE_NAME_FULL}</p>
                         </div>
                         <p className="leading-relaxed mb-6">{t('auth_marketing_desc').substring(0, 100)}...</p>
                         <div className="flex justify-center md:justify-start gap-4">
@@ -517,7 +525,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide }) => {
                 </div>
                 
                 <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <p>&copy; 2025 Farg'ona jamoat salomatligi tibbiyot instituti. {t('footer_rights')}</p>
+                    <p className="text-center md:text-left"><span className="font-bold text-white">{INSTITUTE_NAME_FULL}</span> &copy; 2025. {t('footer_rights')}</p>
                     
                     {/* Modern Developer Credits */}
                     <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 bg-white/5 px-6 py-2 rounded-full border border-white/10 backdrop-blur-sm">
