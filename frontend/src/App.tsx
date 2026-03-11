@@ -535,13 +535,21 @@ const AppContent: React.FC = () => {
             setStatusMessage(t('ddx_generating'));
             const { generateInitialDiagnoses } = await import('./services/apiAiService');
             const response = await generateInitialDiagnoses(patientData);
+            const apiErrorMsg = response.success === false ? (response.error?.message || '') : '';
             if (response.success && response.data?.length) {
                 setDifferentialDiagnoses(response.data);
+                setStatusMessage(t('ddx_feedback_prompt'));
             } else {
-                const diagnoses = await aiService.generateInitialDiagnoses(patientData, language);
-                setDifferentialDiagnoses(diagnoses);
+                try {
+                    const diagnoses = await aiService.generateInitialDiagnoses(patientData, language);
+                    setDifferentialDiagnoses(diagnoses);
+                    setError(null);
+                    setStatusMessage(t('ddx_feedback_prompt'));
+                } catch (fallbackErr) {
+                    setError(apiErrorMsg || t('ddx_generation_error'));
+                    setStatusMessage(t('error_try_again'));
+                }
             }
-            setStatusMessage(t('ddx_feedback_prompt'));
         } catch (e) {
             try {
                 const diagnoses = await aiService.generateInitialDiagnoses(patientData, language);
@@ -549,7 +557,8 @@ const AppContent: React.FC = () => {
                 setError(null);
                 setStatusMessage(t('ddx_feedback_prompt'));
             } catch (fallbackErr) {
-                setError(t('ddx_generation_error'));
+                const msg = fallbackErr instanceof Error ? fallbackErr.message : '';
+                setError(msg || t('ddx_generation_error'));
                 setStatusMessage(t('error_try_again'));
             }
         } 

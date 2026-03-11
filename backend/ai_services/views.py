@@ -237,7 +237,8 @@ def generate_clarifying_questions(request):
         return Response({"success": True, "data": gemini_utils.generate_clarifying_questions(patient_data)})
     except Exception as exc:
         logger.exception("Clarifying questions error: %s", exc)
-        return _err(500, "Savollar yaratishda xatolik")
+        msg = str(exc) if str(exc).strip() else "Savollar yaratishda xatolik"
+        return _err(500, msg)
 
 
 @api_view(["POST"])
@@ -250,10 +251,13 @@ def recommend_specialists(request):
         return _ai_not_configured()
     try:
         recs = gemini_utils.recommend_specialists(patient_data)
+        if not recs:
+            return _err(503, "AI tavsiya qaytarmadi. GEMINI_API_KEY ni tekshiring.")
         return Response({"success": True, "data": {"recommendations": recs}})
     except Exception as exc:
         logger.exception("Recommend specialists error: %s", exc)
-        return _err(500, "Mutaxassislar tavsiyasida xatolik")
+        msg = str(exc) if str(exc).strip() else "Mutaxassislar tavsiyasida xatolik"
+        return _err(500, msg)
 
 
 @api_view(["POST"])
@@ -270,10 +274,14 @@ def generate_diagnoses(request):
         return blocked
 
     try:
-        return Response({"success": True, "data": gemini_utils.generate_diagnoses(patient_data)})
+        data = gemini_utils.generate_diagnoses(patient_data)
+        if not data:
+            return _err(503, "AI tashxis qaytarmadi. GEMINI_API_KEY va modelni tekshiring.")
+        return Response({"success": True, "data": data})
     except Exception as exc:
         logger.exception("Generate diagnoses error: %s", exc)
-        return _err(500, "Tashxis yaratishda xatolik")
+        msg = str(exc) if str(exc).strip() else "Tashxis yaratishda xatolik"
+        return _err(500, msg)
 
 
 # ---------------------------------------------------------------------------

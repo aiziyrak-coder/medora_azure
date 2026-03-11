@@ -179,9 +179,9 @@ O'zbek tilida (Lotin)."""
             if model in SPECIALIST_NAMES:
                 out.append({"model": model, "reason": (r.get("reason") or "Holatga mos.")[:200]})
         return out[:8]
-    except Exception:
-        logger.exception("Gemini recommend_specialists failed")
-        return []
+    except Exception as e:
+        logger.exception("Gemini recommend_specialists failed: %s", e)
+        raise RuntimeError(str(e) or "Mutaxassislar tavsiyasida AI xatolik") from e
 
 
 def generate_diagnoses(patient_data):
@@ -214,7 +214,6 @@ O'zbek tilida (Lotin)."""
                 "uzbekProtocolMatch": (d.get("uzbekProtocolMatch") or "")[:300],
             })
         return out
-    except Exception:
-        logger.exception("Gemini generate_diagnoses failed")
-        return []
--NoNewline
+    except Exception as e:
+        logger.exception("Gemini generate_diagnoses failed: %s", e)
+        raise RuntimeError(str(e) or "Tashxis yaratishda AI xatolik") from e
