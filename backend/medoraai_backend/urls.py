@@ -1,5 +1,5 @@
 """
-URL configuration for AiDoktorai_backend project.
+URL configuration for medoraai_backend project.
 """
 from django.contrib import admin
 from django.urls import path, include
