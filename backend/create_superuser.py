@@ -11,7 +11,7 @@ import sys
 import django
 import logging
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'AiDoktorai_backend.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'medoraai_backend.settings')
 django.setup()
 
 from accounts.models import User

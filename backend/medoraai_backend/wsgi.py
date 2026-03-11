@@ -9,7 +9,7 @@ _req_mod.HttpRequest.get_host = lambda self: (
 )
 
 import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'AiDoktorai_backend.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'medoraai_backend.settings')
 
 import django
 django.setup()

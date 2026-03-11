@@ -48,7 +48,7 @@ pidfile       = os.path.join(_LOGDIR, "AiDoktor.pid")
 # user/group: leave unset when running as cdcgroup (systemd User=cdcgroup)
 
 # ── WSGI ────────────────────────────────────────────────────────────────────
-wsgi_app      = "AiDoktorai_backend.wsgi:application"
+wsgi_app      = "medoraai_backend.wsgi:application"
 
 # ── Worker lifecycle hooks ───────────────────────────────────────────────────
 def on_starting(server):

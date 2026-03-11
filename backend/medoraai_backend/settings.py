@@ -63,25 +63,25 @@ INSTALLED_APPS += [
 ]
 
 MIDDLEWARE = [
-    'AiDoktorai_backend.middleware.EarlyHealthMiddleware',  # very first: /health/ -> 200, no Host check
-    'AiDoktorai_backend.middleware.NormalizeHostMiddleware',
+    'medoraai_backend.middleware.EarlyHealthMiddleware',  # very first: /health/ -> 200, no Host check
+    'medoraai_backend.middleware.NormalizeHostMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'AiDoktorai_backend.middleware.CORSFallbackMiddleware',  # CORS for /health/, /api/ when corsheaders missed
-    'AiDoktorai_backend.middleware.SecurityHeadersMiddleware',  # Custom security headers
-    'AiDoktorai_backend.middleware.RateLimitMiddleware',  # Rate limiting
+    'medoraai_backend.middleware.CORSFallbackMiddleware',  # CORS for /health/, /api/ when corsheaders missed
+    'medoraai_backend.middleware.SecurityHeadersMiddleware',  # Custom security headers
+    'medoraai_backend.middleware.RateLimitMiddleware',  # Rate limiting
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'AiDoktorai_backend.middleware.RequestLoggingMiddleware',  # Request logging
+    'medoraai_backend.middleware.RequestLoggingMiddleware',  # Request logging
     'ai_services.anatomy_guard.AnatomyGuardMiddleware',     # Anatomy & Logic Guard
 ]
 
-ROOT_URLCONF = 'AiDoktorai_backend.urls'
+ROOT_URLCONF = 'medoraai_backend.urls'
 
 TEMPLATES = [
     {
@@ -99,7 +99,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'AiDoktorai_backend.wsgi.application'
+WSGI_APPLICATION = 'medoraai_backend.wsgi.application'
 
 # Database
 DATABASES = {
@@ -171,7 +171,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'AiDoktorai_backend.pagination.StandardResultsSetPagination',
+    'DEFAULT_PAGINATION_CLASS': 'medoraai_backend.pagination.StandardResultsSetPagination',
     'PAGE_SIZE': 20,
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -182,7 +182,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
-    'EXCEPTION_HANDLER': 'AiDoktorai_backend.exceptions.custom_exception_handler',
+    'EXCEPTION_HANDLER': 'medoraai_backend.exceptions.custom_exception_handler',
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle'
@@ -400,7 +400,7 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': False,
         },
-        'AiDoktorai_backend': {
+        'medoraai_backend': {
             'handlers': _AiDoktorI_HANDLERS,
             'level': 'INFO',
             'propagate': False,
