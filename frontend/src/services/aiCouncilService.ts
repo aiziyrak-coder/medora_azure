@@ -921,9 +921,9 @@ export const runCouncilDebate = async (
     const systemInstr = getSystemInstruction(language);
     const introMessages: Record<Language, string> = {
         'uz-L': 'O\'zbekiston yetakchi tibbiyot mutaxassislari yig\'ilmoqda...',
-        'uz-C': 'РЋР·Р±РµРєРёСЃС‚РѕРЅ РµС‚Р°РєС‡Рё С‚РёР±Р±РёС‘С‚ РјСѓС‚Р°С…Р°СЃСЃРёСЃР»Р°СЂРё Р№РёТ“РёР»РјРѕТ›РґР°...',
-        'kaa': 'Qaraqalpaqstan jetekshi medicina qaniygelari jД±ynalmaqta...',
-        'ru': 'Р’РµРґСѓС‰РёРµ РјРµРґРёС†РёРЅСЃРєРёРµ СЃРїРµС†РёР°Р»РёСЃС‚С‹ СЃРѕР±РёСЂР°СЋС‚СЃСЏ...',
+        'uz-C': 'Ўзбекистон етакчи тиббиёт мутахассислари йиғилмоқда...',
+        'kaa': 'Qaraqalpaqstan jetekshi medicina qaniygelari jıynalmaqta...',
+        'ru': 'Ведующие медицинские специалисты собираются...',
         'en': 'Leading medical specialists are gathering...'
     };
     
@@ -949,9 +949,9 @@ export const runCouncilDebate = async (
     for (let round = 1; round <= DEBATE_ROUNDS; round++) {
         const roundMessages: Record<Language, string> = {
             'uz-L': `${round}-bosqich munozarasi boshlanmoqda...`,
-            'uz-C': `${round}-Р±РѕСЃТ›РёС‡ РјСѓРЅРѕР·Р°СЂР°СЃРё Р±РѕС€Р»Р°РЅРјРѕТ›РґР°...`,
-            'kaa': `${round}-basqД±sh munozarasД± baslanbaqta...`,
-            'ru': `РќР°С‡РёРЅР°РµС‚СЃСЏ ${round}-Р№ СЂР°СѓРЅРґ РѕР±СЃСѓР¶РґРµРЅРёСЏ...`,
+            'uz-C': `${round}-боскич мунозараси бошланмоқда...`,
+            'kaa': `${round}-basqısh munozarası baslanbaqta...`,
+            'ru': `Начинается ${round}-й раунд обсуждения...`,
             'en': `Round ${round} of debate starting...`
         };
         onProgress({ type: 'status', message: roundMessages[language] });
@@ -1032,9 +1032,9 @@ export const runCouncilDebate = async (
 
     const finalizingMessages: Record<Language, string> = {
         'uz-L': 'Yakuniy hisobot tayyorlanmoqda...',
-        'uz-C': 'РЇРєСѓРЅРёР№ ТіРёСЃРѕР±РѕС‚ С‚Р°Р№С‘СЂР»Р°РЅРјРѕТ›РґР°...',
-        'kaa': 'JuwmaqlawshД± esabat tayarlanbaqta...',
-        'ru': 'РџРѕРґРіРѕС‚РѕРІРєР° РёС‚РѕРіРѕРІРѕРіРѕ РѕС‚С‡РµС‚Р°...',
+        'uz-C': 'Якуний ҳисобот тайёрланмоқда...',
+        'kaa': 'Juwmaqlawşı esabat tayarlanbaqta...',
+        'ru': 'Подготовка итогового отчёта...',
         'en': 'Preparing final report...'
     };
     onProgress({ type: 'status', message: finalizingMessages[language] });
