@@ -11,8 +11,8 @@ interface LanguageContextType {
 export const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    // Default language set to Uzbek Cyrillic ('uz-C') as requested
-    const [language, setLanguage] = useState<Language>('uz-C');
+    // Default: Uzbek Latin (uz-L) — Cyrillic locale was corrupted; switch to uz-C when fixed
+    const [language, setLanguage] = useState<Language>('uz-L');
     
     return (
         <LanguageContext.Provider value={{ language, setLanguage }}>
