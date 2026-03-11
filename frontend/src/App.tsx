@@ -472,6 +472,7 @@ const AppContent: React.FC = () => {
 
     const handleDataSubmit = async (data: PatientData) => {
         setPatientData(data);
+        setError(null);
         setIsProcessing(true);
         setAppView('clarification');
         setStatusMessage(t('clarification_generating_questions'));
@@ -492,7 +493,9 @@ const AppContent: React.FC = () => {
                 setError(t('clarification_question_error'));
             }
         }
-        setClarificationQuestions(questions.length ? questions : defaultClarifyingQuestions);
+        const finalQuestions = questions.length ? questions : defaultClarifyingQuestions;
+        setClarificationQuestions(finalQuestions);
+        if (finalQuestions.length) setError(null);
         setIsProcessing(false);
     };
     
