@@ -172,3 +172,4 @@ const DrugInteractionChecker: React.FC = () => {
 };
 
 export default DrugInteractionChecker;
+-NoNewline

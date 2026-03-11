@@ -139,3 +139,4 @@ export const AI_SPECIALISTS = {
 
     [AIModel.SYSTEM]: { name: 'Konsilium Chair (Orchestrator)', specialty: 'Moderator', Logo: OrkestratorLogo, text: 'text-slate-700', bg: 'bg-slate-200', border: 'border-slate-300' },
 };
+-NoNewline

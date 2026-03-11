@@ -19,3 +19,4 @@ class DiagnosisFeedbackAdmin(admin.ModelAdmin):
     list_display = ['diagnosis_name', 'feedback', 'analysis', 'created_by', 'created_at']
     list_filter = ['feedback', 'created_at']
     search_fields = ['diagnosis_name', 'analysis__patient__first_name']
+-NoNewline

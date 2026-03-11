@@ -90,3 +90,4 @@ const EPrescriptionView: React.FC<EPrescriptionViewProps> = ({ record, onBack })
 }
 
 export default EPrescriptionView;
+-NoNewline

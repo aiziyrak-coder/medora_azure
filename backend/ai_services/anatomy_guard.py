@@ -10,7 +10,7 @@ Har bir AI so'rovini ikki darajada tekshiradi:
     • Fiziologik ziddiyatlar           (5 yoshda, 30 yillik kasallik ...)
     • Prompt injection                 (ignore previous, jailbreak ...)
 
-  Level 2 – SEMANTIC AI CHECK  (medora-mini, ~500ms, faqat shubhada)
+  Level 2 – SEMANTIC AI CHECK  (AiDoktor-mini, ~500ms, faqat shubhada)
     • Chuqur semantik tahlil
     • Kontekstga bog'liq anatomik xatolar
     • Murakkab mantiqiy ziddiyatlar
@@ -353,3 +353,4 @@ class AnatomyGuardMiddleware:
                 logger.debug("AnatomyGuardMiddleware parse error (skip): %s", exc)
 
         return self.get_response(request)
+-NoNewline

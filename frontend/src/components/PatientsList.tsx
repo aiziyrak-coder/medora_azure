@@ -95,3 +95,4 @@ const PatientsList: React.FC<PatientsListProps> = ({ queue }) => {
 };
 
 export default PatientsList;
+-NoNewline

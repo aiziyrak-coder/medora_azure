@@ -16,3 +16,4 @@ class Migration(migrations.Migration):
             field=models.CharField(choices=[('clinic', 'Klinika'), ('doctor', 'Shifokor'), ('staff', 'Registrator')], default='clinic', max_length=20, verbose_name='Rol'),
         ),
     ]
+-NoNewline

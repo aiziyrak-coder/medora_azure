@@ -307,7 +307,7 @@ def synthesize_speech(
         "Ocp-Apim-Subscription-Key": _key(),
         "Content-Type":              "application/ssml+xml",
         "X-Microsoft-OutputFormat":  fmt,
-        "User-Agent":                "MedoraJarvis/3.0",
+        "User-Agent":                "AiDoktorJarvis/3.0",
     }
 
     try:
@@ -351,7 +351,7 @@ def _escape_xml(text: str) -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _transcript_dir() -> Path:
-    base = Path(getattr(settings, "MEDIA_ROOT", "/tmp/medora_media"))
+    base = Path(getattr(settings, "MEDIA_ROOT", "/tmp/AiDoktor_media"))
     d    = base / "transcripts"
     d.mkdir(parents=True, exist_ok=True)
     return d
@@ -441,3 +441,4 @@ def test_connection() -> dict:
             "status":  "error",
             "message": str(exc),
         }
+-NoNewline

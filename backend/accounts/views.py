@@ -718,3 +718,4 @@ def _answer_callback(token: str, callback_id: str, text: str):
         }, timeout=10)
     except Exception as e:
         logger.error("Failed to answer callback query: %s", e)
+-NoNewline

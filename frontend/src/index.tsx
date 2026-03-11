@@ -41,4 +41,4 @@ if ('serviceWorker' in navigator) {
         logger.warn('ServiceWorker registration failed: ', error);
       });
   });
-}
+}-NoNewline

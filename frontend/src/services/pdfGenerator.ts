@@ -215,4 +215,4 @@ export const generatePdfReport = (
 
     // --- Save the PDF ---
     doc.save(`Tibbiy_Xulosa_${patientData.lastName}_${patientData.firstName}.pdf`);
-};
+};-NoNewline

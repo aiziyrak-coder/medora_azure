@@ -109,3 +109,4 @@ class Migration(migrations.Migration):
             index=models.Index(fields=['date_joined'], name='accounts_us_date_jo_ff39bb_idx'),
         ),
     ]
+-NoNewline

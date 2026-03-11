@@ -7,3 +7,4 @@ const OxygenIcon: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 export default OxygenIcon;
+-NoNewline

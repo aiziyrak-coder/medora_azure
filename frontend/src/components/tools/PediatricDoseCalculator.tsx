@@ -84,4 +84,4 @@ const PediatricDoseCalculator: React.FC = () => {
     );
 };
 
-export default PediatricDoseCalculator;
+export default PediatricDoseCalculator;-NoNewline

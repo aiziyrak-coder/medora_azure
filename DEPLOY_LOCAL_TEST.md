@@ -35,7 +35,7 @@ python manage.py collectstatic --noinput
 ```powershell
 # Backend ishga tushirilgan bo'lishi kerak (port 8000)
 curl http://localhost:8000/health/
-# Javob: {"status":"healthy","service":"medoraai-backend"}
+# Javob: {"status":"healthy","service":"AiDoktorai-backend"}
 
 curl http://localhost:8000/health/detailed/
 # Javob: {"status":"healthy","checks":{"database":"ok","cache":"ok",...}}
@@ -298,3 +298,4 @@ Write-Host "`n✅ Barcha testlar muvaffaqiyatli!" -ForegroundColor Green
 Barcha testlar muvaffaqiyatli bo'lsa, dastur **deploy qilishga tayyor**!
 
 Keyingi qadam: `DEPLOYMENT_CHECKLIST.md` ni ko'ring.
+-NoNewline

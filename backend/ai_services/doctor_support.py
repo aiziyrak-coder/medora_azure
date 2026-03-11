@@ -130,7 +130,7 @@ def _doctor_system_prompt(task_type: str, language_hint: str,
     kb_context = get_uz_context(complaints_text=complaints, include_protocols=True)
     drug_ctx   = get_drug_context()
 
-    return f"""Siz Medora AI tibbiy yordamchisiz – yuqori malakali klinik mutaxassis.
+    return f"""Siz AiDoktor tibbiy yordamchisiz – yuqori malakali klinik mutaxassis.
 
 VAZIFA: {task_instr}
 
@@ -336,3 +336,4 @@ def doctor_consult_stream(
     except Exception as exc:
         logger.error("DoctorSupport stream failed: %s", exc)
         yield f'{{"error": "{exc}"}}'
+-NoNewline

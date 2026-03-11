@@ -1,4 +1,4 @@
-# MedoraAI — Real Bozorga Chiqish Checklist
+# AiDoktorAI — Real Bozorga Chiqish Checklist
 
 ## ✅ Barcha Muammolar Hal Qilindi
 
@@ -13,18 +13,18 @@ Ushbu checklist **real bozorga chiqishdan oldin** barcha qadamlar ro'yxati.
 # Muhim - Production'da o'zgartiring!
 SECRET_KEY=your-very-strong-secret-key-here
 DEBUG=False
-ALLOWED_HOSTS=medoraai.uz,api.medoraai.uz
+ALLOWED_HOSTS=AiDoktorai.uz,api.AiDoktorai.uz
 
 # Database (PostgreSQL)
 DB_ENGINE=django.db.backends.postgresql
-DB_NAME=medoraai_db
-DB_USER=medoraai_user
+DB_NAME=AiDoktorai_db
+DB_USER=AiDoktorai_user
 DB_PASSWORD=strong_password_here
 DB_HOST=localhost
 DB_PORT=5432
 
 # CORS
-CORS_ALLOWED_ORIGINS=https://medoraai.uz,https://www.medoraai.uz
+CORS_ALLOWED_ORIGINS=https://AiDoktorai.uz,https://www.AiDoktorai.uz
 
 # API Keys
 GEMINI_API_KEY=your_gemini_api_key
@@ -61,7 +61,7 @@ chmod 755 logs
 
 ### 2.1 Environment Variables (.env.local)
 ```bash
-VITE_API_BASE_URL=https://api.medoraai.uz/api
+VITE_API_BASE_URL=https://api.AiDoktorai.uz/api
 VITE_GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
@@ -88,7 +88,7 @@ npm run build
 ```nginx
 server {
     listen 80;
-    server_name api.medoraai.uz;
+    server_name api.AiDoktorai.uz;
     
     # SSL redirect
     return 301 https://$server_name$request_uri;
@@ -96,7 +96,7 @@ server {
 
 server {
     listen 443 ssl http2;
-    server_name api.medoraai.uz;
+    server_name api.AiDoktorai.uz;
     
     ssl_certificate /path/to/cert.pem;
     ssl_certificate_key /path/to/key.pem;
@@ -137,7 +137,7 @@ server {
 
 ### 3.2 Gunicorn
 ```bash
-gunicorn medoraai_backend.wsgi:application \
+gunicorn AiDoktorai_backend.wsgi:application \
     --bind 127.0.0.1:8000 \
     --workers 4 \
     --threads 2 \
@@ -147,17 +147,17 @@ gunicorn medoraai_backend.wsgi:application \
 ```
 
 ### 3.3 Systemd Service
-`/etc/systemd/system/medoraai-backend.service`:
+`/etc/systemd/system/AiDoktorai-backend.service`:
 ```ini
 [Unit]
-Description=MedoraAI Backend
+Description=AiDoktorAI Backend
 After=network.target
 
 [Service]
 User=www-data
 WorkingDirectory=/path/to/backend
 Environment="PATH=/path/to/venv/bin"
-ExecStart=/path/to/venv/bin/gunicorn medoraai_backend.wsgi:application \
+ExecStart=/path/to/venv/bin/gunicorn AiDoktorai_backend.wsgi:application \
     --bind 127.0.0.1:8000 \
     --workers 4
 Restart=always
@@ -173,13 +173,13 @@ WantedBy=multi-user.target
 ### 4.1 Subscription Expiry Check
 ```bash
 # Har kuni ertalab 2:00
-0 2 * * * cd /path/to/backend && /path/to/venv/bin/python manage.py check_subscription_expiry >> /var/log/medoraai-cron.log 2>&1
+0 2 * * * cd /path/to/backend && /path/to/venv/bin/python manage.py check_subscription_expiry >> /var/log/AiDoktorai-cron.log 2>&1
 ```
 
 ### 4.2 Database Backup
 ```bash
 # Har kuni ertalab 3:00
-0 3 * * * pg_dump -U medoraai_user -d medoraai_db > /backups/medoraai_$(date +\%Y\%m\%d).sql
+0 3 * * * pg_dump -U AiDoktorai_user -d AiDoktorai_db > /backups/AiDoktorai_$(date +\%Y\%m\%d).sql
 ```
 
 ### 4.3 Log Rotation
@@ -193,8 +193,8 @@ WantedBy=multi-user.target
 ## 5. Monitoring
 
 ### 5.1 Health Checks
-- **Basic:** `curl https://api.medoraai.uz/health/`
-- **Detailed:** `curl https://api.medoraai.uz/health/detailed/`
+- **Basic:** `curl https://api.AiDoktorai.uz/health/`
+- **Detailed:** `curl https://api.AiDoktorai.uz/health/detailed/`
 
 ### 5.2 Log Monitoring
 ```bash
@@ -265,3 +265,4 @@ Batafsil ma'lumot:
 - `PRODUCTION_HARDENING.md` — Barcha muammolar va yechimlar
 - `CRITICAL_ISSUES_FIXED.md` — Hal qilingan muammolar ro'yxati
 - `PRODUCTION_READINESS.md` — Production deploy qo'llanmasi
+-NoNewline

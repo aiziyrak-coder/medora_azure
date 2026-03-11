@@ -44,3 +44,4 @@ export const useApi = <T = unknown>() => {
 
   return { ...state, execute, reset };
 };
+-NoNewline

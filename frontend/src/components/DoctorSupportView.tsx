@@ -342,3 +342,4 @@ export const DoctorSupportView: React.FC<Props> = ({ patientData, language, onEr
 };
 
 export default DoctorSupportView;
+-NoNewline

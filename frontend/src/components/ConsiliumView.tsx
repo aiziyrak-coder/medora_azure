@@ -348,3 +348,4 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
 };
 
 export default ConsiliumView;
+-NoNewline

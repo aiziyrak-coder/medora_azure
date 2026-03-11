@@ -21,26 +21,26 @@ ssh root@167.71.53.238
 Once connected, copy and paste this entire block:
 
 ```bash
-cd /root/medoraai && git pull origin main && cd backend && cat > .env << 'EOF'
-SECRET_KEY=django-insecure-medoraai-dev-key-change-in-production
+cd /root/AiDoktorai && git pull origin main && cd backend && cat > .env << 'EOF'
+SECRET_KEY=django-insecure-AiDoktorai-dev-key-change-in-production
 DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1,medoraapi.cdcgroup.uz,medora.cdcgroup.uz,medora.ziyrak.org,medoraapi.ziyrak.org,20.82.115.71,167.71.53.238
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://medora.cdcgroup.uz,https://medoraapi.cdcgroup.uz
+ALLOWED_HOSTS=localhost,127.0.0.1,AiDoktorapi.fargana.uz,AiDoktor.fargana.uz,AiDoktor.ziyrak.org,AiDoktorapi.ziyrak.org,20.82.115.71,167.71.53.238
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://AiDoktor.fargana.uz,https://AiDoktorapi.fargana.uz
 DB_ENGINE=django.db.backends.sqlite3
-DB_NAME=/root/medoraai/backend/db.sqlite3
+DB_NAME=/root/AiDoktorai/backend/db.sqlite3
 GEMINI_API_KEY=AIzaSyCn4G1ZYDW_WZ9zCoP39EycFHkfrJAEGZA
 AI_MODEL_DEFAULT=gemini-3-pro-preview
 TELEGRAM_BOT_TOKEN=8345119740:AAETf0ZTo8zh2A3S5TKIkm7nWQnhO74yBAo
 TELEGRAM_PAYMENT_GROUP_ID=-5041567370
 EOF
-pkill -f gunicorn || true && sleep 2 && source venv/bin/activate && nohup gunicorn medoraai_backend.wsgi:application --bind 127.0.0.1:8001 --workers 3 >> logs/gunicorn.log 2>&1 & sleep 3 && sudo nginx -t && sudo systemctl reload nginx && echo "✅ DEPLOYMENT COMPLETE!" && curl http://127.0.0.1:8001/health/
+pkill -f gunicorn || true && sleep 2 && source venv/bin/activate && nohup gunicorn AiDoktorai_backend.wsgi:application --bind 127.0.0.1:8001 --workers 3 >> logs/gunicorn.log 2>&1 & sleep 3 && sudo nginx -t && sudo systemctl reload nginx && echo "✅ DEPLOYMENT COMPLETE!" && curl http://127.0.0.1:8001/health/
 ```
 
 #### **Step 3: Test**
 Open your browser:
-- https://medoraapi.cdcgroup.uz/
-- https://medoraapi.cdcgroup.uz/admin/
-- https://medora.cdcgroup.uz/
+- https://AiDoktorapi.fargana.uz/
+- https://AiDoktorapi.fargana.uz/admin/
+- https://AiDoktor.fargana.uz/
 
 ---
 
@@ -48,13 +48,13 @@ Open your browser:
 
 #### **Windows (PowerShell)**
 ```powershell
-cd e:\medoraai\deploy
+cd e:\AiDoktorai\deploy
 .\deploy.ps1
 ```
 
 #### **Linux/Mac/WSL (Bash)**
 ```bash
-cd e:\medoraai/deploy
+cd e:\AiDoktorai/deploy
 bash full-auto-deploy.sh
 ```
 
@@ -77,7 +77,7 @@ bash full-auto-deploy.sh
 - **Host:** 167.71.53.238
 - **Username:** root
 - **Password:** Ziyrak2025Ai
-- **Project:** `/root/medoraai`
+- **Project:** `/root/AiDoktorai`
 
 ---
 
@@ -86,13 +86,13 @@ bash full-auto-deploy.sh
 ### **Check Logs**
 ```bash
 ssh root@167.71.53.238
-tail -f /root/medoraai/backend/logs/django.log
+tail -f /root/AiDoktorai/backend/logs/django.log
 ```
 
 ### **Quick Restart**
 ```bash
 ssh root@167.71.53.238
-cd /root/medoraai/deploy
+cd /root/AiDoktorai/deploy
 ./quick-restart.sh
 ```
 
@@ -113,3 +113,4 @@ All these files are now on GitHub:
 ---
 
 **🎉 Ready to deploy!** Just SSH and run the command above!
+-NoNewline

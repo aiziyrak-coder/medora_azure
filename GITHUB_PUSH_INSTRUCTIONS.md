@@ -5,10 +5,10 @@
 PowerShell'da quyidagi buyruqlarni bajaring:
 
 ```powershell
-cd E:\medoraai
+cd E:\AiDoktorai
 
 # GitHub remote qo'shish
-git remote add origin https://github.com/aiziyrak-coder/medoraai.git
+git remote add origin https://github.com/aiziyrak-coder/AiDoktorai.git
 
 # Tekshirish
 git remote -v
@@ -16,8 +16,8 @@ git remote -v
 
 Natija:
 ```
-origin  https://github.com/aiziyrak-coder/medoraai.git (fetch)
-origin  https://github.com/aiziyrak-coder/medoraai.git (push)
+origin  https://github.com/aiziyrak-coder/AiDoktorai.git (fetch)
+origin  https://github.com/aiziyrak-coder/AiDoktorai.git (push)
 ```
 
 ---
@@ -28,7 +28,7 @@ origin  https://github.com/aiziyrak-coder/medoraai.git (push)
 
 1. GitHub'ga kiring: https://github.com/settings/tokens
 2. **"Generate new token (classic)"** tugmasini bosing
-3. Token nomi: `medoraai-deploy`
+3. Token nomi: `AiDoktorai-deploy`
 4. **Scope'lar**:
    - ✅ `repo` (Full control of private repositories)
 5. **"Generate token"** tugmasini bosing
@@ -46,7 +46,7 @@ cat ~/.ssh/id_ed25519.pub
 # Bu key'ni GitHub'ga qo'shing: Settings > SSH and GPG keys > New SSH key
 
 # Remote'ni SSH URL'ga o'zgartirish
-git remote set-url origin git@github.com:aiziyrak-coder/medoraai.git
+git remote set-url origin git@github.com:aiziyrak-coder/AiDoktorai.git
 ```
 
 ---
@@ -54,7 +54,7 @@ git remote set-url origin git@github.com:aiziyrak-coder/medoraai.git
 ## ✅ QADAM 3: Push Qilish
 
 ```powershell
-cd E:\medoraai
+cd E:\AiDoktorai
 
 # Branch nomini tekshirish
 git branch
@@ -74,7 +74,7 @@ git push -u origin main
 
 ## ✅ QADAM 4: Tekshirish
 
-GitHub'ga kiring: https://github.com/aiziyrak-coder/medoraai
+GitHub'ga kiring: https://github.com/aiziyrak-coder/AiDoktorai
 
 Barcha fayllar ko'rinishi kerak!
 
@@ -85,7 +85,7 @@ Barcha fayllar ko'rinishi kerak!
 Har safar o'zgarish qilganda:
 
 ```powershell
-cd E:\medoraai
+cd E:\AiDoktorai
 
 # O'zgarishlarni ko'rish
 git status
@@ -107,7 +107,7 @@ git push
 ### "remote origin already exists"
 ```powershell
 git remote remove origin
-git remote add origin https://github.com/aiziyrak-coder/medoraai.git
+git remote add origin https://github.com/aiziyrak-coder/AiDoktorai.git
 ```
 
 ### "Authentication failed"
@@ -121,3 +121,4 @@ git remote add origin https://github.com/aiziyrak-coder/medoraai.git
 ---
 
 **Tayyor! Kod GitHub'da! 🎉**
+-NoNewline

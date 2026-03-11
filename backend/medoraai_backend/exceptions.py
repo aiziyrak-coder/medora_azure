@@ -57,3 +57,4 @@ def custom_exception_handler(exc, context):
         logger.error("Unexpected Error: %s", exc, exc_info=True)
 
     return response
+-NoNewline

@@ -357,3 +357,4 @@ Javobni JSON formatida: {{"valid": boolean, "issues": [], "confidence": float}}"
 
 # Global instance
 autonomous_generator = AutonomousProtocolGenerator()
+-NoNewline

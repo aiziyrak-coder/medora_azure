@@ -23,7 +23,7 @@ This guide provides**fully automated**deployment from your local machine to the 
 ### **Method 1: PowerShell Script (Windows - Easiest)**
 
 ```powershell
-cd e:\medoraai\deploy
+cd e:\AiDoktorai\deploy
 .\deploy.ps1
 ```
 
@@ -38,7 +38,7 @@ cd e:\medoraai\deploy
 ### **Method 2: Bash Script (WSL/Linux/Mac)**
 
 ```bash
-cd e:\medoraai/deploy
+cd e:\AiDoktorai/deploy
 bash full-auto-deploy.sh
 ```
 
@@ -54,7 +54,7 @@ bash full-auto-deploy.sh
 
 #### **Step 1: Push to GitHub**
 ```bash
-cd e:\medoraai
+cd e:\AiDoktorai
 git add .
 git commit -m "Your changes"
 git push origin main
@@ -75,21 +75,21 @@ Copy and paste this entire block on the server:
 set -e
 
 echo "📦 Pulling latest changes..."
-cd /root/medoraai
+cd /root/AiDoktorai
 git pull origin main
 
 echo "🔧 Creating.env file..."
-cd /root/medoraai/backend
+cd /root/AiDoktorai/backend
 
 cat > .env << 'EOF'
-SECRET_KEY=django-insecure-medoraai-dev-key-change-in-production
+SECRET_KEY=django-insecure-AiDoktorai-dev-key-change-in-production
 DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1,medoraapi.cdcgroup.uz,medora.cdcgroup.uz,medora.ziyrak.org,medoraapi.ziyrak.org,20.82.115.71,167.71.53.238
+ALLOWED_HOSTS=localhost,127.0.0.1,AiDoktorapi.fargana.uz,AiDoktor.fargana.uz,AiDoktor.ziyrak.org,AiDoktorapi.ziyrak.org,20.82.115.71,167.71.53.238
 
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://medora.cdcgroup.uz,https://medoraapi.cdcgroup.uz
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://AiDoktor.fargana.uz,https://AiDoktorapi.fargana.uz
 
 DB_ENGINE=django.db.backends.sqlite3
-DB_NAME=/root/medoraai/backend/db.sqlite3
+DB_NAME=/root/AiDoktorai/backend/db.sqlite3
 
 GEMINI_API_KEY=AIzaSyCn4G1ZYDW_WZ9zCoP39EycFHkfrJAEGZA
 AI_MODEL_DEFAULT=gemini-3-pro-preview
@@ -111,9 +111,9 @@ echo "🔄 Restarting Gunicorn..."
 pkill -f gunicorn || true
 sleep 2
 
-cd /root/medoraai/backend
+cd /root/AiDoktorai/backend
 source venv/bin/activate
-nohup gunicorn medoraai_backend.wsgi:application \
+nohup gunicorn AiDoktorai_backend.wsgi:application \
     --bind 127.0.0.1:8001 \
     --workers 3 \
     --threads 2 \
@@ -135,9 +135,9 @@ echo "🎉 DEPLOYMENT COMPLETE!"
 echo "========================================"
 echo ""
 echo "Test at:"
-echo "  https://medoraapi.cdcgroup.uz/"
-echo "  https://medoraapi.cdcgroup.uz/admin/"
-echo "  https://medora.cdcgroup.uz/"
+echo "  https://AiDoktorapi.fargana.uz/"
+echo "  https://AiDoktorapi.fargana.uz/admin/"
+echo "  https://AiDoktor.fargana.uz/"
 ```
 
 ---
@@ -148,25 +148,25 @@ echo "  https://medora.cdcgroup.uz/"
 - **Host**: 167.71.53.238
 - **Username**: root
 - **Password**: Ziyrak2025Ai
-- **Project Directory**: `/root/medoraai`
+- **Project Directory**: `/root/AiDoktorai`
 
 ### **Environment Variables Set Automatically**
 
 The deployment creates this `.env` file:
 
 ```env
-SECRET_KEY=django-insecure-medoraai-dev-key-change-in-production
+SECRET_KEY=django-insecure-AiDoktorai-dev-key-change-in-production
 DEBUG=True
 
 # All necessary domains
-ALLOWED_HOSTS=localhost,127.0.0.1,medoraapi.cdcgroup.uz,medora.cdcgroup.uz,medora.ziyrak.org,medoraapi.ziyrak.org,20.82.115.71,167.71.53.238
+ALLOWED_HOSTS=localhost,127.0.0.1,AiDoktorapi.fargana.uz,AiDoktor.fargana.uz,AiDoktor.ziyrak.org,AiDoktorapi.ziyrak.org,20.82.115.71,167.71.53.238
 
 # CORS for frontend
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://medora.cdcgroup.uz,https://medoraapi.cdcgroup.uz
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://AiDoktor.fargana.uz,https://AiDoktorapi.fargana.uz
 
 # Database
 DB_ENGINE=django.db.backends.sqlite3
-DB_NAME=/root/medoraai/backend/db.sqlite3
+DB_NAME=/root/AiDoktorai/backend/db.sqlite3
 
 # AI Services
 GEMINI_API_KEY=AIzaSyCn4G1ZYDW_WZ9zCoP39EycFHkfrJAEGZA
@@ -226,13 +226,13 @@ curl http://127.0.0.1:8001/admin/
 ```
 
 ### **2. Browser Tests**
-- https://medoraapi.cdcgroup.uz/
-- https://medoraapi.cdcgroup.uz/admin/
-- https://medora.cdcgroup.uz/
+- https://AiDoktorapi.fargana.uz/
+- https://AiDoktorapi.fargana.uz/admin/
+- https://AiDoktor.fargana.uz/
 
 ### **3. API Tests**
 ```bash
-curl https://medoraapi.cdcgroup.uz/api/auth/profile/ \
+curl https://AiDoktorapi.fargana.uz/api/auth/profile/ \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -252,7 +252,7 @@ ssh root@167.71.53.238
 ### **Issue: Git Pull Fails**
 ```bash
 # On server
-cd /root/medoraai
+cd /root/AiDoktorai
 git status
 git remote -v
 git reset --hard origin/main
@@ -264,17 +264,17 @@ git reset --hard origin/main
 ps aux | grep gunicorn
 
 # Restart manually
-cd /root/medoraai/backend
+cd /root/AiDoktorai/backend
 source venv/bin/activate
-gunicorn medoraai_backend.wsgi:application --bind 127.0.0.1:8001 --workers 3 &
+gunicorn AiDoktorai_backend.wsgi:application --bind 127.0.0.1:8001 --workers 3 &
 ```
 
 ### **Issue: DisallowedHost Error**
 ```bash
 # Check.env
-cat /root/medoraai/backend/.env | grep ALLOWED_HOSTS
+cat /root/AiDoktorai/backend/.env | grep ALLOWED_HOSTS
 
-# Should include medoraapi.cdcgroup.uz
+# Should include AiDoktorapi.fargana.uz
 # If not, re-run deployment
 ```
 
@@ -306,10 +306,10 @@ cat /root/medoraai/backend/.env | grep ALLOWED_HOSTS
 ### **View Logs**
 ```bash
 # Django logs
-tail -f /root/medoraai/backend/logs/django.log
+tail -f /root/AiDoktorai/backend/logs/django.log
 
 # Gunicorn logs
-tail -f /root/medoraai/backend/logs/gunicorn.log
+tail -f /root/AiDoktorai/backend/logs/gunicorn.log
 
 # Nginx errors
 tail -f /var/log/nginx/error.log
@@ -362,7 +362,7 @@ bash deploy/full-auto-deploy.sh
 ### **Manual Server Deployment**
 ```bash
 ssh root@167.71.53.238
-cd /root/medoraai
+cd /root/AiDoktorai
 git pull origin main
 ./deploy/quick-restart.sh
 ```
@@ -370,14 +370,14 @@ git pull origin main
 ### **Quick Restart Only**
 ```bash
 ssh root@167.71.53.238
-cd /root/medoraai/deploy
+cd /root/AiDoktorai/deploy
 ./quick-restart.sh
 ```
 
 ### **Check Logs**
 ```bash
 ssh root@167.71.53.238
-tail -f /root/medoraai/backend/logs/django.log
+tail -f /root/AiDoktorai/backend/logs/django.log
 ```
 
 ---
@@ -391,7 +391,7 @@ If something goes wrong:
 ssh root@167.71.53.238
 
 # Go to previous working commit
-cd /root/medoraai
+cd /root/AiDoktorai
 git log --oneline -5
 git reset --hard GOOD_COMMIT_HASH
 
@@ -402,5 +402,6 @@ git reset --hard GOOD_COMMIT_HASH
 ---
 
 **📅 Last Updated:** March 11, 2026  
-**👥 Author:** MEDORA AI Team  
+**👥 Author:** AiDoktor Team  
 **✅ Status:**Fully Automated & Production Ready
+-NoNewline

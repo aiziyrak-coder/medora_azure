@@ -200,3 +200,4 @@ class QueueItemSerializer(serializers.ModelSerializer):
 
     def get_patient_name(self, obj):
         return f"{obj.last_name} {obj.first_name}"
+-NoNewline

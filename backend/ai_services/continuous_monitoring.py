@@ -911,3 +911,4 @@ class ContinuousMonitoringSystem:
 
 # Global instance
 continuous_monitoring = ContinuousMonitoringSystem()
+-NoNewline

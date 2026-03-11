@@ -37,3 +37,4 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
             return obj.created_by == request.user
         
         return False
+-NoNewline

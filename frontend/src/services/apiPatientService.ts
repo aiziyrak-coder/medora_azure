@@ -168,3 +168,4 @@ export const deletePatientAttachment = async (
  * Convert Patient to PatientData for frontend use
  */
 export const convertPatientToPatientData = apiToPatientData;
+-NoNewline

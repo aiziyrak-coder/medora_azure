@@ -26,3 +26,4 @@ const DebateStatusIndicator: React.FC<DebateStatusIndicatorProps> = ({ message }
 };
 
 export default DebateStatusIndicator;
+-NoNewline

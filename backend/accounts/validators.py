@@ -57,3 +57,4 @@ def sanitize_filename(filename):
     if len(filename) > 255:
         filename = filename[:255]
     return filename
+-NoNewline

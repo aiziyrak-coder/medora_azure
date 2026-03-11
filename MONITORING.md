@@ -51,3 +51,4 @@ Ishga tushirish va sozlash: **monitoring_gateway/README.md**.
 - **MonitoringDashboard:** Grid (12–16 ta mini-kartochka), bitta bemor tanlansa – batafsil ko‘rinish (oxirgi vitals, alarmlar, vital tarix).
 - **Polling:** Dashboard har 5 soniyada yangilanadi.
 - **WebSocket:** Agar gateway ishlasa (`VITE_MONITORING_WS_URL`, default dev da `ws://localhost:9000/ws/vitals`), kartochkalarda real-time vitals ko‘rsatiladi.
+-NoNewline

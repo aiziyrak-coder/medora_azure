@@ -27,7 +27,7 @@ const BANK_ACCOUNT = {
     accountNumber: '20214000901234567890',
     mfo: '00447',
     inn: '123456789',
-    receiver: 'MEDORA AI',
+    receiver: 'AiDoktor',
 };
 
 /** Shifokor uchun default reja (API dan kelmasa) */
@@ -334,3 +334,4 @@ const SubscriptionPage: React.FC<SubscriptionPageProps> = ({ user, onSubscriptio
 };
 
 export default SubscriptionPage;
+-NoNewline

@@ -145,3 +145,4 @@ class UserAdmin(BaseUserAdmin):
     def delete_model(self, request, obj):
         """Single-object delete: only clear tokens; actual delete done in delete_view to avoid 500."""
         super().delete_model(request, obj)
+-NoNewline

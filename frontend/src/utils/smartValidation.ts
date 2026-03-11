@@ -88,3 +88,4 @@ export function getSmartValidationMessage(
   }
   return null;
 }
+-NoNewline

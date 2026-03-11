@@ -6,4 +6,4 @@ const AlertTriangleIcon: React.FC<{ className?: string }> = ({ className = "w-5 
     </svg>
 );
 
-export default AlertTriangleIcon;
+export default AlertTriangleIcon;-NoNewline

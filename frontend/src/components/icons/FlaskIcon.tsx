@@ -6,4 +6,4 @@ const FlaskIcon: React.FC<{ className?: string }> = ({ className = "h-7 w-7 text
     </svg>
 );
 
-export default FlaskIcon;
+export default FlaskIcon;-NoNewline

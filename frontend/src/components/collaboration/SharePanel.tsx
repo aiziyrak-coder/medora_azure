@@ -5,3 +5,4 @@ const SharePanel: React.FC = () => {
 };
 
 export default SharePanel;
+-NoNewline

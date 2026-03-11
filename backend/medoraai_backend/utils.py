@@ -34,3 +34,4 @@ def validate_request_origin(request):
                 return True
     
     return False
+-NoNewline

@@ -78,3 +78,4 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ language, onLanguag
 };
 
 export default LanguageSwitcher;
+-NoNewline

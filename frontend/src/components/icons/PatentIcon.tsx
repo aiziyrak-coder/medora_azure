@@ -7,3 +7,4 @@ const PatentIcon: React.FC<{ className?: string }> = ({ className = "h-7 w-7 tex
 );
 
 export default PatentIcon;
+-NoNewline

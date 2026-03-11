@@ -217,3 +217,4 @@ O'zbek tilida (Lotin)."""
     except Exception:
         logger.exception("Gemini generate_diagnoses failed")
         return []
+-NoNewline

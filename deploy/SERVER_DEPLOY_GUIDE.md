@@ -11,7 +11,7 @@ Serverda dasturni yangilash va test qilish uchun qadamma-qadam qo'llanma.
 ```bash
 ssh root@167.71.53.238
 # yoki
-ssh root@medoraapi.cdcgroup.uz
+ssh root@AiDoktorapi.fargana.uz
 ```
 
 **Parol**: `Ziyrak2025Ai` (yoki sizning shaxsiy kalitingiz)
@@ -23,7 +23,7 @@ ssh root@medoraapi.cdcgroup.uz
 ### Variant A: To'liq Deploy Script (Tavsiya etiladi)
 
 ```bash
-cd /root/medoraai/deploy
+cd /root/AiDoktorai/deploy
 chmod +x deploy-test.sh
 ./deploy-test.sh
 ```
@@ -43,7 +43,7 @@ chmod +x deploy-test.sh
 ### Variant B: Tezkor Restart
 
 ```bash
-cd /root/medoraai/deploy
+cd /root/AiDoktorai/deploy
 chmod +x quick-restart.sh
 ./quick-restart.sh
 ```
@@ -63,28 +63,28 @@ Agar skriptlar ishlamasa, har bir buyruqni alohida bajaring:
 
 #### 1. Git Pull
 ```bash
-cd /root/medoraai
+cd /root/AiDoktorai
 git pull origin main
 ```
 
 #### 2. .env Faylini Tahrirlash
 ```bash
-cd /root/medoraai/backend
+cd /root/AiDoktorai/backend
 nano .env
 ```
 
 **Muhim o'zgarishlar:**
 ```env
-ALLOWED_HOSTS=localhost,127.0.0.1,medoraapi.cdcgroup.uz,medora.cdcgroup.uz,medora.ziyrak.org,medoraapi.ziyrak.org,20.82.115.71,167.71.53.238
+ALLOWED_HOSTS=localhost,127.0.0.1,AiDoktorapi.fargana.uz,AiDoktor.fargana.uz,AiDoktor.ziyrak.org,AiDoktorapi.ziyrak.org,20.82.115.71,167.71.53.238
 
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://medora.cdcgroup.uz,https://medoraapi.cdcgroup.uz
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://AiDoktor.fargana.uz,https://AiDoktorapi.fargana.uz
 ```
 
 Saqlash: `Ctrl+O` → `Enter` → `Ctrl+X`
 
 #### 3. Virtual Environment Faollashtirish
 ```bash
-cd /root/medoraai/backend
+cd /root/AiDoktorai/backend
 source venv/bin/activate
 ```
 
@@ -102,19 +102,19 @@ python manage.py migrate
 
 **Systemctl bilan:**
 ```bash
-sudo systemctl restart medoraai-backend
-sudo systemctl status medoraai-backend
+sudo systemctl restart AiDoktorai-backend
+sudo systemctl status AiDoktorai-backend
 ```
 
 **Yoki Manual:**
 ```bash
 # Eski process'larni to'xtatish
-pkill -f "gunicorn.*medoraai_backend"
+pkill -f "gunicorn.*AiDoktorai_backend"
 
 # Yangi boshlash
-cd /root/medoraai/backend
+cd /root/AiDoktorai/backend
 source venv/bin/activate
-nohup gunicorn medoraai_backend.wsgi:application \
+nohup gunicorn AiDoktorai_backend.wsgi:application \
     --bind 127.0.0.1:8001 \
     --workers 3 \
     --timeout 120 \
@@ -153,16 +153,16 @@ curl http://127.0.0.1:8001/api/
 ### Tashqi Test (Brauzerda)
 
 1. **Backend:**
-   - https://medoraapi.cdcgroup.uz/
-   - https://medoraapi.cdcgroup.uz/admin/
-   - https://medoraapi.cdcgroup.uz/swagger/
+   - https://AiDoktorapi.fargana.uz/
+   - https://AiDoktorapi.fargana.uz/admin/
+   - https://AiDoktorapi.fargana.uz/swagger/
 
 2. **Frontend:**
-   - https://medora.cdcgroup.uz/
+   - https://AiDoktor.fargana.uz/
 
 3. **API Test:**
    ```bash
-  curl https://medoraapi.cdcgroup.uz/api/auth/profile/ \
+  curl https://AiDoktorapi.fargana.uz/api/auth/profile/ \
      -H "Authorization: Bearer YOUR_TOKEN"
    ```
 
@@ -173,19 +173,19 @@ curl http://127.0.0.1:8001/api/
 ### Django Loglar
 ```bash
 # Real-time kuzatish
-tail -f /root/medoraai/backend/logs/django.log
+tail -f /root/AiDoktorai/backend/logs/django.log
 
 # Oxirgi 50 qator
-tail -n 50 /root/medoraai/backend/logs/django.log
+tail -n 50 /root/AiDoktorai/backend/logs/django.log
 
 # Xatoliklar
-tail -f /root/medoraai/backend/logs/django_errors.log
+tail -f /root/AiDoktorai/backend/logs/django_errors.log
 ```
 
 ### Gunicorn Loglar
 ```bash
-tail -f /root/medoraai/backend/logs/access.log
-tail -f /root/medoraai/backend/logs/error.log
+tail -f /root/AiDoktorai/backend/logs/access.log
+tail -f /root/AiDoktorai/backend/logs/error.log
 ```
 
 ### Nginx Loglar
@@ -200,7 +200,7 @@ tail -f /var/log/nginx/access.log
 ### Systemd Journal (agar systemctl ishlatilsa)
 ```bash
 # Backend service
-journalctl -u medoraai-backend-f
+journalctl -u AiDoktorai-backend-f
 
 # Nginx service
 journalctl -u nginx -f
@@ -214,9 +214,9 @@ journalctl -u nginx -f
 **Sabab:** `.env` faylida domen yo'q  
 **Yechim:**
 ```bash
-nano /root/medoraai/backend/.env
+nano /root/AiDoktorai/backend/.env
 # ALLOWED_HOSTS ga domenni qo'shing
-sudo systemctl restart medoraai-backend
+sudo systemctl restart AiDoktorai-backend
 ```
 
 ### ❌ 502 Bad Gateway
@@ -227,7 +227,7 @@ sudo systemctl restart medoraai-backend
 ps aux | grep gunicorn
 
 # Restart
-sudo systemctl restart medoraai-backend
+sudo systemctl restart AiDoktorai-backend
 # yoki manual restart
 ```
 
@@ -245,9 +245,9 @@ sudo nginx -t && sudo systemctl reload nginx
 **Sabab:** Frontend domeni CORS ro'yxatida yo'q  
 **Yechim:**
 ```bash
-nano /root/medoraai/backend/.env
+nano /root/AiDoktorai/backend/.env
 # CORS_ALLOWED_ORIGINS ga frontend domenni qo'shing
-sudo systemctl restart medoraai-backend
+sudo systemctl restart AiDoktorai-backend
 ```
 
 ---
@@ -271,7 +271,7 @@ lsof -i :8001
 ### Service Holati
 ```bash
 # Backend
-sudo systemctl status medoraai-backend
+sudo systemctl status AiDoktorai-backend
 
 # Nginx
 sudo systemctl status nginx
@@ -283,18 +283,18 @@ sudo systemctl status redis
 ### Restart
 ```bash
 # Backend
-sudo systemctl restart medoraai-backend
+sudo systemctl restart AiDoktorai-backend
 
 # Nginx
 sudo systemctl restart nginx
 
 # Hammasi
-sudo systemctl restart nginx medoraai-backend
+sudo systemctl restart nginx AiDoktorai-backend
 ```
 
 ### Enable on Boot
 ```bash
-sudo systemctl enable medoraai-backend
+sudo systemctl enable AiDoktorai-backend
 sudo systemctl enable nginx
 ```
 
@@ -339,9 +339,9 @@ Har bir deploy dan keyin tekshiring:
 - [ ] Gunicorn restart edildi
 - [ ] Nginx reload qilindi
 - [ ] Health check: `http://127.0.0.1:8001/health/` → HTTP 200
-- [ ] HTTPS orqali test: `https://medoraapi.cdcgroup.uz/`
-- [ ] Admin panel: `https://medoraapi.cdcgroup.uz/admin/`
-- [ ] Frontend ulandi: `https://medora.cdcgroup.uz/`
+- [ ] HTTPS orqali test: `https://AiDoktorapi.fargana.uz/`
+- [ ] Admin panel: `https://AiDoktorapi.fargana.uz/admin/`
+- [ ] Frontend ulandi: `https://AiDoktor.fargana.uz/`
 - [ ] Loglarda xatolik yo'q
 
 ---
@@ -352,12 +352,12 @@ Agar muammo bo'lsa:
 
 1. **Loglarni tekshiring:**
    ```bash
-   tail -f /root/medoraai/backend/logs/django.log
+   tail -f /root/AiDoktorai/backend/logs/django.log
    ```
 
 2. **Service holatini tekshiring:**
    ```bash
-   sudo systemctl status medoraai-backend
+   sudo systemctl status AiDoktorai-backend
    ```
 
 3. **Port bandligini tekshiring:**
@@ -373,4 +373,5 @@ Agar muammo bo'lsa:
 ---
 
 **📅 Oxirgi yangilanish:** March 11, 2026  
-**👤 Muallif:** MEDORA AI Team
+**👤 Muallif:** AiDoktor Team
+-NoNewline

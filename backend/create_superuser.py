@@ -11,7 +11,7 @@ import sys
 import django
 import logging
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'medoraai_backend.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'AiDoktorai_backend.settings')
 django.setup()
 
 from accounts.models import User
@@ -53,3 +53,4 @@ except Exception as e:
     logger.exception("Superuser yaratishda xatolik")
     print(f"Xatolik: {e}")
     sys.exit(1)
+-NoNewline

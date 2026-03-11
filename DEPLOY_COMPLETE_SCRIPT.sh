@@ -4,28 +4,28 @@
 set -e
 
 echo "========================================"
-echo "🚀 MEDORA AI - Full Deployment"
+echo "🚀 AiDoktor - Full Deployment"
 echo "========================================"
 echo ""
 
 # Step 1: Git pull
 echo "📦 Pulling latest changes..."
-cd /root/medoraai
+cd /root/AiDoktorai
 git pull origin main
 echo "✅ Git pull complete"
 echo ""
 
 # Step 2: Create.env file
 echo "🔧 Creating.env file..."
-cd /root/medoraai/backend
+cd /root/AiDoktorai/backend
 
 cat > .env << 'EOF'
-SECRET_KEY=django-insecure-medoraai-dev-key-change-in-production
+SECRET_KEY=django-insecure-AiDoktorai-dev-key-change-in-production
 DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1,medoraapi.cdcgroup.uz,medora.cdcgroup.uz,medora.ziyrak.org,medoraapi.ziyrak.org,20.82.115.71,167.71.53.238
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://medora.cdcgroup.uz,https://medoraapi.cdcgroup.uz
+ALLOWED_HOSTS=localhost,127.0.0.1,AiDoktorapi.fargana.uz,AiDoktor.fargana.uz,AiDoktor.ziyrak.org,AiDoktorapi.ziyrak.org,20.82.115.71,167.71.53.238
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://AiDoktor.fargana.uz,https://AiDoktorapi.fargana.uz
 DB_ENGINE=django.db.backends.sqlite3
-DB_NAME=/root/medoraai/backend/db.sqlite3
+DB_NAME=/root/AiDoktorai/backend/db.sqlite3
 GEMINI_API_KEY=AIzaSyCn4G1ZYDW_WZ9zCoP39EycFHkfrJAEGZA
 AI_MODEL_DEFAULT=gemini-3-pro-preview
 TELEGRAM_BOT_TOKEN=8345119740:AAETf0ZTo8zh2A3S5TKIkm7nWQnhO74yBAo
@@ -53,9 +53,9 @@ echo "🔄 Restarting Gunicorn..."
 pkill-f gunicorn || true
 sleep 2
 
-cd /root/medoraai/backend
+cd /root/AiDoktorai/backend
 source venv/bin/activate
-nohup gunicorn medoraai_backend.wsgi:application \
+nohup gunicorn AiDoktorai_backend.wsgi:application \
     --bind 127.0.0.1:8001 \
     --workers 3 \
     --threads 2 \
@@ -101,15 +101,16 @@ echo "🎉 DEPLOYMENT COMPLETE!"
 echo "========================================"
 echo ""
 echo "Test URLs:"
-echo "  Backend: https://medoraapi.cdcgroup.uz/"
-echo "  Admin: https://medoraapi.cdcgroup.uz/admin/"
-echo "  Frontend: https://medora.cdcgroup.uz/"
+echo "  Backend: https://AiDoktorapi.fargana.uz/"
+echo "  Admin: https://AiDoktorapi.fargana.uz/admin/"
+echo "  Frontend: https://AiDoktor.fargana.uz/"
 echo ""
 echo "Registration test:"
-echo "  curl -X POST https://medoraapi.cdcgroup.uz/api/auth/register/ \\"
+echo "  curl -X POST https://AiDoktorapi.fargana.uz/api/auth/register/ \\"
 echo "    -H \"Content-Type: application/json\" \\"
 echo "    -d '{\"phone\":\"+998901234567\",\"name\":\"Test\",\"password\":\"testpass123\",\"password_confirm\":\"testpass123\",\"role\":\"monitoring\"}'"
 echo ""
 echo "Monitor logs:"
-echo "  tail -f /root/medoraai/backend/logs/django.log"
+echo "  tail -f /root/AiDoktorai/backend/logs/django.log"
 echo ""
+-NoNewline

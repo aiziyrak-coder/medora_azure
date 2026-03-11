@@ -53,3 +53,4 @@ urlpatterns = [
     path("learning/improve/", get_improved_protocol,    name="get_improved_protocol"),
 
 ]
+-NoNewline

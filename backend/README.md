@@ -1,4 +1,4 @@
-# MEDORA AI Backend API
+# AiDoktor Backend API
 
 Django REST Framework bilan yaratilgan professional backend API.
 
@@ -136,7 +136,8 @@ backend/
 ├── patients/          # Bemorlar
 ├── analyses/          # Tahlillar
 ├── ai_services/       # AI xizmatlar
-├── medoraai_backend/  # Asosiy sozlamalar
+├── AiDoktorai_backend/  # Asosiy sozlamalar
 ├── manage.py
 └── requirements.txt
 ```
+-NoNewline

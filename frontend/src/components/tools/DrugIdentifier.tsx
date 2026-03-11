@@ -207,3 +207,4 @@ const DrugIdentifier: React.FC = () => {
 };
 
 export default DrugIdentifier;
+-NoNewline

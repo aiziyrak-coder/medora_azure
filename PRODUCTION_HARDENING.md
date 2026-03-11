@@ -1,4 +1,4 @@
-# MedoraAI — Real Bozorga Chiqish: Barcha Muammolar va Yechimlar
+# AiDoktorAI — Real Bozorga Chiqish: Barcha Muammolar va Yechimlar
 
 Ushbu hujjat **real bozorga chiqishda** duch kelishi mumkin bo'lgan **barcha muammolar, to'siqlar, qiyinchiliklar va xatoliklarni** hal qilish uchun qilingan o'zgarishlar va tavsiyalar.
 
@@ -195,7 +195,7 @@ Ushbu hujjat **real bozorga chiqishda** duch kelishi mumkin bo'lgan **barcha mua
 
 #### Caching Strategy
 - **Redis:** Stats, rate limiting, usage counters
-- **Cache keys:** Namespaced (`medoraai:usage:...`)
+- **Cache keys:** Namespaced (`AiDoktorai:usage:...`)
 
 ### 7.2 ⚠️ Qo'shimcha tavsiyalar
 
@@ -260,7 +260,7 @@ Ushbu hujjat **real bozorga chiqishda** duch kelishi mumkin bo'lgan **barcha mua
 0 2 * * * cd /path/to/backend && python manage.py check_subscription_expiry
 
 # Database backup (har kuni 3:00)
-0 3 * * * pg_dump -U user -d medoraai > /backups/medoraai_$(date +\%Y\%m\%d).sql
+0 3 * * * pg_dump -U user -d AiDoktorai > /backups/AiDoktorai_$(date +\%Y\%m\%d).sql
 
 # Log rotation (haftada 1 marta)
 0 4 * * 0 find /path/to/backend/logs -name "*.log" -mtime +30 -delete
@@ -365,3 +365,4 @@ Ushbu hujjat **real bozorga chiqishda** duch kelishi mumkin bo'lgan **barcha mua
 - ⚠️ Email/SMS notifications (ixtiyoriy)
 
 Dastur **real bozorga chiqishga tayyor** — asosiy xavfsizlik, performance va error handling barcha qilingan!
+-NoNewline

@@ -40,3 +40,4 @@ export const sendPaymentReceipt = async (
         };
     }
 };
+-NoNewline

@@ -6,4 +6,4 @@ const CheckCircleIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-
     </svg>
 );
 
-export default CheckCircleIcon;
+export default CheckCircleIcon;-NoNewline

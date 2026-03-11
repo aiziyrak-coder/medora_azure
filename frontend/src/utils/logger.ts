@@ -8,14 +8,14 @@ const isDevelopment = import.meta.env.DEV;
 export const logger = {
   log: (...args: unknown[]) => {
     if (isDevelopment) {
-      console.log('[MEDORA AI]', ...args);
+      console.log('[AiDoktor]', ...args);
     }
   },
   
   error: (...args: unknown[]) => {
     // Always log errors, but format them properly
     if (isDevelopment) {
-      console.error('[MEDORA AI ERROR]', ...args);
+      console.error('[AiDoktor ERROR]', ...args);
     } else {
       // In production, you might want to send to error tracking service
       // For now, we'll still log but in a more controlled way
@@ -25,13 +25,14 @@ export const logger = {
   
   warn: (...args: unknown[]) => {
     if (isDevelopment) {
-      console.warn('[MEDORA AI WARN]', ...args);
+      console.warn('[AiDoktor WARN]', ...args);
     }
   },
   
   info: (...args: unknown[]) => {
     if (isDevelopment) {
-      console.info('[MEDORA AI INFO]', ...args);
+      console.info('[AiDoktor INFO]', ...args);
     }
   }
 };
+-NoNewline

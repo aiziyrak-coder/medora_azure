@@ -116,3 +116,4 @@ const RealTimePatientMonitor: React.FC<RealTimePatientMonitorProps> = ({
 };
 
 export default RealTimePatientMonitor;
+-NoNewline

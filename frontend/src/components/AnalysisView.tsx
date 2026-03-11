@@ -242,3 +242,4 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
 };
 
 export default AnalysisView;
+-NoNewline

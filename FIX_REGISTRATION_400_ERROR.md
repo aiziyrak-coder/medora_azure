@@ -21,19 +21,19 @@ ssh root@167.71.53.238
 Then run this command:
 
 ```bash
-cd /root/medoraai && git pull origin main && cd backend && cat > .env << 'EOF'
-SECRET_KEY=django-insecure-medoraai-dev-key-change-in-production
+cd /root/AiDoktorai && git pull origin main && cd backend && cat > .env << 'EOF'
+SECRET_KEY=django-insecure-AiDoktorai-dev-key-change-in-production
 DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1,medoraapi.cdcgroup.uz,medora.cdcgroup.uz,medora.ziyrak.org,medoraapi.ziyrak.org,20.82.115.71,167.71.53.238
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://medora.cdcgroup.uz,https://medoraapi.cdcgroup.uz
+ALLOWED_HOSTS=localhost,127.0.0.1,AiDoktorapi.fargana.uz,AiDoktor.fargana.uz,AiDoktor.ziyrak.org,AiDoktorapi.ziyrak.org,20.82.115.71,167.71.53.238
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://AiDoktor.fargana.uz,https://AiDoktorapi.fargana.uz
 DB_ENGINE=django.db.backends.sqlite3
-DB_NAME=/root/medoraai/backend/db.sqlite3
+DB_NAME=/root/AiDoktorai/backend/db.sqlite3
 GEMINI_API_KEY=AIzaSyCn4G1ZYDW_WZ9zCoP39EycFHkfrJAEGZA
 AI_MODEL_DEFAULT=gemini-3-pro-preview
 TELEGRAM_BOT_TOKEN=8345119740:AAETf0ZTo8zh2A3S5TKIkm7nWQnhO74yBAo
 TELEGRAM_PAYMENT_GROUP_ID=-5041567370
 EOF
-pkill -f gunicorn || true && sleep 2 && source venv/bin/activate && nohup gunicorn medoraai_backend.wsgi:application --bind 127.0.0.1:8001 --workers 3 >> logs/gunicorn.log 2>&1 & sleep 3 && sudo nginx -t && sudo systemctl reload nginx && python manage.py migrate && echo "✅ DEPLOYMENT COMPLETE!" && curl http://127.0.0.1:8001/health/
+pkill -f gunicorn || true && sleep 2 && source venv/bin/activate && nohup gunicorn AiDoktorai_backend.wsgi:application --bind 127.0.0.1:8001 --workers 3 >> logs/gunicorn.log 2>&1 & sleep 3 && sudo nginx -t && sudo systemctl reload nginx && python manage.py migrate && echo "✅ DEPLOYMENT COMPLETE!" && curl http://127.0.0.1:8001/health/
 ```
 
 ### **Option 2: Check Current Status**
@@ -42,17 +42,17 @@ pkill -f gunicorn || true && sleep 2 && source venv/bin/activate && nohup gunico
 ssh root@167.71.53.238
 
 # Check if .env exists
-cat /root/medoraai/backend/.env | grep ALLOWED_HOSTS
+cat /root/AiDoktorai/backend/.env | grep ALLOWED_HOSTS
 
 # Check git status
-cd /root/medoraai
+cd /root/AiDoktorai
 git log --oneline -3
 
 # Check Gunicorn is running
 ps aux | grep gunicorn
 
 # Check logs
-tail -n 50 /root/medoraai/backend/logs/django_errors.log
+tail -n 50 /root/AiDoktorai/backend/logs/django_errors.log
 ```
 
 ---
@@ -62,7 +62,7 @@ tail -n 50 /root/medoraai/backend/logs/django_errors.log
 ### **1. Test Registration Endpoint**
 
 ```bash
-curl -X POST https://medoraapi.cdcgroup.uz/api/auth/register/ \
+curl -X POST https://AiDoktorapi.fargana.uz/api/auth/register/ \
   -H "Content-Type: application/json" \
   -d '{
     "phone": "+998901234567",
@@ -88,7 +88,7 @@ Expected response:
 ### **2. Test Login**
 
 ```bash
-curl -X POST https://medoraapi.cdcgroup.uz/api/auth/login/ \
+curl -X POST https://AiDoktorapi.fargana.uz/api/auth/login/ \
   -H "Content-Type: application/json" \
   -d '{
     "phone": "+998901234567",
@@ -115,24 +115,24 @@ curl -X POST https://medoraapi.cdcgroup.uz/api/auth/login/ \
 ### **Step 1: Update Code**
 ```bash
 ssh root@167.71.53.238
-cd /root/medoraai
+cd /root/AiDoktorai
 git pull origin main
 ```
 
 ### **Step 2: Create.env**
 ```bash
-cd /root/medoraai/backend
+cd /root/AiDoktorai/backend
 nano .env
 ```
 
 Paste:
 ```env
-SECRET_KEY=django-insecure-medoraai-dev-key-change-in-production
+SECRET_KEY=django-insecure-AiDoktorai-dev-key-change-in-production
 DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1,medoraapi.cdcgroup.uz,medora.cdcgroup.uz,medora.ziyrak.org,medoraapi.ziyrak.org,20.82.115.71,167.71.53.238
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://medora.cdcgroup.uz,https://medoraapi.cdcgroup.uz
+ALLOWED_HOSTS=localhost,127.0.0.1,AiDoktorapi.fargana.uz,AiDoktor.fargana.uz,AiDoktor.ziyrak.org,AiDoktorapi.ziyrak.org,20.82.115.71,167.71.53.238
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://AiDoktor.fargana.uz,https://AiDoktorapi.fargana.uz
 DB_ENGINE=django.db.backends.sqlite3
-DB_NAME=/root/medoraai/backend/db.sqlite3
+DB_NAME=/root/AiDoktorai/backend/db.sqlite3
 GEMINI_API_KEY=AIzaSyCn4G1ZYDW_WZ9zCoP39EycFHkfrJAEGZA
 AI_MODEL_DEFAULT=gemini-3-pro-preview
 TELEGRAM_BOT_TOKEN=8345119740:AAETf0ZTo8zh2A3S5TKIkm7nWQnhO74yBAo
@@ -151,7 +151,7 @@ python manage.py migrate
 ```bash
 pkill -f gunicorn
 sleep 2
-nohup gunicorn medoraai_backend.wsgi:application --bind 127.0.0.1:8001 --workers 3 >> logs/gunicorn.log 2>&1 &
+nohup gunicorn AiDoktorai_backend.wsgi:application --bind 127.0.0.1:8001 --workers 3 >> logs/gunicorn.log 2>&1 &
 sleep 3
 sudo nginx -t && sudo systemctl reload nginx
 ```
@@ -167,8 +167,8 @@ curl http://127.0.0.1:8001/health/
 
 ### **Check Logs**
 ```bash
-tail -f /root/medoraai/backend/logs/django.log
-tail -f /root/medoraai/backend/logs/django_errors.log
+tail -f /root/AiDoktorai/backend/logs/django.log
+tail -f /root/AiDoktorai/backend/logs/django_errors.log
 ```
 
 ### **Common Issues**
@@ -202,3 +202,4 @@ tail -f /root/medoraai/backend/logs/django_errors.log
 **📅 Date:** March 11, 2026  
 **✅ Status:**Ready to deploy  
 **🔧 Action Required:** SSH and run deployment command
+-NoNewline

@@ -264,3 +264,4 @@ export const runCouncilDebate = async (
 ): Promise<ApiResponse<{ status: string; message: string }>> => {
   return apiPost('/ai/council-debate/', { patient_data: patientData });
 };
+-NoNewline

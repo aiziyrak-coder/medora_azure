@@ -534,3 +534,4 @@ const DataInputForm: React.FC<DataInputFormProps> = ({ isAnalyzing, onSubmit }) 
 };
 
 export default DataInputForm;
+-NoNewline

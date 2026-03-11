@@ -8,3 +8,4 @@ const HeartRateIcon: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 export default HeartRateIcon;
+-NoNewline

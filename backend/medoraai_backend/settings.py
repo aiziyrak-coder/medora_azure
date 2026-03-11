@@ -1,5 +1,5 @@
 """
-Django settings for medoraai_backend project.
+Django settings for AiDoktor (Farg'ona Jamoat Salomatligi Tibbiyot Instituti) project.
 """
 
 from pathlib import Path
@@ -7,10 +7,10 @@ from datetime import timedelta
 import os
 from decouple import config
 
-# DisallowedHost bartaraf: get_host() ni settings yuklanishida patch (medoraapi.cdcgroup.uz qabul qilish)
+# DisallowedHost bartaraf: get_host() ni settings yuklanishida patch (AiDoktorapi.fargana.uz qabul qilish)
 import django.http.request as _django_request_mod
 _django_request_mod.HttpRequest.get_host = lambda self: (
-    (self.META.get('HTTP_HOST') or 'medora.cdcgroup.uz').split('#')[0].strip()
+    (self.META.get('HTTP_HOST') or 'AiDoktor.fargana.uz').split('#')[0].strip()
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -30,7 +30,7 @@ if not DEBUG and SECRET_KEY == _default_secret:
     )
 
 # ALLOWED_HOSTS: serverni .env/systemd override qilishini bekor qilish — faqat *
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', 'aidoktor.fargana.uz', 'api.aidoktor.fargana.uz', 'localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
@@ -63,25 +63,25 @@ INSTALLED_APPS += [
 ]
 
 MIDDLEWARE = [
-    'medoraai_backend.middleware.EarlyHealthMiddleware',  # very first: /health/ -> 200, no Host check
-    'medoraai_backend.middleware.NormalizeHostMiddleware',
+    'AiDoktorai_backend.middleware.EarlyHealthMiddleware',  # very first: /health/ -> 200, no Host check
+    'AiDoktorai_backend.middleware.NormalizeHostMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'medoraai_backend.middleware.CORSFallbackMiddleware',  # CORS for /health/, /api/ when corsheaders missed
-    'medoraai_backend.middleware.SecurityHeadersMiddleware',  # Custom security headers
-    'medoraai_backend.middleware.RateLimitMiddleware',  # Rate limiting
+    'AiDoktorai_backend.middleware.CORSFallbackMiddleware',  # CORS for /health/, /api/ when corsheaders missed
+    'AiDoktorai_backend.middleware.SecurityHeadersMiddleware',  # Custom security headers
+    'AiDoktorai_backend.middleware.RateLimitMiddleware',  # Rate limiting
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'medoraai_backend.middleware.RequestLoggingMiddleware',  # Request logging
+    'AiDoktorai_backend.middleware.RequestLoggingMiddleware',  # Request logging
     'ai_services.anatomy_guard.AnatomyGuardMiddleware',     # Anatomy & Logic Guard
 ]
 
-ROOT_URLCONF = 'medoraai_backend.urls'
+ROOT_URLCONF = 'AiDoktorai_backend.urls'
 
 TEMPLATES = [
     {
@@ -99,7 +99,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'medoraai_backend.wsgi.application'
+WSGI_APPLICATION = 'AiDoktorai_backend.wsgi.application'
 
 # Database
 DATABASES = {
@@ -171,7 +171,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'medoraai_backend.pagination.StandardResultsSetPagination',
+    'DEFAULT_PAGINATION_CLASS': 'AiDoktorai_backend.pagination.StandardResultsSetPagination',
     'PAGE_SIZE': 20,
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -182,7 +182,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
-    'EXCEPTION_HANDLER': 'medoraai_backend.exceptions.custom_exception_handler',
+    'EXCEPTION_HANDLER': 'AiDoktorai_backend.exceptions.custom_exception_handler',
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle'
@@ -215,9 +215,9 @@ CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
     default=(
         'http://localhost:3000,http://127.0.0.1:3000,'
-        'https://medora.cdcgroup.uz,http://medora.cdcgroup.uz,'
-        'https://medoraai.cdcgroup.uz,https://medoraapi.cdcgroup.uz,'
-        'https://medora.ziyrak.org,http://medora.ziyrak.org,http://20.82.115.71'
+        'https://AiDoktor.fargana.uz,http://AiDoktor.fargana.uz,'
+        'https://AiDoktorai.fargana.uz,https://AiDoktorapi.fargana.uz,'
+        'https://AiDoktor.ziyrak.org,http://AiDoktor.ziyrak.org,http://20.82.115.71'
     ),
     cast=lambda v: [s.strip() for s in v.split(',') if s.strip()]
 )
@@ -226,8 +226,8 @@ CORS_ALLOW_CREDENTIALS = True
 
 # CSRF (Django 4+): ishonchli originlar
 CSRF_TRUSTED_ORIGINS = [
-    'https://medora.cdcgroup.uz', 'https://medoraai.cdcgroup.uz', 'https://medoraapi.cdcgroup.uz',
-    'http://medora.cdcgroup.uz', 'http://localhost:3000', 'http://127.0.0.1:3000',
+    'https://AiDoktor.fargana.uz', 'https://AiDoktorai.fargana.uz', 'https://AiDoktorapi.fargana.uz',
+    'http://AiDoktor.fargana.uz', 'http://localhost:3000', 'http://127.0.0.1:3000',
 ]
 
 CORS_ALLOW_METHODS = [
@@ -272,17 +272,17 @@ AZURE_OPENAI_ENDPOINT   = config('AZURE_OPENAI_ENDPOINT',   default='')
 AZURE_OPENAI_API_KEY    = config('AZURE_OPENAI_API_KEY',    default='')
 AZURE_OPENAI_API_VERSION = config('AZURE_OPENAI_API_VERSION', default='2024-12-01-preview')
 
-# Azure Speech Services (Medora-Jarvis)
+# Azure Speech Services (AiDoktor-Jarvis)
 AZURE_SPEECH_KEY      = config('AZURE_SPEECH_KEY',      default='')
 AZURE_SPEECH_REGION   = config('AZURE_SPEECH_REGION',   default='swedencentral')
 AZURE_SPEECH_ENDPOINT = config('AZURE_SPEECH_ENDPOINT', default='https://swedencentral.api.cognitive.microsoft.com/')
 
 # Azure deployment names
-AZURE_DEPLOY_GPT4O = config('AZURE_DEPLOY_GPT4O', default='medora-gpt4o')
-AZURE_DEPLOY_DEEPSEEK = config('AZURE_DEPLOY_DEEPSEEK', default='medora-deepseek')
-AZURE_DEPLOY_LLAMA = config('AZURE_DEPLOY_LLAMA', default='medora-llama')
-AZURE_DEPLOY_MISTRAL = config('AZURE_DEPLOY_MISTRAL', default='medora-mistral')
-AZURE_DEPLOY_MINI = config('AZURE_DEPLOY_MINI', default='medora-mini')
+AZURE_DEPLOY_GPT4O = config('AZURE_DEPLOY_GPT4O', default='AiDoktor-gpt4o')
+AZURE_DEPLOY_DEEPSEEK = config('AZURE_DEPLOY_DEEPSEEK', default='AiDoktor-deepseek')
+AZURE_DEPLOY_LLAMA = config('AZURE_DEPLOY_LLAMA', default='AiDoktor-llama')
+AZURE_DEPLOY_MISTRAL = config('AZURE_DEPLOY_MISTRAL', default='AiDoktor-mistral')
+AZURE_DEPLOY_MINI = config('AZURE_DEPLOY_MINI', default='AiDoktor-mini')
 
 # AI: faqat Gemini (kalit .env dan, bo'sh joy/newline olib tashlanadi)
 GEMINI_API_KEY   = (config('GEMINI_API_KEY', default='') or '').strip()
@@ -330,7 +330,7 @@ if REDIS_URL:
             'OPTIONS': {
                 'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             },
-            'KEY_PREFIX': 'medoraai',
+            'KEY_PREFIX': 'AiDoktorai',
             'TIMEOUT': 300,  # 5 minutes default
         }
     }
@@ -339,7 +339,7 @@ else:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'medoraai-cache',
+            'LOCATION': 'AiDoktorai-cache',
         }
     }
 
@@ -358,7 +358,7 @@ _USE_FILE_LOGS = _logs_writable()
 _ROOT_HANDLERS = ['console', 'file'] if _USE_FILE_LOGS else ['console']
 _DJANGO_HANDLERS = ['console', 'file'] if _USE_FILE_LOGS else ['console']
 _REQUEST_HANDLERS = ['error_file'] if _USE_FILE_LOGS else ['console']
-_MEDORAI_HANDLERS = ['console', 'file', 'error_file'] if _USE_FILE_LOGS else ['console']
+_AiDoktorI_HANDLERS = ['console', 'file', 'error_file'] if _USE_FILE_LOGS else ['console']
 
 LOGGING = {
     'version': 1,
@@ -400,8 +400,8 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': False,
         },
-        'medoraai_backend': {
-            'handlers': _MEDORAI_HANDLERS,
+        'AiDoktorai_backend': {
+            'handlers': _AiDoktorI_HANDLERS,
             'level': 'INFO',
             'propagate': False,
         },
@@ -446,3 +446,4 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
 
 # get_host() patch settings boshida qo'yilgan (DisallowedHost bartaraf)
+-NoNewline

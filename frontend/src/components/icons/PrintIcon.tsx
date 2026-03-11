@@ -7,3 +7,4 @@ const PrintIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) 
 );
 
 export default PrintIcon;
+-NoNewline

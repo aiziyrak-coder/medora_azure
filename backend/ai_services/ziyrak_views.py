@@ -1,5 +1,5 @@
 """
-Medora-Ziyrak API Views
+AiDoktor-Ziyrak API Views
 ========================
 Endpoint'lar: /api/ziyrak/*
 
@@ -79,7 +79,7 @@ def session_create(request):
                 "language":   session.language,
                 "mode":       session.mode,
                 "created_at": session.created_at,
-                "greeting":   "Men Medora platformasining raqamli yordamchisi - Ziyrakman.",
+                "greeting":   "Men AiDoktor platformasining raqamli yordamchisi - Ziyrakman.",
             },
         })
     except Exception as exc:
@@ -404,3 +404,4 @@ def surgery_log_get(request, session_id: str):
     from .ziyrak_surgery import get_surgery_log
     log = get_surgery_log(session_id)
     return Response({"success": True, "data": log})
+-NoNewline

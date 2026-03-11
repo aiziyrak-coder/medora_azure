@@ -91,7 +91,7 @@ const TvDisplay: React.FC<{ doctorId: string }> = ({ doctorId }) => {
                     <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center font-black text-2xl shadow-lg shadow-blue-600/50">M</div>
                         <div>
-                            <h1 className="text-2xl font-black tracking-tighter leading-none">MEDORA AI</h1>
+                            <h1 className="text-2xl font-black tracking-tighter leading-none">AiDoktor</h1>
                             <p className="text-xs text-blue-400 font-bold uppercase tracking-widest mt-1">Elektron Navbat</p>
                         </div>
                     </div>
@@ -204,7 +204,7 @@ const TvDisplay: React.FC<{ doctorId: string }> = ({ doctorId }) => {
                         <div className="text-center text-slate-500">Video yuklanmadi</div>
                     )
                 ) : (
-                    // Default Medora Admin Ad (Looping Image/Text)
+                    // Default AiDoktor Admin Ad (Looping Image/Text)
                     <div className="relative w-full h-full">
                         <img 
                             src="https://images.unsplash.com/photo-1516549655169-df83a0774514?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80" 
@@ -251,3 +251,4 @@ const TvDisplay: React.FC<{ doctorId: string }> = ({ doctorId }) => {
 };
 
 export default TvDisplay;
+-NoNewline

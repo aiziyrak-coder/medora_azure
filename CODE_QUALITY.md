@@ -125,3 +125,4 @@
 5. **Internationalization**: Barcha matn i18n orqali
 6. **Accessibility**: WCAG 2.1 AA standartlari
 7. **Mobile**: Progressive Web App (PWA) to'liq qo'llab-quvvatlash
+-NoNewline

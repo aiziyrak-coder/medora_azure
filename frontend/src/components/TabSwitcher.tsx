@@ -53,4 +53,4 @@ const TabSwitcher: React.FC<TabSwitcherProps> = ({ activeTab, onTabChange }) => 
     );
 };
 
-export default TabSwitcher;
+export default TabSwitcher;-NoNewline

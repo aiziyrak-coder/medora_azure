@@ -159,4 +159,4 @@ const ResearchView: React.FC = () => {
     );
 };
 
-export default ResearchView;
+export default ResearchView;-NoNewline

@@ -7,3 +7,4 @@ const QuestionMarkCircleIcon: React.FC<{ className?: string }> = ({ className = 
 );
 
 export default QuestionMarkCircleIcon;
+-NoNewline

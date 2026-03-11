@@ -1905,3 +1905,4 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
 };
 
 export default DoctorDashboard;
+-NoNewline

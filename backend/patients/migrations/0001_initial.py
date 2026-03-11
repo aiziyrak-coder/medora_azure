@@ -83,3 +83,4 @@ class Migration(migrations.Migration):
             index=models.Index(fields=['phone'], name='patients_pa_phone_fc49bb_idx'),
         ),
     ]
+-NoNewline

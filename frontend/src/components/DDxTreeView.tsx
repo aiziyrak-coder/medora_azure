@@ -56,3 +56,4 @@ const DDxTreeView: React.FC<DDxTreeViewProps> = ({ diagnoses, onStartDebate, isD
 }
 
 export default DDxTreeView;
+-NoNewline

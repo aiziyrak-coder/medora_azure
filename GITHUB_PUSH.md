@@ -2,17 +2,17 @@
 
 ## QADAM 1: GitHub Repository Yaratish
 
-1. https://github.com/aiziyrak-coder/medoraai ga kiring
+1. https://github.com/aiziyrak-coder/AiDoktorai ga kiring
 2. Agar repository bo'sh bo'lsa, "Initialize with README" ni **o'chiring** (agar mavjud bo'lsa)
-3. Repository URL ni eslab qoling: `https://github.com/aiziyrak-coder/medoraai.git`
+3. Repository URL ni eslab qoling: `https://github.com/aiziyrak-coder/AiDoktorai.git`
 
 ## QADAM 2: Lokalda Git Setup
 
 ```powershell
-cd E:\medoraai
+cd E:\AiDoktorai
 
 # Git remote qo'shish
-git remote add origin https://github.com/aiziyrak-coder/medoraai.git
+git remote add origin https://github.com/aiziyrak-coder/AiDoktorai.git
 
 # Branch nomini main qilish
 git branch -M main
@@ -42,7 +42,7 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 # Settings > SSH and GPG keys > New SSH key
 
 # Remote'ni SSH URL'ga o'zgartirish
-git remote set-url origin git@github.com:aiziyrak-coder/medoraai.git
+git remote set-url origin git@github.com:aiziyrak-coder/AiDoktorai.git
 ```
 
 ## QADAM 4: Push Qilish
@@ -59,3 +59,4 @@ git add .
 git commit -m "Your commit message"
 git push
 ```
+-NoNewline

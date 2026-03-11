@@ -28,19 +28,19 @@ Ziyrak2025Ai
 #### **Step 3: Copy This ENTIRE Command and Paste:**
 
 ```bash
-cd /root/medoraai && git pull origin main && cd backend && cat > .env << 'EOF'
-SECRET_KEY=django-insecure-medoraai-dev-key-change-in-production
+cd /root/AiDoktorai && git pull origin main && cd backend && cat > .env << 'EOF'
+SECRET_KEY=django-insecure-AiDoktorai-dev-key-change-in-production
 DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1,medoraapi.cdcgroup.uz,medora.cdcgroup.uz,medora.ziyrak.org,medoraapi.ziyrak.org,20.82.115.71,167.71.53.238
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://medora.cdcgroup.uz,https://medoraapi.cdcgroup.uz
+ALLOWED_HOSTS=localhost,127.0.0.1,AiDoktorapi.fargana.uz,AiDoktor.fargana.uz,AiDoktor.ziyrak.org,AiDoktorapi.ziyrak.org,20.82.115.71,167.71.53.238
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://AiDoktor.fargana.uz,https://AiDoktorapi.fargana.uz
 DB_ENGINE=django.db.backends.sqlite3
-DB_NAME=/root/medoraai/backend/db.sqlite3
+DB_NAME=/root/AiDoktorai/backend/db.sqlite3
 GEMINI_API_KEY=AIzaSyCn4G1ZYDW_WZ9zCoP39EycFHkfrJAEGZA
 AI_MODEL_DEFAULT=gemini-3-pro-preview
 TELEGRAM_BOT_TOKEN=8345119740:AAETf0ZTo8zh2A3S5TKIkm7nWQnhO74yBAo
 TELEGRAM_PAYMENT_GROUP_ID=-5041567370
 EOF
-source venv/bin/activate && pip install -r requirements.txt --quiet && python manage.py migrate --noinput && pkill -f gunicorn || true && sleep 2 && nohup gunicorn medoraai_backend.wsgi:application --bind 127.0.0.1:8001 --workers 3 >> logs/gunicorn.log 2>&1 & sleep 3 && sudo nginx -t && sudo systemctl reload nginx && sleep 3 && curl http://127.0.0.1:8001/health/ && echo "" && echo "✅ DEPLOYMENT COMPLETE!" && echo "Test: https://medoraapi.cdcgroup.uz/"
+source venv/bin/activate && pip install -r requirements.txt --quiet && python manage.py migrate --noinput && pkill -f gunicorn || true && sleep 2 && nohup gunicorn AiDoktorai_backend.wsgi:application --bind 127.0.0.1:8001 --workers 3 >> logs/gunicorn.log 2>&1 & sleep 3 && sudo nginx -t && sudo systemctl reload nginx && sleep 3 && curl http://127.0.0.1:8001/health/ && echo "" && echo "✅ DEPLOYMENT COMPLETE!" && echo "Test: https://AiDoktorapi.fargana.uz/"
 ```
 
 **Press Enter** and wait 2-3 minutes.
@@ -50,7 +50,7 @@ source venv/bin/activate && pip install -r requirements.txt --quiet && python ma
 ## 🧪 AFTER DEPLOYMENT - TEST REGISTRATION:
 
 ### **Option A: Test via Browser**
-1. Go to: https://medora.cdcgroup.uz/
+1. Go to: https://AiDoktor.fargana.uz/
 2. Click "Register"
 3. Fill in:
    - Phone: `+998901234567`
@@ -61,7 +61,7 @@ source venv/bin/activate && pip install -r requirements.txt --quiet && python ma
 
 ### **Option B: Test via Command**
 ```bash
-curl -X POST https://medoraapi.cdcgroup.uz/api/auth/register/ \
+curl -X POST https://AiDoktorapi.fargana.uz/api/auth/register/ \
   -H "Content-Type: application/json" \
   -d '{
     "phone": "+998901234567",
@@ -109,10 +109,10 @@ ssh root@167.71.53.238
 ps aux | grep gunicorn
 
 # Check logs
-tail -f /root/medoraai/backend/logs/django.log
+tail -f /root/AiDoktorai/backend/logs/django.log
 
 # Quick restart
-cd /root/medoraai/deploy
+cd /root/AiDoktorai/deploy
 ./quick-restart.sh
 ```
 
@@ -147,14 +147,15 @@ Just:
 - Host: 167.71.53.238
 - User: root
 - Password: Ziyrak2025Ai
-- Project: /root/medoraai
+- Project: /root/AiDoktorai
 
 **Test URLs After Deploy:**
-- https://medoraapi.cdcgroup.uz/
-- https://medoraapi.cdcgroup.uz/admin/
-- https://medora.cdcgroup.uz/
+- https://AiDoktorapi.fargana.uz/
+- https://AiDoktorapi.fargana.uz/admin/
+- https://AiDoktor.fargana.uz/
 
 ---
 
 **Last Updated:** March 11, 2026  
 **Status:** ✅ Ready to Deploy
+-NoNewline

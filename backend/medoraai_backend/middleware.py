@@ -11,7 +11,7 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 # Health uchun minimal javob (Host/ALLOWED_HOSTS tekshirilmaydi)
-HEALTH_BODY = b'{"status":"healthy","service":"medoraai-backend"}'
+HEALTH_BODY = b'{"status":"healthy","service":"AiDoktorai-backend"}'
 
 
 class EarlyHealthMiddleware(MiddlewareMixin):
@@ -21,7 +21,7 @@ class EarlyHealthMiddleware(MiddlewareMixin):
     """
     def process_request(self, request):
         _meta = request.META
-        _fallback = 'medora.cdcgroup.uz'
+        _fallback = 'AiDoktor.fargana.uz'
         # 1) get_host() ni instance da override (CommonMiddleware DisallowedHost tashlamaydi)
         def _safe_get_host():
             h = (_meta.get('HTTP_HOST') or _fallback).strip().split('#')[0].strip()
@@ -29,9 +29,9 @@ class EarlyHealthMiddleware(MiddlewareMixin):
         request.get_host = _safe_get_host
         # 2) ALLOWED_HOSTS majburan *
         settings.ALLOWED_HOSTS = ['*']
-        # 3) cdcgroup.uz hostni normalize qilish
+        # 3) fargana.uz hostni normalize qilish
         host_raw = (_meta.get('HTTP_HOST') or '').strip().split(':')[0].lower()
-        if host_raw and 'cdcgroup.uz' in host_raw:
+        if host_raw and 'fargana.uz' in host_raw:
             _meta['HTTP_HOST'] = _fallback
         # 4) /health/ uchun darhol 200
         if request.method in ('GET', 'OPTIONS') and request.path.rstrip('/') == '/health':
@@ -45,13 +45,13 @@ class EarlyHealthMiddleware(MiddlewareMixin):
 
 class NormalizeHostMiddleware(MiddlewareMixin):
     """
-    Run first: normalize Host for cdcgroup.uz so ALLOWED_HOSTS check never returns 400.
-    Barcha so'rovlar (login, health, api) uchun Host ni medora.cdcgroup.uz qiladi.
+    Run first: normalize Host for fargana.uz so ALLOWED_HOSTS check never returns 400.
+    Barcha so'rovlar (login, health, api) uchun Host ni AiDoktor.fargana.uz qiladi.
     """
     def process_request(self, request):
         host = (request.META.get('HTTP_HOST') or '').strip().split(':')[0].lower()
-        if host and 'cdcgroup.uz' in host:
-            request.META['HTTP_HOST'] = 'medora.cdcgroup.uz'
+        if host and 'fargana.uz' in host:
+            request.META['HTTP_HOST'] = 'AiDoktor.fargana.uz'
         return None
 
 
@@ -72,7 +72,7 @@ class CORSFallbackMiddleware(MiddlewareMixin):
                 try:
                     origin = request.build_absolute_uri('/').rstrip('/')
                 except Exception:
-                    origin = 'https://medora.cdcgroup.uz'
+                    origin = 'https://AiDoktor.fargana.uz'
             if origin is None:
                 return response
             if getattr(response, 'headers', None):
@@ -167,3 +167,4 @@ class RequestLoggingMiddleware(MiddlewareMixin):
         except Exception:
             pass
         return response
+-NoNewline

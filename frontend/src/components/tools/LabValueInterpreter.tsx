@@ -75,4 +75,4 @@ const LabValueInterpreter: React.FC = () => {
     );
 };
 
-export default LabValueInterpreter;
+export default LabValueInterpreter;-NoNewline

@@ -307,3 +307,4 @@ const FinalReportCard: React.FC<{ report: FinalReport, patientData: Partial<Pati
 };
 
 export default FinalReportCard;
+-NoNewline

@@ -58,7 +58,7 @@ const MobileBlocker: React.FC<{ onLogout: () => void }> = ({ onLogout }) => (
         </div>
         <h2 className="text-2xl font-bold text-white mb-4">Qurilma mos kelmadi</h2>
         <p className="text-slate-300 text-lg leading-relaxed max-w-md">
-            Hurmatli foydalanuvchi, <strong>MEDORA AI</strong> (Klinika) tizimining to'liq funksionalidan foydalanish uchun, iltimos, 
+            Hurmatli foydalanuvchi, <strong>AiDoktor</strong> (Klinika) tizimining to'liq funksionalidan foydalanish uchun, iltimos, 
             <span className="text-blue-400 font-bold"> Kompyuter</span> yoki <span className="text-blue-400 font-bold">Planshet</span> orqali kiring.
         </p>
         <div className="mt-8 p-4 bg-slate-800/50 rounded-xl border border-white/10">
@@ -749,7 +749,7 @@ const AppContent: React.FC = () => {
             {isApiConfigured() && !apiHealthy && (
                 <div className="flex-none flex items-center justify-center gap-3 py-2 px-4 bg-amber-500/90 text-white text-sm font-medium z-40">
                     {healthStatus === 400 ? (
-                        <span>Domen boshqa serverga yo&apos;naltirilgan. DNS tekshiring: <code className="bg-black/20 px-1 rounded">nslookup medora.cdcgroup.uz</code> → <code className="bg-black/20 px-1 rounded">167.71.53.238</code> bo&apos;lishi kerak.</span>
+                        <span>Domen boshqa serverga yo&apos;naltirilgan. DNS tekshiring: <code className="bg-black/20 px-1 rounded">nslookup AiDoktor.fargana.uz</code> → <code className="bg-black/20 px-1 rounded">167.71.53.238</code> bo&apos;lishi kerak.</span>
                     ) : (
                         <span>Server bilan bog&apos;lanish yo&apos;q. Ma&apos;lumotlar mahalliy saqlanadi.</span>
                     )}
@@ -792,12 +792,12 @@ const AppContent: React.FC = () => {
                     <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 bg-white/40 px-4 py-1.5 rounded-full border border-white/40 shadow-sm">
                         <div className="flex items-center gap-1.5 group">
                             <span className="opacity-70">{t('footer_creator')}:</span>
-                            <a href="https://cdcgroup.uz" target="_blank" rel="noopener noreferrer" className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent font-bold hover:scale-105 transition-transform duration-200 cursor-pointer">CDCGroup</a>
+                            <a href="https://fargana.uz" target="_blank" rel="noopener noreferrer" className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent font-bold hover:scale-105 transition-transform duration-200 cursor-pointer">CDCGroup</a>
                         </div>
                         <span className="hidden sm:block w-px h-3 bg-slate-300"></span>
                         <div className="flex items-center gap-1.5 group">
                             <span className="opacity-70">{t('footer_support')}:</span>
-                            <a href="https://cdcgroup.uz" target="_blank" rel="noopener noreferrer" className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent font-bold hover:scale-105 transition-transform duration-200 cursor-pointer">CraDev Company</a>
+                            <a href="https://fargana.uz" target="_blank" rel="noopener noreferrer" className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent font-bold hover:scale-105 transition-transform duration-200 cursor-pointer">CraDev Company</a>
                         </div>
                     </div>
                 </div>
@@ -813,3 +813,4 @@ const App: React.FC = () => (
 );
 
 export default App;
+-NoNewline

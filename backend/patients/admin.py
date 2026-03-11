@@ -19,3 +19,4 @@ class PatientAttachmentAdmin(admin.ModelAdmin):
     list_display = ['name', 'patient', 'mime_type', 'uploaded_at']
     list_filter = ['mime_type', 'uploaded_at']
     search_fields = ['name', 'patient__first_name', 'patient__last_name']
+-NoNewline

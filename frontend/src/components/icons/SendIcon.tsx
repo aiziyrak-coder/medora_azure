@@ -6,4 +6,4 @@ const SendIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) =
     </svg>
 );
 
-export default SendIcon;
+export default SendIcon;-NoNewline

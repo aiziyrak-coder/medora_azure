@@ -23,3 +23,4 @@ class StandardResultsSetPagination(PageNumberPagination):
             },
             'data': data
         })
+-NoNewline

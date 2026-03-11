@@ -75,3 +75,4 @@ class ErrorBoundaryClass extends Component<Props, State> {
 
 export { ErrorBoundaryClass };
 export default ErrorBoundaryClass;
+-NoNewline

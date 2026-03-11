@@ -87,19 +87,19 @@ Har bir K12 qurilmasi uchun:
 ### **1. Backend yangilash:**
 ```bash
 ssh root@167.71.53.238
-cd /root/medoraai
+cd /root/AiDoktorai
 git pull origin main
 cd backend
 source venv/bin/activate
 python manage.py migrate
 pkill -f gunicorn
-nohup gunicorn medoraai_backend.wsgi:application --bind 127.0.0.1:8001 --workers 3 &
+nohup gunicorn AiDoktorai_backend.wsgi:application --bind 127.0.0.1:8001 --workers 3 &
 sudo systemctl reload nginx
 ```
 
 ### **2. Test:**
 ```bash
-curl -X POST https://medoraapi.cdcgroup.uz/api/v1/devices/bulk-register/ \
+curl -X POST https://AiDoktorapi.fargana.uz/api/v1/devices/bulk-register/ \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -118,3 +118,4 @@ curl -X POST https://medoraapi.cdcgroup.uz/api/v1/devices/bulk-register/ \
 ---
 
 **To'liq frontend kodu hali yaratilmadi. Serverga deploy qilishdan oldin frontend komponentini qo'shish kerak.**
+-NoNewline

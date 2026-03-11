@@ -277,3 +277,4 @@ const ResearchReportCard: React.FC<{ report: ResearchReport }> = ({ report }) =>
 };
 
 export default ResearchReportCard;
+-NoNewline

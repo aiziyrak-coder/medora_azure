@@ -51,3 +51,4 @@ export function getUzbekistanContextForAI(language: 'uz-L' | 'uz-C' | 'ru' | 'en
 3) Dori-darmonlar:${sep}${drugs}
 4) Atamalar va standartlar:${sep}${standards}`;
 }
+-NoNewline

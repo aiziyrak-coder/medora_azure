@@ -1,11 +1,12 @@
 """
-ASGI config for medoraai_backend project.
+ASGI config for AiDoktorai_backend project.
 """
 
 import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'medoraai_backend.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'AiDoktorai_backend.settings')
 
 application = get_asgi_application()
+-NoNewline

@@ -1,4 +1,4 @@
-# Medora AI – AI integratsiya g‘oyalari
+# AiDoktor – AI integratsiya g‘oyalari
 
 Bu hujjatda loyihaga **qanday va qayerda** AI (asosan Gemini) ni zo‘r qilib integratsiya qilish mumkinligi bo‘yicha aniq takliflar keltirilgan.
 
@@ -172,3 +172,4 @@ Frontend: `monitoringApiService.ts` (yangi `getMonitoringRiskScore`), `Monitorin
 | 7 | AI taklif qiladigan chegaralar | O‘rta | O‘rta | Backend + threshold sozlamalarida “AI taklif” |
 
 Agar birinchi marta qo‘shmoqchi bo‘lsangiz, **1 (risk score)** va **2 (alarm tushuntirishi)** dan boshlash eng ma’qul – infratuzilma bir xil, foydalanuvchi darhol ko‘radi va “AI zo‘r qilib ishlatilmoqda” hissi beradi.
+-NoNewline

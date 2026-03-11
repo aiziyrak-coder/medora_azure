@@ -7,3 +7,4 @@ const ScaleIcon: React.FC<{ className?: string }> = ({ className = "h-7 w-7 text
 );
 
 export default ScaleIcon;
+-NoNewline

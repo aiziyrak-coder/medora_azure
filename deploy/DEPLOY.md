@@ -1,11 +1,11 @@
-# MedoraAI — mukammal deploy (build, push, pull, migrate, restart)
+# AiDoktorAI — mukammal deploy (build, push, pull, migrate, restart)
 
 Bitta buyruq bilan: lokal o‘zgarishlarni commit/push qilish + serverda pull, migrate, frontend build, backend restart.
 
 ## Windows (PowerShell)
 
 ```powershell
-cd E:\medoraai
+cd E:\AiDoktorai
 .\deploy\full_deploy.ps1
 ```
 
@@ -16,14 +16,14 @@ Bu skript:
 Serverda `server-deploy.sh` bajariladi:
 - **Pull** — yangi kod
 - **Backend:** venv, `pip install`, `migrate --noinput`, remove_monitoring_demo_user, demo monitoring data, collectstatic, **restart backend**
-- **Frontend:** `npm install`, `npm run build` (VITE_API_BASE_URL=https://medora.cdcgroup.uz/api)
+- **Frontend:** `npm install`, `npm run build` (VITE_API_BASE_URL=https://AiDoktor.fargana.uz/api)
 - **Systemd:** backend service **restart**
 - **Nginx:** config nusxalash va **reload**
 
 ## Serverda qo‘lda (SSH)
 
 ```bash
-cd /root/medoraai
+cd /root/AiDoktorai
 git pull origin main
 sudo bash deploy/server-deploy.sh
 ```
@@ -31,11 +31,11 @@ sudo bash deploy/server-deploy.sh
 ## Lokal: faqat push, keyin serverda qo‘lda deploy
 
 ```powershell
-cd E:\medoraai
+cd E:\AiDoktorai
 git add -A
 git commit -m "Deploy"
 git push origin main
-# Serverga kirib: cd /root/medoraai && git pull && sudo bash deploy/server-deploy.sh
+# Serverga kirib: cd /root/AiDoktorai && git pull && sudo bash deploy/server-deploy.sh
 ```
 
 Yoki lokal mashinadan serverda deployni ishga tushirish (Python + paramiko):
@@ -46,4 +46,5 @@ python deploy/deploy_remote.py
 
 ---
 
-**Deploydan keyin:** brauzerda https://medora.cdcgroup.uz ni **Ctrl+Shift+R** bilan yangilang.
+**Deploydan keyin:** brauzerda https://AiDoktor.fargana.uz ni **Ctrl+Shift+R** bilan yangilang.
+-NoNewline

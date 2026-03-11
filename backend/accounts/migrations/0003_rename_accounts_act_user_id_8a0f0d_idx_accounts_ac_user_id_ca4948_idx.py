@@ -16,3 +16,4 @@ class Migration(migrations.Migration):
             old_name='accounts_act_user_id_8a0f0d_idx',
         ),
     ]
+-NoNewline

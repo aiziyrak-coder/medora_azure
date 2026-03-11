@@ -2,7 +2,7 @@
 // This service simulates a URL shortener backend using localStorage
 // In production, this would be a database mapping table.
 
-const TV_MAPPING_KEY = 'medora_tv_mapping';
+const TV_MAPPING_KEY = 'AiDoktor_tv_mapping';
 
 interface TvMapping {
     [shortCode: string]: string; // shortCode -> doctorId
@@ -64,3 +64,4 @@ export const getTvUrl = (code: string): string => {
     url.hash = ''; // Clear hash if present to ensure clean URL
     return url.toString();
 };
+-NoNewline

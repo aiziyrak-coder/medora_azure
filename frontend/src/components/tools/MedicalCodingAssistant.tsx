@@ -85,4 +85,4 @@ const MedicalCodingAssistant: React.FC = () => {
     );
 };
 
-export default MedicalCodingAssistant;
+export default MedicalCodingAssistant;-NoNewline

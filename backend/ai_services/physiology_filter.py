@@ -250,3 +250,4 @@ def check(patient_data: dict, use_ai: bool = True) -> FilterResult:
             return l2
 
     return PASS
+-NoNewline

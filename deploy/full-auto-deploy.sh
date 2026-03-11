@@ -1,5 +1,5 @@
 #!/bin/bash
-# MEDORA AI - Full Automated Deployment Script
+# AiDoktor - Full Automated Deployment Script
 # Pushes to GitHub, then SSH to server and deploy automatically
 
 set -e  # Exit on error
@@ -15,11 +15,11 @@ NC='\033[0m' # No Color
 SERVER_USER="root"
 SERVER_HOST="167.71.53.238"
 SERVER_PASSWORD="Ziyrak2025Ai"
-PROJECT_DIR="/root/medoraai"
+PROJECT_DIR="/root/AiDoktorai"
 BACKEND_DIR="${PROJECT_DIR}/backend"
 
 echo -e "${BLUE}================================================${NC}"
-echo -e "${BLUE}🚀 MEDORA AI - Full Automated Deployment${NC}"
+echo -e "${BLUE}🚀 AiDoktor - Full Automated Deployment${NC}"
 echo -e "${BLUE}================================================${NC}"
 echo ""
 
@@ -42,24 +42,24 @@ echo ""
 echo "========================================"
 echo "📦 Pulling latest changes from GitHub..."
 echo "========================================"
-cd /root/medoraai
+cd /root/AiDoktorai
 git pull origin main
 
 echo ""
 echo "========================================"
 echo "🔧 Creating .env file..."
 echo "========================================"
-cd /root/medoraai/backend
+cd /root/AiDoktorai/backend
 
 cat > .env << 'EOF'
-SECRET_KEY=django-insecure-medoraai-dev-key-change-in-production
+SECRET_KEY=django-insecure-AiDoktorai-dev-key-change-in-production
 DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1,medoraapi.cdcgroup.uz,medora.cdcgroup.uz,medora.ziyrak.org,medoraapi.ziyrak.org,20.82.115.71,167.71.53.238
+ALLOWED_HOSTS=localhost,127.0.0.1,AiDoktorapi.fargana.uz,AiDoktor.fargana.uz,AiDoktor.ziyrak.org,AiDoktorapi.ziyrak.org,20.82.115.71,167.71.53.238
 
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://medora.cdcgroup.uz,https://medoraapi.cdcgroup.uz
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://AiDoktor.fargana.uz,https://AiDoktorapi.fargana.uz
 
 DB_ENGINE=django.db.backends.sqlite3
-DB_NAME=/root/medoraai/backend/db.sqlite3
+DB_NAME=/root/AiDoktorai/backend/db.sqlite3
 
 GEMINI_API_KEY=AIzaSyCn4G1ZYDW_WZ9zCoP39EycFHkfrJAEGZA
 AI_MODEL_DEFAULT=gemini-3-pro-preview
@@ -92,9 +92,9 @@ echo "========================================"
 pkill -f gunicorn || true
 sleep 2
 
-cd /root/medoraai/backend
+cd /root/AiDoktorai/backend
 source venv/bin/activate
-nohup gunicorn medoraai_backend.wsgi:application \
+nohup gunicorn AiDoktorai_backend.wsgi:application \
     --bind 127.0.0.1:8001 \
     --workers 3 \
     --threads 2 \
@@ -137,12 +137,12 @@ echo "🎉 Deployment Completed Successfully!"
 echo "========================================"
 echo ""
 echo "📝 Test URLs:"
-echo "   - https://medoraapi.cdcgroup.uz/"
-echo "   - https://medoraapi.cdcgroup.uz/admin/"
-echo "   - https://medora.cdcgroup.uz/"
+echo "   - https://AiDoktorapi.fargana.uz/"
+echo "   - https://AiDoktorapi.fargana.uz/admin/"
+echo "   - https://AiDoktor.fargana.uz/"
 echo ""
 echo "📊 Monitor logs:"
-echo "  tail -f /root/medoraai/backend/logs/django.log"
+echo "  tail -f /root/AiDoktorai/backend/logs/django.log"
 echo "  tail -f /var/log/nginx/error.log"
 echo ""
 
@@ -188,3 +188,4 @@ fi
 
 echo ""
 echo -e "${GREEN}✅ Deployment process completed!${NC}"
+-NoNewline

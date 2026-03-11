@@ -165,3 +165,4 @@ def queue_item_detail(request, item_id):
         item.complaints = str(request.data['complaints']).strip()
     item.save()
     return Response({'success': True, 'data': _item_to_frontend(item)})
+-NoNewline

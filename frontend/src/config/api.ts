@@ -19,3 +19,4 @@ export const API_CONFIG = {
 export const isApiConfigured = (): boolean => {
   return !!import.meta.env.VITE_API_BASE_URL;
 };
+-NoNewline

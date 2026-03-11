@@ -1,19 +1,19 @@
 """
-Medora-Ziyrak AI Engine
+AiDoktor-Ziyrak AI Engine
 ========================
 Ikki rejim:
   1. ConsultationMonitor  - passiv tinglash, auto-diagnosis
   2. ZiyrakChat           - interaktiv suhbat, kontekst xotirasi
 
 O'zini tanishtirish:
-  "Men Medora platformasining raqamli yordamchisi - Ziyrakman."
+  "Men AiDoktor platformasining raqamli yordamchisi - Ziyrakman."
 
 Context management:
   - Har bir sessiya uchun suhbat tarixi (rolling window: 20 xabar)
   - Bemor ma'lumotlari, transkript, doktor so'rovlari - birgalikda kontekst
   - AnatomyGuard - har bir ovozli so'rovda ham ishlaydi
 
-GPT-4o (medora-gpt4o) - barcha Ziyrak so'rovlari uchun
+GPT-4o (AiDoktor-gpt4o) - barcha Ziyrak so'rovlari uchun
 """
 
 from __future__ import annotations
@@ -40,13 +40,13 @@ logger = logging.getLogger(__name__)
 # ─────────────────────────────────────────────────────────────────────────────
 
 _ZIYRAK_INTRO = (
-    "Men Medora platformasining raqamli yordamchisi - Ziyrakman. "
+    "Men AiDoktor platformasining raqamli yordamchisi - Ziyrakman. "
     "Sizga tibbiy masalalarda yordam beraman."
 )
 
 _ZIYRAK_SYSTEM = """\
-Siz "Medora-Ziyrak" — Medora platformasining raqamli tibbiy yordamchisi siz.
-O'zingizni shu tarzda tanishtirasiz: "Men Medora platformasining raqamli yordamchisi - Ziyrakman."
+Siz "AiDoktor-Ziyrak" — AiDoktor platformasining raqamli tibbiy yordamchisi siz.
+O'zingizni shu tarzda tanishtirasiz: "Men AiDoktor platformasining raqamli yordamchisi - Ziyrakman."
 
 Siz shifokorning ishonchli yordamchisi siz, SHIFOKORGA yordam berasiz.
 
@@ -475,3 +475,4 @@ def get_session_info(session_id: str) -> dict:
         ),
         "has_patient_data":  bool(session.patient_data.get("complaints")),
     }
+-NoNewline

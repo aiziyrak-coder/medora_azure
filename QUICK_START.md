@@ -1,4 +1,4 @@
-# 🚀 Tezkor Boshlash - MEDORA AI
+# 🚀 Tezkor Boshlash - AiDoktor
 
 ## Backend va Frontendni Ishga Tushirish
 
@@ -100,3 +100,4 @@ Endi sizning dasturingiz to'liq ishlaydi:
 - ✅ API orqali mukammal bog'langan
 - ✅ JWT authentication
 - ✅ Real-time data sync
+-NoNewline

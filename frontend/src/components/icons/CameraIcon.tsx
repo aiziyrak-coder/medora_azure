@@ -9,3 +9,4 @@ const CameraIcon: React.FC<{ className?: string }> = ({ className = "w-6 h-6" })
 );
 
 export default CameraIcon;
+-NoNewline

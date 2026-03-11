@@ -1,5 +1,5 @@
 """
-URL configuration for medoraai_backend project.
+URL configuration for AiDoktorai_backend project.
 """
 from django.contrib import admin
 from django.urls import path, include
@@ -28,7 +28,7 @@ def root_view(request):
     if _HAS_YASG:
         endpoints['api_docs'] = '/swagger/'
     return JsonResponse({
-        'message': 'MedoraAI Backend API',
+        'message': 'AiDoktorAI Backend API',
         'version': '1.0.0',
         'endpoints': endpoints,
     })
@@ -36,11 +36,11 @@ def root_view(request):
 if _HAS_YASG:
     schema_view = get_schema_view(
         openapi.Info(
-            title="MEDORA AI Backend API",
+            title="AiDoktor Backend API",
             default_version='v1',
             description="Tibbiy Konsilium Tizimi - Django REST Framework API",
             terms_of_service="https://www.google.com/policies/terms/",
-            contact=openapi.Contact(email="contact@medoraai.local"),
+            contact=openapi.Contact(email="contact@AiDoktorai.local"),
             license=openapi.License(name="BSD License"),
         ),
         public=True,
@@ -96,3 +96,4 @@ def handler500(request):
         'error': {'code': 500, 'message': "Server xatoligi. Iltimos, keyinroq urinib ko'ring.", 'details': {}}
     }, status=500, content_type='application/json; charset=utf-8')
 
+-NoNewline

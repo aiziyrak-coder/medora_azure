@@ -7,3 +7,4 @@ const ThumbUpIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }
 );
 
 export default ThumbUpIcon;
+-NoNewline

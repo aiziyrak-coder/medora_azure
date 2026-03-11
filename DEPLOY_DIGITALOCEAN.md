@@ -1,4 +1,4 @@
-# 🚀 Digital Ocean Deploy Qo'llanmasi - MEDORA AI
+# 🚀 Digital Ocean Deploy Qo'llanmasi - AiDoktor
 
 Ushbu qo'llanma Digital Ocean serverida dasturni deploy qilish uchun **qadamma-qadam** ko'rsatma.
 
@@ -7,12 +7,12 @@ Ushbu qo'llanma Digital Ocean serverida dasturni deploy qilish uchun **qadamma-q
 ## 📋 Oldindan Tayyorlash
 
 ### 1. GitHub Repository
-- Repository: `https://github.com/aiziyrak-coder/medoraai`
+- Repository: `https://github.com/aiziyrak-coder/AiDoktorai`
 - Kod GitHub'ga push qilingan bo'lishi kerak
 
 ### 2. Server Ma'lumotlari
-- **Frontend Domain**: `medora.cdcgroup.uz`
-- **Backend Domain**: `medoraapi.cdcgroup.uz`
+- **Frontend Domain**: `AiDoktor.fargana.uz`
+- **Backend Domain**: `AiDoktorapi.fargana.uz`
 - **Server IP**: (Digital Ocean droplet IP)
 
 ---
@@ -26,8 +26,8 @@ Ushbu qo'llanma Digital Ocean serverida dasturni deploy qilish uchun **qadamma-q
 ssh root@YOUR_SERVER_IP
 
 # Yangi papka yaratish
-mkdir -p /var/www/medoraai
-cd /var/www/medoraai
+mkdir -p /var/www/AiDoktorai
+cd /var/www/AiDoktorai
 ```
 
 ---
@@ -68,10 +68,10 @@ pip3 install gunicorn
 ### QADAM 3: GitHub'dan Kodni Yuklab Olish
 
 ```bash
-cd /var/www/medoraai
+cd /var/www/AiDoktorai
 
 # GitHub'dan clone qilish
-git clone https://github.com/aiziyrak-coder/medoraai.git .
+git clone https://github.com/aiziyrak-coder/AiDoktorai.git .
 
 # Yoki agar repository bo'sh bo'lsa, kodni boshqa usul bilan yuklang
 ```
@@ -81,7 +81,7 @@ git clone https://github.com/aiziyrak-coder/medoraai.git .
 ### QADAM 4: Backend Setup
 
 ```bash
-cd /var/www/medoraai/backend
+cd /var/www/AiDoktorai/backend
 
 # Virtual environment yaratish
 python3.11 -m venv venv
@@ -102,18 +102,18 @@ nano .env
 # CRITICAL - O'zgartiring!
 SECRET_KEY=your-very-strong-secret-key-here-generate-new-one
 DEBUG=False
-ALLOWED_HOSTS=medoraapi.cdcgroup.uz,localhost,127.0.0.1
+ALLOWED_HOSTS=AiDoktorapi.fargana.uz,localhost,127.0.0.1
 
 # Database (PostgreSQL)
 DB_ENGINE=django.db.backends.postgresql
-DB_NAME=medoraai_db
-DB_USER=medoraai_user
+DB_NAME=AiDoktorai_db
+DB_USER=AiDoktorai_user
 DB_PASSWORD=strong_password_here_change_this
 DB_HOST=localhost
 DB_PORT=5432
 
 # CORS - Faqat frontend domeni!
-CORS_ALLOWED_ORIGINS=https://medora.cdcgroup.uz,http://medora.cdcgroup.uz
+CORS_ALLOWED_ORIGINS=https://AiDoktor.fargana.uz,http://AiDoktor.fargana.uz
 
 # API Keys
 GEMINI_API_KEY=your_gemini_api_key_here
@@ -138,16 +138,16 @@ python -c "from django.core.management.utils import get_random_secret_key; print
 sudo -u postgres psql
 
 # Database va user yaratish
-CREATE DATABASE medoraai_db;
-CREATE USER medoraai_user WITH PASSWORD 'strong_password_here';
-ALTER ROLE medoraai_user SET client_encoding TO 'utf8';
-ALTER ROLE medoraai_user SET default_transaction_isolation TO 'read committed';
-ALTER ROLE medoraai_user SET timezone TO 'Asia/Tashkent';
-GRANT ALL PRIVILEGES ON DATABASE medoraai_db TO medoraai_user;
+CREATE DATABASE AiDoktorai_db;
+CREATE USER AiDoktorai_user WITH PASSWORD 'strong_password_here';
+ALTER ROLE AiDoktorai_user SET client_encoding TO 'utf8';
+ALTER ROLE AiDoktorai_user SET default_transaction_isolation TO 'read committed';
+ALTER ROLE AiDoktorai_user SET timezone TO 'Asia/Tashkent';
+GRANT ALL PRIVILEGES ON DATABASE AiDoktorai_db TO AiDoktorai_user;
 \q
 
 # Migrations
-cd /var/www/medoraai/backend
+cd /var/www/AiDoktorai/backend
 source venv/bin/activate
 python manage.py migrate
 
@@ -172,7 +172,7 @@ chmod 755 logs
 ### QADAM 6: Frontend Build
 
 ```bash
-cd /var/www/medoraai/frontend
+cd /var/www/AiDoktorai/frontend
 
 # .env.local yaratish
 cp .env.example .env.local
@@ -181,7 +181,7 @@ nano .env.local
 
 **.env.local (Production):**
 ```env
-VITE_API_BASE_URL=https://medoraapi.cdcgroup.uz/api
+VITE_API_BASE_URL=https://AiDoktorapi.fargana.uz/api
 ```
 
 **Build:**
@@ -196,7 +196,7 @@ npm run build
 ### QADAM 7: Gunicorn Configuration
 
 ```bash
-cd /var/www/medoraai/backend
+cd /var/www/AiDoktorai/backend
 nano gunicorn_config.py
 ```
 
@@ -219,22 +219,22 @@ loglevel = "info"
 ### QADAM 8: Systemd Service (Backend)
 
 ```bash
-nano /etc/systemd/system/medoraai-backend.service
+nano /etc/systemd/system/AiDoktorai-backend.service
 ```
 
-**/etc/systemd/system/medoraai-backend.service:**
+**/etc/systemd/system/AiDoktorai-backend.service:**
 ```ini
 [Unit]
-Description=MedoraAI Backend Gunicorn
+Description=AiDoktorAI Backend Gunicorn
 After=network.target postgresql.service redis.service
 
 [Service]
 User=www-data
 Group=www-data
-WorkingDirectory=/var/www/medoraai/backend
-Environment="PATH=/var/www/medoraai/backend/venv/bin"
-ExecStart=/var/www/medoraai/backend/venv/bin/gunicorn \
-    medoraai_backend.wsgi:application \
+WorkingDirectory=/var/www/AiDoktorai/backend
+Environment="PATH=/var/www/AiDoktorai/backend/venv/bin"
+ExecStart=/var/www/AiDoktorai/backend/venv/bin/gunicorn \
+    AiDoktorai_backend.wsgi:application \
     -c gunicorn_config.py
 Restart=always
 RestartSec=3
@@ -246,26 +246,26 @@ WantedBy=multi-user.target
 **Ishga tushirish:**
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable medoraai-backend
-sudo systemctl start medoraai-backend
-sudo systemctl status medoraai-backend
+sudo systemctl enable AiDoktorai-backend
+sudo systemctl start AiDoktorai-backend
+sudo systemctl status AiDoktorai-backend
 ```
 
 ---
 
 ### QADAM 9: Nginx Configuration
 
-#### Backend (medoraapi.cdcgroup.uz)
+#### Backend (AiDoktorapi.fargana.uz)
 
 ```bash
-nano /etc/nginx/sites-available/medoraapi
+nano /etc/nginx/sites-available/AiDoktorapi
 ```
 
-**/etc/nginx/sites-available/medoraapi:**
+**/etc/nginx/sites-available/AiDoktorapi:**
 ```nginx
 server {
     listen 80;
-    server_name medoraapi.cdcgroup.uz;
+    server_name AiDoktorapi.fargana.uz;
     
     # SSL redirect (Let's Encrypt keyin qo'shiladi)
     # return 301 https://$server_name$request_uri;
@@ -282,14 +282,14 @@ server {
     
     # Static files
     location /static/ {
-        alias /var/www/medoraai/backend/staticfiles/;
+        alias /var/www/AiDoktorai/backend/staticfiles/;
         expires 30d;
         add_header Cache-Control "public, immutable";
     }
     
     # Media files
     location /media/ {
-        alias /var/www/medoraai/backend/media/;
+        alias /var/www/AiDoktorai/backend/media/;
         expires 7d;
     }
     
@@ -301,22 +301,22 @@ server {
 }
 ```
 
-#### Frontend (medora.cdcgroup.uz)
+#### Frontend (AiDoktor.fargana.uz)
 
 ```bash
-nano /etc/nginx/sites-available/medora
+nano /etc/nginx/sites-available/AiDoktor
 ```
 
-**/etc/nginx/sites-available/medora:**
+**/etc/nginx/sites-available/AiDoktor:**
 ```nginx
 server {
     listen 80;
-    server_name medora.cdcgroup.uz;
+    server_name AiDoktor.fargana.uz;
     
     # SSL redirect (Let's Encrypt keyin qo'shiladi)
     # return 301 https://$server_name$request_uri;
     
-    root /var/www/medoraai/frontend/dist;
+    root /var/www/AiDoktorai/frontend/dist;
     index index.html;
     
     # SPA routing
@@ -334,8 +334,8 @@ server {
 
 **Enable qilish:**
 ```bash
-ln -s /etc/nginx/sites-available/medoraapi /etc/nginx/sites-enabled/
-ln -s /etc/nginx/sites-available/medora /etc/nginx/sites-enabled/
+ln -s /etc/nginx/sites-available/AiDoktorapi /etc/nginx/sites-enabled/
+ln -s /etc/nginx/sites-available/AiDoktor /etc/nginx/sites-enabled/
 
 # Test va reload
 nginx -t
@@ -349,12 +349,12 @@ systemctl reload nginx
 Digital Ocean DNS panelida yoki domen provayderingizda:
 
 **A Records:**
-- `medora.cdcgroup.uz` → Server IP
-- `medoraapi.cdcgroup.uz` → Server IP
+- `AiDoktor.fargana.uz` → Server IP
+- `AiDoktorapi.fargana.uz` → Server IP
 
 Yoki **CNAME** (agar subdomain bo'lsa):
-- `medora` → `@` yoki asosiy domen
-- `medoraapi` → `@` yoki asosiy domen
+- `AiDoktor` → `@` yoki asosiy domen
+- `AiDoktorapi` → `@` yoki asosiy domen
 
 ---
 
@@ -365,10 +365,10 @@ Yoki **CNAME** (agar subdomain bo'lsa):
 apt install certbot python3-certbot-nginx -y
 
 # SSL sertifikat olish (Backend)
-certbot --nginx -d medoraapi.cdcgroup.uz
+certbot --nginx -d AiDoktorapi.fargana.uz
 
 # SSL sertifikat olish (Frontend)
-certbot --nginx -d medora.cdcgroup.uz
+certbot --nginx -d AiDoktor.fargana.uz
 
 # Avtomatik yangilanish
 certbot renew --dry-run
@@ -399,10 +399,10 @@ crontab -e
 **Qo'shing:**
 ```bash
 # Har kuni ertalab 2:00 - Subscription expiry check
-0 2 * * * cd /var/www/medoraai/backend && /var/www/medoraai/backend/venv/bin/python manage.py check_subscription_expiry >> /var/log/medoraai-cron.log 2>&1
+0 2 * * * cd /var/www/AiDoktorai/backend && /var/www/AiDoktorai/backend/venv/bin/python manage.py check_subscription_expiry >> /var/log/AiDoktorai-cron.log 2>&1
 
 # Har kuni ertalab 3:00 - Database backup
-0 3 * * * pg_dump -U medoraai_user -d medoraai_db > /backups/medoraai_$(date +\%Y\%m\%d).sql
+0 3 * * * pg_dump -U AiDoktorai_user -d AiDoktorai_db > /backups/AiDoktorai_$(date +\%Y\%m\%d).sql
 ```
 
 ---
@@ -411,25 +411,25 @@ crontab -e
 
 ### Backend
 ```bash
-curl http://medoraapi.cdcgroup.uz/health/
+curl http://AiDoktorapi.fargana.uz/health/
 # yoki
-curl https://medoraapi.cdcgroup.uz/health/
+curl https://AiDoktorapi.fargana.uz/health/
 ```
 
 ### Frontend
 ```bash
-curl http://medora.cdcgroup.uz
+curl http://AiDoktor.fargana.uz
 # yoki
-curl https://medora.cdcgroup.uz
+curl https://AiDoktor.fargana.uz
 ```
 
 ### Logs
 ```bash
 # Backend logs
-tail -f /var/www/medoraai/backend/logs/django.log
+tail -f /var/www/AiDoktorai/backend/logs/django.log
 
 # Systemd service logs
-journalctl -u medoraai-backend -f
+journalctl -u AiDoktorai-backend -f
 
 # Nginx logs
 tail -f /var/log/nginx/access.log
@@ -441,7 +441,7 @@ tail -f /var/log/nginx/error.log
 ## 🔄 Yangilash (Update)
 
 ```bash
-cd /var/www/medoraai
+cd /var/www/AiDoktorai
 
 # Kodni yangilash
 git pull origin main
@@ -452,7 +452,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py collectstatic --noinput
-systemctl restart medoraai-backend
+systemctl restart AiDoktorai-backend
 
 # Frontend
 cd ../frontend
@@ -467,8 +467,8 @@ systemctl reload nginx
 
 ### Backend ishlamayapti
 ```bash
-systemctl status medoraai-backend
-journalctl -u medoraai-backend -n 50
+systemctl status AiDoktorai-backend
+journalctl -u AiDoktorai-backend -n 50
 ```
 
 ### Nginx xatolik
@@ -479,17 +479,18 @@ systemctl status nginx
 
 ### Database xatolik
 ```bash
-sudo -u postgres psql -d medoraai_db -c "SELECT 1;"
+sudo -u postgres psql -d AiDoktorai_db -c "SELECT 1;"
 ```
 
 ---
 
 ## 📚 Qo'shimcha Ma'lumot
 
-- **Backend Admin**: https://medoraapi.cdcgroup.uz/admin/
-- **API Docs**: https://medoraapi.cdcgroup.uz/swagger/
-- **Frontend**: https://medora.cdcgroup.uz
+- **Backend Admin**: https://AiDoktorapi.fargana.uz/admin/
+- **API Docs**: https://AiDoktorapi.fargana.uz/swagger/
+- **Frontend**: https://AiDoktor.fargana.uz
 
 ---
 
 **Tayyor! Dastur production'da ishlayapti! 🎉**
+-NoNewline

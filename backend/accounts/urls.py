@@ -45,3 +45,4 @@ urlpatterns = [
     path('queue/add/', queue_add, name='queue_add'),
     path('queue/<int:item_id>/', queue_item_detail, name='queue_item_detail'),
 ]
+-NoNewline

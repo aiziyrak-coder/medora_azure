@@ -117,4 +117,4 @@ const FollowUpAnalysis: React.FC<FollowUpAnalysisProps> = ({ isAnalyzing, onSubm
     );
 };
 
-export default FollowUpAnalysis;
+export default FollowUpAnalysis;-NoNewline

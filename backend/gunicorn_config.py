@@ -1,6 +1,6 @@
 """
 Gunicorn Production Config
-Azure VM: 20.82.115.71  |  medora.ziyrak.org
+Azure VM: 20.82.115.71  |  AiDoktor.ziyrak.org
 2 vCPU Azure Standard B2s — 4 worker (2*CPU+1)
 """
 
@@ -44,15 +44,16 @@ access_log_format = (
 # ── Process ─────────────────────────────────────────────────────────────────
 preload_app   = True                          # Xotira tejash
 daemon        = False                         # systemd boshqaradi
-pidfile       = os.path.join(_LOGDIR, "medora.pid")
+pidfile       = os.path.join(_LOGDIR, "AiDoktor.pid")
 # user/group: leave unset when running as cdcgroup (systemd User=cdcgroup)
 
 # ── WSGI ────────────────────────────────────────────────────────────────────
-wsgi_app      = "medoraai_backend.wsgi:application"
+wsgi_app      = "AiDoktorai_backend.wsgi:application"
 
 # ── Worker lifecycle hooks ───────────────────────────────────────────────────
 def on_starting(server):
-    server.log.info("Medora AI backend starting on Azure VM 20.82.115.71")
+    server.log.info("AiDoktor backend starting on Azure VM 20.82.115.71")
 
 def worker_exit(server, worker):
     server.log.info("Worker %s exited", worker.pid)
+-NoNewline

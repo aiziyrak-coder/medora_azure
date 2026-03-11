@@ -3,11 +3,11 @@ Multi-Agent Medical Consilium System  —  Production-Ready v3
 =============================================================
 
 5 ta Azure deployment:
-  medora-gpt4o     → Orchestrator / Rais (GPT-4o)
-  medora-deepseek  → Mantiqiy Tahlilchi  (DeepSeek-R1)
-  medora-llama     → Faktik Bazasi       (Llama-3.3-70B)
-  medora-mistral   → SSV Protokollar     (Mistral-Large)
-  medora-mini      → Farmakolog          (GPT-4o-mini)
+  AiDoktor-gpt4o     → Orchestrator / Rais (GPT-4o)
+  AiDoktor-deepseek  → Mantiqiy Tahlilchi  (DeepSeek-R1)
+  AiDoktor-llama     → Faktik Bazasi       (Llama-3.3-70B)
+  AiDoktor-mistral   → SSV Protokollar     (Mistral-Large)
+  AiDoktor-mini      → Farmakolog          (GPT-4o-mini)
 
 3-fazali debate (Orchestrator boshqaruvi ostida):
 
@@ -23,7 +23,7 @@ Multi-Agent Medical Consilium System  —  Production-Ready v3
 
   PHASE 3 – Weighted Consensus
       Orchestrator har bir agentga refutation kuchiga qarab WEIGHT beradi.
-      Eng kuchli dalillar asosida YAKUNIY Medora Konsilium Xulosasi.
+      Eng kuchli dalillar asosida YAKUNIY AiDoktor Konsilium Xulosasi.
 
 Xavfsizlik:
   - PhysiologyFilter views.py da OLDIN chaqiriladi.
@@ -423,7 +423,7 @@ PHASE 1 – Mustaqil tashxislar:
 PHASE 2 – Debate va refutation'lar:
 {phase2_json}
 
-Quyidagi JSON formatida YAKUNIY MEDORA KONSILIUM XULOSASINI bering:
+Quyidagi JSON formatida YAKUNIY AiDoktor KONSILIUM XULOSASINI bering:
 {{
   "consensus_diagnosis": {{
     "name": "Asosiy tashxis nomi",
@@ -633,7 +633,7 @@ def _build_final_report(consensus: dict, p1: list[dict],
             }
             for a in AGENTS
         ],
-        "generatedBy": "Medora Multi-Agent Consilium v3 (Azure AI Foundry)",
+        "generatedBy": "AiDoktor Multi-Agent Consilium v3 (Azure AI Foundry)",
     }
 
 
@@ -689,3 +689,4 @@ def run_consilium(patient_data: dict, language: str = "uz-L") -> dict:
 
     logger.info("[%s] Completed in %.1fs", result.session_id, result.duration_sec)
     return result.to_dict()
+-NoNewline

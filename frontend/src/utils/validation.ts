@@ -242,3 +242,4 @@ export const validateVitalSign = (
   
   return { isValid: true };
 };
+-NoNewline

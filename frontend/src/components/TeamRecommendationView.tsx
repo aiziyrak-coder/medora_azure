@@ -214,3 +214,4 @@ const TeamRecommendationView: React.FC<TeamRecommendationViewProps> = ({ recomme
 };
 
 export default TeamRecommendationView;
+-NoNewline

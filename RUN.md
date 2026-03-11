@@ -1,10 +1,10 @@
-# MedoraAI — Backend 8000, Frontend 3000 da ishga tushirish
+# AiDoktorAI — Backend 8000, Frontend 3000 da ishga tushirish
 
 ## Birinchi marta sozlash
 
 ### Backend (port 8000)
 ```powershell
-cd E:\medoraai\backend
+cd E:\AiDoktorai\backend
 py -m venv venv
 .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
@@ -14,7 +14,7 @@ pip install -r requirements.txt
 **Node.js kerak.** Agar `npm` topilmasa: https://nodejs.org/ dan LTS versiyasini o'rnating, "Add to PATH" belgilang, keyin terminalni qayta oching. Batafsil: `FRONTEND_SETUP.md`.
 
 ```powershell
-cd E:\medoraai\frontend
+cd E:\AiDoktorai\frontend
 npm install
 npm run dev
 ```
@@ -26,7 +26,7 @@ Yoki: `frontend\run-dev.bat` faylini ikki marta bosing (avval Node.js o'rnatilga
 
 ### Variant 1: Ikkala serverni bir vaqtda (alohida oynalarda)
 ```powershell
-cd E:\medoraai
+cd E:\AiDoktorai
 .\run-all.ps1
 ```
 Backend **8000**, frontend **3000** portda ochiladi (ikkita yangi PowerShell oynasi).
@@ -34,13 +34,13 @@ Backend **8000**, frontend **3000** portda ochiladi (ikkita yangi PowerShell oyn
 ### Variant 2: Alohida terminalda
 **Terminal 1 – Backend:**
 ```powershell
-cd E:\medoraai
+cd E:\AiDoktorai
 .\run-backend.ps1
 ```
 
 **Terminal 2 – Frontend:**
 ```powershell
-cd E:\medoraai
+cd E:\AiDoktorai
 .\run-frontend.ps1
 ```
 
@@ -50,7 +50,7 @@ cd E:\medoraai
 
 1. Portlarni tozalash:
    ```powershell
-   cd E:\medoraai
+   cd E:\AiDoktorai
    .\kill-ports.ps1
    ```
 2. Qayta ishga tushirish:
@@ -69,3 +69,4 @@ cd E:\medoraai
 | Frontend | 3000 | http://localhost:3000 |
 
 Frontend API uchun `http://localhost:8000/api` dan foydalanadi (Vite env da sozlangan).
+-NoNewline

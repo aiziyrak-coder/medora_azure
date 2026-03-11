@@ -3,13 +3,13 @@
 # Foydalanish: ./deploy-test.sh
 
 echo "================================================"
-echo "🚀 MEDORA AI - Deploy & Restart Script"
+echo "🚀 AiDoktor - Deploy & Restart Script"
 echo "================================================"
 echo ""
 
 # 1. Git pull
 echo "📦 GitHub'dan yangilanishlarni yuklash..."
-cd /root/medoraai
+cd /root/AiDoktorai
 git pull origin main
 
 if [ $? -ne 0 ]; then
@@ -21,7 +21,7 @@ echo ""
 
 # 2. Backend .env faylini tekshirish
 echo "🔧 Backend .env faylini tekshirish..."
-cd /root/medoraai/backend
+cd /root/AiDoktorai/backend
 
 if [ ! -f ".env" ]; then
     echo "❌ .env fayl topilmadi!"
@@ -29,14 +29,14 @@ if [ ! -f ".env" ]; then
 fi
 
 # ALLOWED_HOSTS ni tekshirish
-if grep -q "medoraapi.cdcgroup.uz" .env; then
+if grep -q "AiDoktorapi.fargana.uz" .env; then
     echo "✅ ALLOWED_HOSTS to'g'ri sozlangan"
 else
-    echo "⚠️  ALLOWED_HOSTS da medoraapi.cdcgroup.uz yo'q!"
+    echo "⚠️  ALLOWED_HOSTS da AiDoktorapi.fargana.uz yo'q!"
     echo "Quyidagi buyruqni bajaring:"
     echo "nano .env"
     echo ""
-    echo "ALLOWED_HOSTS=localhost,127.0.0.1,medoraapi.cdcgroup.uz,medora.cdcgroup.uz,medora.ziyrak.org,medoraapi.ziyrak.org,20.82.115.71,167.71.53.238"
+    echo "ALLOWED_HOSTS=localhost,127.0.0.1,AiDoktorapi.fargana.uz,AiDoktor.fargana.uz,AiDoktor.ziyrak.org,AiDoktorapi.ziyrak.org,20.82.115.71,167.71.53.238"
    read -p "Davom etishdan oldin .env ni tahrirlashni xohlaysizmi? (y/n): " edit_choice
     if [ "$edit_choice" = "y" ]; then
         nano .env
@@ -60,22 +60,22 @@ echo ""
 echo "🔄 Gunicorn restart qilinmoqda..."
 
 # Variant 1: Agar systemctl ishlatilsa
-if command -v systemctl &> /dev/null && systemctl is-active --quiet medoraai-backend; then
+if command -v systemctl &> /dev/null && systemctl is-active --quiet AiDoktorai-backend; then
     echo "Systemctl orqali restart..."
-    sudo systemctl restart medoraai-backend
-    sudo systemctl status medoraai-backend --no-pager
+    sudo systemctl restart AiDoktorai-backend
+    sudo systemctl status AiDoktorai-backend --no-pager
 else
     # Variant 2: Manual restart
     echo "Manual restart..."
     
     # Eski process'larni to'xtatish
-    pkill -f "gunicorn.*medoraai_backend"
+    pkill -f "gunicorn.*AiDoktorai_backend"
     sleep 2
     
     # Yangi process boshlash (background)
-    cd /root/medoraai/backend
+    cd /root/AiDoktorai/backend
     source venv/bin/activate
-    nohup gunicorn medoraai_backend.wsgi:application \
+    nohup gunicorn AiDoktorai_backend.wsgi:application \
         --bind 127.0.0.1:8001 \
         --workers 3 \
         --threads 2 \
@@ -113,7 +113,7 @@ if [ "$HEALTH_RESPONSE" = "200" ]; then
     echo "✅ Backend health check: OK (HTTP $HEALTH_RESPONSE)"
 else
     echo "❌ Backend health check: FAILED (HTTP $HEALTH_RESPONSE)"
-    echo "Loglarni tekshiring: /root/medoraai/backend/logs/"
+    echo "Loglarni tekshiring: /root/AiDoktorai/backend/logs/"
 fi
 echo ""
 
@@ -140,14 +140,15 @@ echo "================================================"
 echo ""
 echo "📝 Keyingi qadamlar:"
 echo "1. Brauzerda ochib tekshiring:"
-echo "   - https://medoraapi.cdcgroup.uz/"
-echo "   - https://medoraapi.cdcgroup.uz/admin/"
-echo "   - https://medora.cdcgroup.uz/"
+echo "   - https://AiDoktorapi.fargana.uz/"
+echo "   - https://AiDoktorapi.fargana.uz/admin/"
+echo "   - https://AiDoktor.fargana.uz/"
 echo ""
 echo "2. Agar xatolik bo'lsa loglarni tekshiring:"
-echo "   - tail -f /root/medoraai/backend/logs/django.log"
+echo "   - tail -f /root/AiDoktorai/backend/logs/django.log"
 echo "   - tail -f /var/log/nginx/error.log"
 echo ""
 echo "3. Yoki ushbu skriptni qayta ishga tushiring:"
 echo "   ./deploy-test.sh"
 echo ""
+-NoNewline

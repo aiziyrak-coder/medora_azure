@@ -144,4 +144,4 @@ const EcgAnalyzer: React.FC = () => {
     );
 };
 
-export default EcgAnalyzer;
+export default EcgAnalyzer;-NoNewline

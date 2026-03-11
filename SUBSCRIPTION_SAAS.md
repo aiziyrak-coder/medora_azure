@@ -1,4 +1,4 @@
-# MedoraAI — Obuna (SaaS): Klinika va Shifokor
+# AiDoktorAI — Obuna (SaaS): Klinika va Shifokor
 
 ## Ikki tur obuna
 
@@ -73,3 +73,4 @@ Klinikalar uchun hisob raqam **frontend** da `SubscriptionPage.tsx` ichida `BANK
 - **Shifokor:** 10$/oy, chek yuborish → admin tasdiqlagach 30 kun faol.
 - Backend: `SubscriptionPlan` (plan_type: clinic/doctor), `SubscriptionPayment`, admin tasdiqlash.
 - Frontend: klinika uchun bank rekvizitlari, shifokor uchun chek yuklash.
+-NoNewline

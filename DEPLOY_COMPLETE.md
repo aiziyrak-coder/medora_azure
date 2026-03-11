@@ -1,4 +1,4 @@
-# 🚀 To'liq Deploy Qo'llanmasi - MEDORA AI
+# 🚀 To'liq Deploy Qo'llanmasi - AiDoktor
 
 Ushbu qo'llanma dasturni **production'ga deploy qilish** uchun barcha qadamlar.
 
@@ -75,8 +75,8 @@ sudo apt install redis-server -y
 ### 1. Code Deployment
 ```bash
 # Server'ga kod yuklash (Git orqali)
-git clone https://github.com/your-repo/medoraai.git
-cd medoraai/backend
+git clone https://github.com/your-repo/AiDoktorai.git
+cd AiDoktorai/backend
 
 # Virtual environment
 python3.11 -m venv venv
@@ -99,18 +99,18 @@ nano .env  # yoki vim
 # CRITICAL - Production uchun o'zgartiring!
 SECRET_KEY=your-very-strong-secret-key-here-generate-new-one
 DEBUG=False
-ALLOWED_HOSTS=medoraai.uz,api.medoraai.uz,www.medoraai.uz
+ALLOWED_HOSTS=AiDoktorai.uz,api.AiDoktorai.uz,www.AiDoktorai.uz
 
 # Database (PostgreSQL)
 DB_ENGINE=django.db.backends.postgresql
-DB_NAME=medoraai_db
-DB_USER=medoraai_user
+DB_NAME=AiDoktorai_db
+DB_USER=AiDoktorai_user
 DB_PASSWORD=strong_password_here
 DB_HOST=localhost
 DB_PORT=5432
 
 # CORS - Faqat o'z domeningiz!
-CORS_ALLOWED_ORIGINS=https://medoraai.uz,https://www.medoraai.uz
+CORS_ALLOWED_ORIGINS=https://AiDoktorai.uz,https://www.AiDoktorai.uz
 
 # API Keys
 GEMINI_API_KEY=your_gemini_api_key_here
@@ -134,12 +134,12 @@ python -c "from django.core.management.utils import get_random_secret_key; print
 ```bash
 # PostgreSQL database yaratish
 sudo -u postgres psql
-CREATE DATABASE medoraai_db;
-CREATE USER medoraai_user WITH PASSWORD 'strong_password_here';
-ALTER ROLE medoraai_user SET client_encoding TO 'utf8';
-ALTER ROLE medoraai_user SET default_transaction_isolation TO 'read committed';
-ALTER ROLE medoraai_user SET timezone TO 'Asia/Tashkent';
-GRANT ALL PRIVILEGES ON DATABASE medoraai_db TO medoraai_user;
+CREATE DATABASE AiDoktorai_db;
+CREATE USER AiDoktorai_user WITH PASSWORD 'strong_password_here';
+ALTER ROLE AiDoktorai_user SET client_encoding TO 'utf8';
+ALTER ROLE AiDoktorai_user SET default_transaction_isolation TO 'read committed';
+ALTER ROLE AiDoktorai_user SET timezone TO 'Asia/Tashkent';
+GRANT ALL PRIVILEGES ON DATABASE AiDoktorai_db TO AiDoktorai_user;
 \q
 
 # Migrations
@@ -180,24 +180,24 @@ loglevel = "info"
 
 **Ishga tushirish:**
 ```bash
-gunicorn medoraai_backend.wsgi:application -c gunicorn_config.py
+gunicorn AiDoktorai_backend.wsgi:application -c gunicorn_config.py
 ```
 
 ### 6. Systemd Service (Linux)
 
-**/etc/systemd/system/medoraai-backend.service:**
+**/etc/systemd/system/AiDoktorai-backend.service:**
 ```ini
 [Unit]
-Description=MedoraAI Backend Gunicorn
+Description=AiDoktorAI Backend Gunicorn
 After=network.target postgresql.service redis.service
 
 [Service]
 User=www-data
 Group=www-data
-WorkingDirectory=/path/to/medoraai/backend
-Environment="PATH=/path/to/medoraai/backend/venv/bin"
-ExecStart=/path/to/medoraai/backend/venv/bin/gunicorn \
-    medoraai_backend.wsgi:application \
+WorkingDirectory=/path/to/AiDoktorai/backend
+Environment="PATH=/path/to/AiDoktorai/backend/venv/bin"
+ExecStart=/path/to/AiDoktorai/backend/venv/bin/gunicorn \
+    AiDoktorai_backend.wsgi:application \
     -c gunicorn_config.py
 Restart=always
 RestartSec=3
@@ -209,9 +209,9 @@ WantedBy=multi-user.target
 **Ishga tushirish:**
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable medoraai-backend
-sudo systemctl start medoraai-backend
-sudo systemctl status medoraai-backend
+sudo systemctl enable AiDoktorai-backend
+sudo systemctl start AiDoktorai-backend
+sudo systemctl status AiDoktorai-backend
 ```
 
 ---
@@ -229,7 +229,7 @@ nano .env.local
 
 **.env.local (Production):**
 ```env
-VITE_API_BASE_URL=https://api.medoraai.uz/api
+VITE_API_BASE_URL=https://api.AiDoktorai.uz/api
 # VITE_GEMINI_API_KEY - frontend'da kerak emas (backend orqali)
 ```
 
@@ -246,18 +246,18 @@ npm run build
 ```nginx
 server {
     listen 80;
-    server_name medoraai.uz www.medoraai.uz;
+    server_name AiDoktorai.uz www.AiDoktorai.uz;
     return 301 https://$server_name$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name medoraai.uz www.medoraai.uz;
+    server_name AiDoktorai.uz www.AiDoktorai.uz;
     
     ssl_certificate /path/to/cert.pem;
     ssl_certificate_key /path/to/key.pem;
     
-    root /path/to/medoraai/dist;
+    root /path/to/AiDoktorai/dist;
     index index.html;
     
     # SPA routing
@@ -290,7 +290,7 @@ server {
 sudo apt install certbot python3-certbot-nginx -y
 
 # SSL sertifikat olish
-sudo certbot --nginx -d medoraai.uz -d www.medoraai.uz -d api.medoraai.uz
+sudo certbot --nginx -d AiDoktorai.uz -d www.AiDoktorai.uz -d api.AiDoktorai.uz
 
 # Avtomatik yangilanish
 sudo certbot renew --dry-run
@@ -300,21 +300,21 @@ sudo certbot renew --dry-run
 
 ## 🔄 Nginx Configuration
 
-**/etc/nginx/sites-available/medoraai:**
+**/etc/nginx/sites-available/AiDoktorai:**
 ```nginx
 # Backend API
 server {
     listen 80;
-    server_name api.medoraai.uz;
+    server_name api.AiDoktorai.uz;
     return 301 https://$server_name$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name api.medoraai.uz;
+    server_name api.AiDoktorai.uz;
     
-    ssl_certificate /etc/letsencrypt/live/api.medoraai.uz/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/api.medoraai.uz/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/api.AiDoktorai.uz/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.AiDoktorai.uz/privkey.pem;
     
     # Security headers
     add_header X-Content-Type-Options nosniff;
@@ -334,14 +334,14 @@ server {
     
     # Static files
     location /static/ {
-        alias /path/to/medoraai/backend/staticfiles/;
+        alias /path/to/AiDoktorai/backend/staticfiles/;
         expires 30d;
         add_header Cache-Control "public, immutable";
     }
     
     # Media files
     location /media/ {
-        alias /path/to/medoraai/backend/media/;
+        alias /path/to/AiDoktorai/backend/media/;
         expires 7d;
     }
     
@@ -355,18 +355,18 @@ server {
 # Frontend
 server {
     listen 80;
-    server_name medoraai.uz www.medoraai.uz;
+    server_name AiDoktorai.uz www.AiDoktorai.uz;
     return 301 https://$server_name$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name medoraai.uz www.medoraai.uz;
+    server_name AiDoktorai.uz www.AiDoktorai.uz;
     
-    ssl_certificate /etc/letsencrypt/live/medoraai.uz/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/medoraai.uz/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/AiDoktorai.uz/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/AiDoktorai.uz/privkey.pem;
     
-    root /path/to/medoraai/dist;
+    root /path/to/AiDoktorai/dist;
     index index.html;
     
     # SPA routing
@@ -384,7 +384,7 @@ server {
 
 **Enable:**
 ```bash
-sudo ln -s /etc/nginx/sites-available/medoraai /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/AiDoktorai /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
@@ -396,19 +396,19 @@ sudo systemctl reload nginx
 ### Subscription Expiry Check
 ```bash
 # Har kuni ertalab 2:00
-0 2 * * * cd /path/to/medoraai/backend && /path/to/venv/bin/python manage.py check_subscription_expiry >> /var/log/medoraai-cron.log 2>&1
+0 2 * * * cd /path/to/AiDoktorai/backend && /path/to/venv/bin/python manage.py check_subscription_expiry >> /var/log/AiDoktorai-cron.log 2>&1
 ```
 
 ### Database Backup
 ```bash
 # Har kuni ertalab 3:00
-0 3 * * * pg_dump -U medoraai_user -d medoraai_db > /backups/medoraai_$(date +\%Y\%m\%d).sql
+0 3 * * * pg_dump -U AiDoktorai_user -d AiDoktorai_db > /backups/AiDoktorai_$(date +\%Y\%m\%d).sql
 ```
 
 ### Log Rotation
 ```bash
 # Haftada 1 marta
-0 4 * * 0 find /path/to/medoraai/backend/logs -name "*.log" -mtime +30 -delete
+0 4 * * 0 find /path/to/AiDoktorai/backend/logs -name "*.log" -mtime +30 -delete
 ```
 
 **Crontab o'rnatish:**
@@ -421,8 +421,8 @@ crontab -e
 
 ## ✅ Post-Deployment Checklist
 
-- [ ] Backend health check: `curl https://api.medoraai.uz/health/`
-- [ ] Frontend ochiladi: `https://medoraai.uz`
+- [ ] Backend health check: `curl https://api.AiDoktorai.uz/health/`
+- [ ] Frontend ochiladi: `https://AiDoktorai.uz`
 - [ ] Login/Register ishlaydi
 - [ ] API so'rovlar ishlaydi
 - [ ] SSL sertifikat to'g'ri
@@ -438,26 +438,26 @@ crontab -e
 ### Health Checks
 ```bash
 # Basic
-curl https://api.medoraai.uz/health/
+curl https://api.AiDoktorai.uz/health/
 
 # Detailed
-curl https://api.medoraai.uz/health/detailed/
+curl https://api.AiDoktorai.uz/health/detailed/
 ```
 
 ### Logs
 ```bash
 # Backend logs
-tail -f /path/to/medoraai/backend/logs/django.log
+tail -f /path/to/AiDoktorai/backend/logs/django.log
 
 # Error logs
-tail -f /path/to/medoraai/backend/logs/django_errors.log
+tail -f /path/to/AiDoktorai/backend/logs/django_errors.log
 
 # Nginx logs
 tail -f /var/log/nginx/access.log
 tail -f /var/log/nginx/error.log
 
 # Systemd service logs
-sudo journalctl -u medoraai-backend -f
+sudo journalctl -u AiDoktorai-backend -f
 ```
 
 ---
@@ -467,19 +467,19 @@ sudo journalctl -u medoraai-backend -f
 ### Backend ishlamayapti
 ```bash
 # Status tekshirish
-sudo systemctl status medoraai-backend
+sudo systemctl status AiDoktorai-backend
 
 # Logs
-sudo journalctl -u medoraai-backend -n 50
+sudo journalctl -u AiDoktorai-backend -n 50
 
 # Qayta ishga tushirish
-sudo systemctl restart medoraai-backend
+sudo systemctl restart AiDoktorai-backend
 ```
 
 ### Database xatolik
 ```bash
 # Connection tekshirish
-psql -U medoraai_user -d medoraai_db -c "SELECT 1;"
+psql -U AiDoktorai_user -d AiDoktorai_db -c "SELECT 1;"
 
 # Migrations
 cd backend
@@ -509,3 +509,4 @@ sudo systemctl reload nginx
 ## ✅ Tayyor!
 
 Dastur production'da ishlayapti! 🎉
+-NoNewline

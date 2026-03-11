@@ -82,15 +82,15 @@ class Deployments:
     """Centralized deployment-name registry."""
 
     @staticmethod
-    def gpt4o()    -> str: return _deploy_name("AZURE_DEPLOY_GPT4O",    "medora-gpt4o")
+    def gpt4o()    -> str: return _deploy_name("AZURE_DEPLOY_GPT4O",    "AiDoktor-gpt4o")
     @staticmethod
-    def deepseek() -> str: return _deploy_name("AZURE_DEPLOY_DEEPSEEK", "medora-deepseek")
+    def deepseek() -> str: return _deploy_name("AZURE_DEPLOY_DEEPSEEK", "AiDoktor-deepseek")
     @staticmethod
-    def llama()    -> str: return _deploy_name("AZURE_DEPLOY_LLAMA",    "medora-llama")
+    def llama()    -> str: return _deploy_name("AZURE_DEPLOY_LLAMA",    "AiDoktor-llama")
     @staticmethod
-    def mistral()  -> str: return _deploy_name("AZURE_DEPLOY_MISTRAL",  "medora-mistral")
+    def mistral()  -> str: return _deploy_name("AZURE_DEPLOY_MISTRAL",  "AiDoktor-mistral")
     @staticmethod
-    def mini()     -> str: return _deploy_name("AZURE_DEPLOY_MINI",     "medora-mini")
+    def mini()     -> str: return _deploy_name("AZURE_DEPLOY_MINI",     "AiDoktor-mini")
 
 
 # Keep module-level callables for backwards-compat imports
@@ -409,3 +409,4 @@ def generate_diagnoses(patient_data: dict) -> list[dict]:
             "uzbekProtocolMatch": str(d.get("uzbekProtocolMatch", ""))[:300],
         })
     return out
+-NoNewline

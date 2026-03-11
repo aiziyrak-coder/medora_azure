@@ -1,5 +1,5 @@
 
-const SETTINGS_KEY_PREFIX = 'medora_tv_settings_';
+const SETTINGS_KEY_PREFIX = 'AiDoktor_tv_settings_';
 
 export interface TvSettings {
     isUnlocked: boolean;
@@ -33,10 +33,10 @@ export const saveTvSettings = (doctorId: string, settings: TvSettings) => {
 
 // Generates a specific unlock code for a doctor based on their phone number
 export const generateUnlockCode = (phone: string): string => {
-    // Logic: "MEDORA-" + Last 4 digits of phone
+    // Logic: "AiDoktor-" + Last 4 digits of phone
     const cleanPhone = phone.replace(/\D/g, '');
     const suffix = cleanPhone.slice(-4);
-    return `MEDORA-${suffix}`;
+    return `AiDoktor-${suffix}`;
 };
 
 export const subscribeToSettingsUpdates = (doctorId: string, callback: (settings: TvSettings) => void) => {
@@ -49,3 +49,4 @@ export const subscribeToSettingsUpdates = (doctorId: string, callback: (settings
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
 };
+-NoNewline

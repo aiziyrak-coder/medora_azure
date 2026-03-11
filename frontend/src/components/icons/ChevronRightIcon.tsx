@@ -7,3 +7,4 @@ const ChevronRightIcon: React.FC<{ className?: string }> = ({ className = "w-5 h
 );
 
 export default ChevronRightIcon;
+-NoNewline

@@ -1,6 +1,6 @@
 {
-  "short_name": "MedoraAi",
-  "name": "MedoraAi - Tibbiy Ekspertiza Platformasi",
+  "short_name": "AiDoktorAi",
+  "name": "AiDoktorAi - Tibbiy Ekspertiza Platformasi",
   "description": "Murakkab klinik holatlarni tahlil qilish va tashxis qo'yish uchun ilg'or raqamli texnologiyalar asosidagi tibbiy konsilium.",
   "start_url": "/",
   "background_color": "#f8fafc",
@@ -9,3 +9,4 @@
   "theme_color": "#3b82f6",
   "icons": []
 }
+-NoNewline

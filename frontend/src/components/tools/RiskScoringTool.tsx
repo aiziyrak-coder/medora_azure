@@ -77,4 +77,4 @@ const RiskScoringTool: React.FC = () => {
     );
 };
 
-export default RiskScoringTool;
+export default RiskScoringTool;-NoNewline

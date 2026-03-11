@@ -1,4 +1,4 @@
-# Serverda API kalitlarni joylash (medora.cdcgroup.uz / medoraapi.cdcgroup.uz)
+# Serverda API kalitlarni joylash (AiDoktor.fargana.uz / AiDoktorapi.fargana.uz)
 
 Serverda **ikki joyda** `.env` fayllari bo‘lishi kerak.
 
@@ -9,10 +9,10 @@ Serverda **ikki joyda** `.env` fayllari bo‘lishi kerak.
 Backend **www-data** hisobi ostida ishlaydi. SQLite (db.sqlite3) va backend papkasi unga **yozish huquqi** bilan berilishi kerak:
 
 ```bash
-sudo chown -R www-data:www-data /var/www/medoraai/backend
-sudo chmod 664 /var/www/medoraai/backend/db.sqlite3
-sudo chmod 775 /var/www/medoraai/backend
-sudo systemctl restart medoraai-backend
+sudo chown -R www-data:www-data /var/www/AiDoktorai/backend
+sudo chmod 664 /var/www/AiDoktorai/backend/db.sqlite3
+sudo chmod 775 /var/www/AiDoktorai/backend
+sudo systemctl restart AiDoktorai-backend
 ```
 
 Shundan keyin ro‘yxatdan o‘tish/kirish ishlashi kerak.
@@ -21,12 +21,12 @@ Shundan keyin ro‘yxatdan o‘tish/kirish ishlashi kerak.
 
 ## 1. Backend uchun (Django / Gunicorn)
 
-**Joyi:** `/var/www/medoraai/backend/.env`
+**Joyi:** `/var/www/AiDoktorai/backend/.env`
 
 Backend ishga tushganda shu papkadan ishlaydi, shuning uchun kalitlar shu yerda bo‘lishi kerak.
 
 ```bash
-sudo nano /var/www/medoraai/backend/.env
+sudo nano /var/www/AiDoktorai/backend/.env
 ```
 
 **Fayl ichiga (barcha kalitlarni o‘zingizniki bilan almashtiring):**
@@ -35,10 +35,10 @@ sudo nano /var/www/medoraai/backend/.env
 # Django
 SECRET_KEY=your-very-long-random-secret-key-change-this
 DEBUG=False
-ALLOWED_HOSTS=medoraapi.cdcgroup.uz,127.0.0.1,localhost
+ALLOWED_HOSTS=AiDoktorapi.fargana.uz,127.0.0.1,localhost
 
 # CORS – frontend manzili
-CORS_ALLOWED_ORIGINS=https://medora.cdcgroup.uz,http://localhost:3000
+CORS_ALLOWED_ORIGINS=https://AiDoktor.fargana.uz,http://localhost:3000
 
 # Ma'lumotlar bazasi (SQLite ishlatilsa)
 DB_ENGINE=django.db.backends.sqlite3
@@ -59,26 +59,26 @@ REDIS_URL=redis://localhost:6379/1
 **Xavfsizlik:** Fayl faqat serverda bo‘lsin, Gitga commit qilmaymiz. Ruxsatni tekshirish:
 
 ```bash
-sudo chown www-data:www-data /var/www/medoraai/backend/.env
-sudo chmod 600 /var/www/medoraai/backend/.env
+sudo chown www-data:www-data /var/www/AiDoktorai/backend/.env
+sudo chmod 600 /var/www/AiDoktorai/backend/.env
 ```
 
 Backendni qayta ishga tushirish:
 
 ```bash
-sudo systemctl restart medoraai-backend
+sudo systemctl restart AiDoktorai-backend
 ```
 
 ---
 
 ## 2. Frontend build uchun (Vite – build paytida)
 
-**Joyi:** `/var/www/medoraai/.env.production`
+**Joyi:** `/var/www/AiDoktorai/.env.production`
 
-Frontend `npm run build` **loyiha root**idan (ya’ni `/var/www/medoraai`) env o‘qiydi, shuning uchun fayl **root**da bo‘lishi kerak: `/var/www/medoraai/.env.production`.
+Frontend `npm run build` **loyiha root**idan (ya’ni `/var/www/AiDoktorai`) env o‘qiydi, shuning uchun fayl **root**da bo‘lishi kerak: `/var/www/AiDoktorai/.env.production`.
 
 ```bash
-sudo nano /var/www/medoraai/.env.production
+sudo nano /var/www/AiDoktorai/.env.production
 ```
 
 **Fayl ichiga:**
@@ -90,13 +90,13 @@ GEMINI_API_KEY=your-gemini-api-key-here
 # Yoki: VITE_GEMINI_API_KEY=your-gemini-api-key-here
 
 # Backend API manzili (production)
-VITE_API_BASE_URL=https://medoraapi.cdcgroup.uz/api
+VITE_API_BASE_URL=https://AiDoktorapi.fargana.uz/api
 ```
 
 Keyin build:
 
 ```bash
-cd /var/www/medoraai/frontend
+cd /var/www/AiDoktorai/frontend
 npm run build
 ```
 
@@ -110,7 +110,8 @@ Builddan keyin `dist/` yangilangan bo‘ladi va brauzerda API kalit ishlatiladi.
 
 | Qayerda        | Fayl yo‘li                           | Vazifasi                    |
 |----------------|--------------------------------------|-----------------------------|
-| Backend        | `/var/www/medoraai/backend/.env`     | Django/Gunicorn kalitlari   |
-| Frontend build | `/var/www/medoraai/.env.production`  | Build paytida GEMINI, API URL |
+| Backend        | `/var/www/AiDoktorai/backend/.env`     | Django/Gunicorn kalitlari   |
+| Frontend build | `/var/www/AiDoktorai/.env.production`  | Build paytida GEMINI, API URL |
 
 Barcha API kalitlarni (Gemini, Telegram, SECRET_KEY va hokazo) **faqat serverdagi** shu ikki faylga yozing; repoda faqat `.env.example` bo‘lsin, ichida haqiqiy kalitlar bo‘lmasin.
+-NoNewline

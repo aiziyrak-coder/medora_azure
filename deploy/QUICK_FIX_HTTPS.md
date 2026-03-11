@@ -15,7 +15,7 @@ Backend ishlayapti (http://127.0.0.1:8001/health/ ✅) lekin HTTPS orqali kirib 
 ### **QADAM 1: .env Faylini Yaratish**
 
 ```bash
-cd /root/medoraai/backend
+cd /root/AiDoktorai/backend
 cp .env.example .env
 nano .env
 ```
@@ -23,18 +23,18 @@ nano .env
 **.env fayliga quyidagilarni qo'shing:**
 
 ```env
-SECRET_KEY=django-insecure-medoraai-dev-key-change-in-production
+SECRET_KEY=django-insecure-AiDoktorai-dev-key-change-in-production
 DEBUG=True
 
 # ENG MUHIM - ALLOWED_HOSTS:
-ALLOWED_HOSTS=localhost,127.0.0.1,medoraapi.cdcgroup.uz,medora.cdcgroup.uz,medora.ziyrak.org,medoraapi.ziyrak.org,20.82.115.71,167.71.53.238
+ALLOWED_HOSTS=localhost,127.0.0.1,AiDoktorapi.fargana.uz,AiDoktor.fargana.uz,AiDoktor.ziyrak.org,AiDoktorapi.ziyrak.org,20.82.115.71,167.71.53.238
 
 # CORS:
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://medora.cdcgroup.uz,https://medoraapi.cdcgroup.uz
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://AiDoktor.fargana.uz,https://AiDoktorapi.fargana.uz
 
 # Database:
 DB_ENGINE=django.db.backends.sqlite3
-DB_NAME=/root/medoraai/backend/db.sqlite3
+DB_NAME=/root/AiDoktorai/backend/db.sqlite3
 
 # AI:
 GEMINI_API_KEY=AIzaSyCn4G1ZYDW_WZ9zCoP39EycFHkfrJAEGZA
@@ -56,10 +56,10 @@ TELEGRAM_PAYMENT_GROUP_ID=-5041567370
 pkill -f gunicorn
 
 # Yangi boshlash
-cd /root/medoraai/backend
+cd /root/AiDoktorai/backend
 source venv/bin/activate
 
-nohup gunicorn medoraai_backend.wsgi:application \
+nohup gunicorn AiDoktorai_backend.wsgi:application \
     --bind 127.0.0.1:8001 \
     --workers 3 \
     --timeout 120 \
@@ -87,9 +87,9 @@ nginx -t
 
 Agar xatolik bo'lsa:
 ```bash
-cat /etc/nginx/sites-enabled/medoraapi
+cat /etc/nginx/sites-enabled/AiDoktorapi
 # yoki
-cat /etc/nginx/conf.d/medoraapi.conf
+cat /etc/nginx/conf.d/AiDoktorapi.conf
 ```
 
 #### 3.2. Nginx reload:
@@ -116,13 +116,13 @@ curl http://127.0.0.1:8001/admin/
 ```
 
 ### 2. HTTPS test (brauzerda):
-- https://medoraapi.cdcgroup.uz/
-- https://medoraapi.cdcgroup.uz/admin/
-- https://medoraapi.cdcgroup.uz/swagger/
+- https://AiDoktorapi.fargana.uz/
+- https://AiDoktorapi.fargana.uz/admin/
+- https://AiDoktorapi.fargana.uz/swagger/
 
 ### 3. CURL test:
 ```bash
-curl -I https://medoraapi.cdcgroup.uz/
+curl -I https://AiDoktorapi.fargana.uz/
 ```
 
 ---
@@ -133,11 +133,11 @@ Agar hali ham ishlamasa, loglarni tekshiring:
 
 ```bash
 # Django logs
-tail -f /root/medoraai/backend/logs/django.log
-tail -f /root/medoraai/backend/logs/django_errors.log
+tail -f /root/AiDoktorai/backend/logs/django.log
+tail -f /root/AiDoktorai/backend/logs/django_errors.log
 
 # Gunicorn logs
-tail -f /root/medoraai/backend/logs/gunicorn.log
+tail -f /root/AiDoktorai/backend/logs/gunicorn.log
 
 # Nginx logs
 tail -f /var/log/nginx/error.log
@@ -145,7 +145,7 @@ tail -f /var/log/nginx/access.log
 
 # Systemd logs
 journalctl -u nginx -f
-journalctl -u medoraai-backend-f
+journalctl -u AiDoktorai-backend-f
 ```
 
 ---
@@ -155,7 +155,7 @@ journalctl -u medoraai-backend-f
 Barcha qadamlarni avtomatik bajarish uchun:
 
 ```bash
-cd /root/medoraai/deploy
+cd /root/AiDoktorai/deploy
 
 # 1. .env yaratish (interactive)
 ./deploy-test.sh
@@ -177,8 +177,8 @@ cd /root/medoraai/deploy
    ```
 
 3. **ALLOWED_HOSTS** - Har doim domenlarni qo'shing:
-   - `medoraapi.cdcgroup.uz`
-   - `medora.cdcgroup.uz`
+   - `AiDoktorapi.fargana.uz`
+   - `AiDoktor.fargana.uz`
    - IP manzillar: `20.82.115.71`, `167.71.53.238`
 
 ---
@@ -187,26 +187,27 @@ cd /root/medoraai/deploy
 
 ```bash
 # 1. .env yaratish va tahrirlash
-cd /root/medoraai/backend
+cd /root/AiDoktorai/backend
 cp .env.example .env
 nano .env
 # (yuqoridagi .env content ni copy-paste qiling)
 
 # 2. Gunicorn restart
 pkill -f gunicorn
-cd /root/medoraai/backend
+cd /root/AiDoktorai/backend
 source venv/bin/activate
-nohup gunicorn medoraai_backend.wsgi:application --bind 127.0.0.1:8001 --workers 3 --timeout 120 >> logs/gunicorn.log 2>&1 &
+nohup gunicorn AiDoktorai_backend.wsgi:application --bind 127.0.0.1:8001 --workers 3 --timeout 120 >> logs/gunicorn.log 2>&1 &
 
 # 3. Nginx reload
 sudo nginx -t && sudo systemctl reload nginx
 
 # 4. Test
 curl http://127.0.0.1:8001/health/
-curl -I https://medoraapi.cdcgroup.uz/
+curl -I https://AiDoktorapi.fargana.uz/
 ```
 
 ---
 
 **📅 Sana:** March 11, 2026  
 **🔧 Holat:** Backend HTTP ishlayapti, HTTPS uchun .env kerak
+-NoNewline

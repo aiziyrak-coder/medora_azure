@@ -6,4 +6,4 @@ const DownloadIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" 
     </svg>
 );
 
-export default DownloadIcon;
+export default DownloadIcon;-NoNewline

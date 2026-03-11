@@ -139,3 +139,4 @@ Frontend avtomatik ravishda:
 3. CORS sozlamalarini production domain'lar uchun yangilang
 4. HTTPS ishlating
 5. Environment variables'ni xavfsiz saqlang
+-NoNewline

@@ -165,3 +165,4 @@ const Dashboard: React.FC<DashboardProps> = ({ userName, onNewAnalysis, onViewHi
 }
 
 export default Dashboard;
+-NoNewline

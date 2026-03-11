@@ -77,3 +77,4 @@ class AnalysisRecordUpdateSerializer(serializers.ModelSerializer):
             'patient_data', 'debate_history', 'final_report',
             'follow_up_history', 'selected_specialists', 'detected_medications'
         ]
+-NoNewline

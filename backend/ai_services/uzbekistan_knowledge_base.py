@@ -472,3 +472,4 @@ def get_drug_context(drug_names: list[str] = None) -> str:
                 + (f" [EHTIYOT: {d['note']}]" if d.get("note") else "")
             )
     return "\n".join(lines)
+-NoNewline
