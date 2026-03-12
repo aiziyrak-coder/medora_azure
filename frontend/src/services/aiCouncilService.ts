@@ -168,7 +168,25 @@ function tryRepairTruncatedJson(raw: string): unknown | null {
         return fixed;
     };
 
-    // 0.5) Kesilgan string ichida: oxirida ochiq qator (masalan justification: "…оксидла)
+    /** Close brackets in reverse order of opening (so { "a": [ { → " } ] }) */
+    const closeBracketsInOrder = (text: string): string => {
+        const stack: string[] = [];
+        let inStr = false;
+        let escaped = false;
+        for (let i = 0; i < text.length; i++) {
+            if (escaped) { escaped = false; continue; }
+            if (text[i] === '\\' && inStr) { escaped = true; continue; }
+            if (text[i] === '"') { inStr = !inStr; continue; }
+            if (!inStr) {
+                if (text[i] === '{') stack.push('}');
+                else if (text[i] === '[') stack.push(']');
+                else if (text[i] === '}' || text[i] === ']') stack.pop();
+            }
+        }
+        return text + stack.join('');
+    };
+
+    // 0.5) Kesilgan string ichida: oxirida ochiq qator (justification, reason, va h.k.)
     if (s.startsWith('[') || s.startsWith('{')) {
         const trimmed = s.replace(/,\s*$/, '');
         const inString = (str: string): boolean => {
@@ -182,11 +200,15 @@ function tryRepairTruncatedJson(raw: string): unknown | null {
             return inStr;
         };
         if (/[\w\u0400-\u04FF\u0000-\u007F]\s*$/.test(trimmed) && inString(trimmed)) {
-            const closed = fixBrackets(trimmed + '"');
+            const withQuote = trimmed + '"';
             try {
-                return JSON.parse(closed);
+                return JSON.parse(closeBracketsInOrder(withQuote));
             } catch {
-                //
+                try {
+                    return JSON.parse(fixBrackets(withQuote));
+                } catch {
+                    //
+                }
             }
         }
     }
@@ -217,9 +239,27 @@ function tryRepairTruncatedJson(raw: string): unknown | null {
                 continue;
             }
         }
-        const withClosedString = /[\w\u0400-\u04FF]\s*$/.test(s) ? fixBrackets(s + '"') : s;
+        const endsWithWord = /[\w\u0400-\u04FF]\s*$/.test(s);
+        if (endsWithWord) {
+            const inStr = (str: string): boolean => {
+                let inS = false, esc = false;
+                for (let i = 0; i < str.length; i++) {
+                    if (esc) { esc = false; continue; }
+                    if (str[i] === '\\') { esc = true; continue; }
+                    if (str[i] === '"') inS = !inS;
+                }
+                return inS;
+            };
+            if (inStr(s)) {
+                try {
+                    return JSON.parse(closeBracketsInOrder(s + '"'));
+                } catch {
+                    //
+                }
+            }
+        }
         try {
-            return JSON.parse(fixBrackets(withClosedString + (withClosedString === s ? ']' : '')));
+            return JSON.parse(fixBrackets(endsWithWord ? s + '"' : s));
         } catch {
             //
         }
@@ -810,7 +850,7 @@ export const recommendSpecialists = async (data: PatientData, language: Language
     const systemInstr = getSystemInstruction(language);
     const availableSpecialists = Object.values(AIModel).filter(m => m !== AIModel.SYSTEM).join(', ');
     const prompt = buildMultimodalPrompt(
-        `Analyze the patient's clinical case. Select 5-6 specialists from: [${availableSpecialists}]. Provide a short reason for each. Return JSON { "recommendations": [{ "model": "SpecialistName", "reason": "Reason..." }] }. Output Language: ${langMap[language]}.`,
+        `Analyze the patient's clinical case. Select 5-6 specialists from: [${availableSpecialists}]. For each give ONE short sentence reason (max 10-15 words). Return ONLY valid JSON: { "recommendations": [{ "model": "ExactNameFromList", "reason": "Short reason." }] }. Output Language: ${langMap[language]}.`,
         data
     );
     
@@ -832,7 +872,7 @@ export const recommendSpecialists = async (data: PatientData, language: Language
         required: ['recommendations'],
     };
     try {
-        const result = await callGemini(prompt, DEPLOY_PRO, schema, false, systemInstr, true, 2048) as { recommendations?: Array<{ model?: string; reason?: string }> };
+        const result = await callGemini(prompt, DEPLOY_PRO, schema, false, systemInstr, true, 4096) as { recommendations?: Array<{ model?: string; reason?: string }> };
         const recs = Array.isArray(result?.recommendations) ? result.recommendations : [];
         const mapped = recs.map(r => ({
             model: (r?.model && Object.values(AIModel).includes(r.model as AIModel) ? r.model : AIModel.GEMINI) as AIModel,
