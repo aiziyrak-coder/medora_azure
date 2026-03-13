@@ -1,224 +1,220 @@
 /**
- * HexBackground — Animatsion ari uyali + elektron zarrachalar foni
- * Canvas asosida: hexagon grid + glow elektronlar hexagon qirralarida harakat qiladi
+ * HexBackground — Ari uyali chiziqlar + ingichka elektron zarralar
+ * Elektronlar hex qirralar bo'ylab yorug' chiziq sifatida yuguradi
  */
 import React, { useEffect, useRef } from 'react';
 
-interface Point { x: number; y: number; }
-interface Segment { a: Point; b: Point; }
+interface Point    { x: number; y: number }
+interface Segment  { a: Point; b: Point }
 interface Electron {
-    seg: Segment;
-    t: number;      // 0–1 progress along segment
-    speed: number;
-    trail: number;  // trail length (0–1)
-    color: string;
-    size: number;
-    trailPoints: { x: number; y: number; alpha: number }[];
+    seg:    Segment;
+    t:      number;   // 0‒1 progress
+    speed:  number;
+    hue:    number;   // HSL hue
+    trailPts: Point[];
 }
 
-const COLORS = [
-    'rgba(56,189,248,',   // sky-400
-    'rgba(34,211,238,',   // cyan-400
-    'rgba(52,211,153,',   // emerald-400
-    'rgba(99,179,237,',   // blue-300
-    'rgba(167,243,208,',  // green-200
-    'rgba(147,197,253,',  // blue-200
-];
+const ELECTRON_COUNT = 55;
+const HEX_SIZE       = 42;
+const TRAIL_LEN      = 26;   // kanta uzunligi (segment soni)
 
-function getHexSegments(W: number, H: number, size: number): Segment[] {
-    const segments: Segment[] = [];
-    const w = size * 2;
-    const h = Math.sqrt(3) * size;
-    const cols = Math.ceil(W / (w * 0.75)) + 2;
-    const rows = Math.ceil(H / h) + 2;
+/* Hexagon grid segmentlari */
+function buildSegments(W: number, H: number, size: number): Segment[] {
+    const segs: Segment[] = [];
+    const hx = size * 1.5;
+    const hy = size * Math.sqrt(3);
+    const cols = Math.ceil(W / hx) + 3;
+    const rows = Math.ceil(H / hy) + 3;
 
-    for (let col = -1; col < cols; col++) {
-        for (let row = -1; row < rows; row++) {
-            const cx = col * w * 0.75;
-            const cy = row * h + (col % 2 === 0 ? 0 : h / 2);
-            // 6 vertices of the hexagon
-            const pts: Point[] = [];
+    for (let c = -1; c < cols; c++) {
+        for (let r = -1; r < rows; r++) {
+            const cx = c * hx;
+            const cy = r * hy + (c % 2 !== 0 ? hy / 2 : 0);
+            const verts: Point[] = Array.from({ length: 6 }, (_, i) => {
+                const a = (Math.PI / 3) * i - Math.PI / 6;
+                return { x: cx + size * Math.cos(a), y: cy + size * Math.sin(a) };
+            });
             for (let i = 0; i < 6; i++) {
-                const angle = Math.PI / 180 * (60 * i - 30);
-                pts.push({ x: cx + size * Math.cos(angle), y: cy + size * Math.sin(angle) });
-            }
-            // 6 edges — only add each edge once to avoid duplicates
-            for (let i = 0; i < 6; i++) {
-                const a = pts[i];
-                const b = pts[(i + 1) % 6];
-                // Simple dedup: only push edges where a.x <= b.x or (a.x===b.x && a.y<b.y)
-                if (a.x < b.x || (Math.abs(a.x - b.x) < 0.1 && a.y < b.y)) {
-                    segments.push({ a, b });
-                }
+                const a = verts[i], b = verts[(i + 1) % 6];
+                if (a.x < b.x || (Math.abs(a.x - b.x) < 0.5 && a.y < b.y))
+                    segs.push({ a, b });
             }
         }
     }
-    return segments;
+    return segs;
+}
+
+/* Nuqtaga yaqin segment uchlarini topish */
+function adjacent(pt: Point, segs: Segment[]): Segment[] {
+    const EPS = 1.5;
+    return segs.filter(s =>
+        (Math.abs(s.a.x - pt.x) < EPS && Math.abs(s.a.y - pt.y) < EPS) ||
+        (Math.abs(s.b.x - pt.x) < EPS && Math.abs(s.b.y - pt.y) < EPS)
+    );
 }
 
 function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
 
 const HexBackground: React.FC = () => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const animRef = useRef<number>(0);
+    const ref = useRef<HTMLCanvasElement>(null);
+    const raf = useRef(0);
 
     useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
+        const cv  = ref.current;
+        if (!cv) return;
+        const ctx = cv.getContext('2d');
         if (!ctx) return;
 
         let W = 0, H = 0;
-        const HEX_SIZE = 36;
-        let segments: Segment[] = [];
-        const electrons: Electron[] = [];
-        const ELECTRON_COUNT = 40;
+        let segs: Segment[] = [];
+        const elecs: Electron[] = [];
+
+        function mkElectron(t0?: number): Electron {
+            const seg = segs[Math.floor(Math.random() * segs.length)];
+            return {
+                seg,
+                t:    t0 ?? Math.random(),
+                speed: 0.0055 + Math.random() * 0.009,
+                hue:  160 + Math.random() * 80,   // cyan–teal–green zone
+                trailPts: [],
+            };
+        }
 
         function resize() {
             W = window.innerWidth;
             H = window.innerHeight;
-            canvas!.width  = W;
-            canvas!.height = H;
-            segments = getHexSegments(W, H, HEX_SIZE);
-            // Repopulate electrons on resize
-            electrons.length = 0;
-            for (let i = 0; i < ELECTRON_COUNT; i++) {
-                spawnElectron(true);
-            }
+            cv!.width  = W;
+            cv!.height = H;
+            segs = buildSegments(W, H, HEX_SIZE);
+            elecs.length = 0;
+            for (let i = 0; i < ELECTRON_COUNT; i++) elecs.push(mkElectron());
         }
 
-        function spawnElectron(immediate = false) {
-            if (segments.length === 0) return;
-            const seg = segments[Math.floor(Math.random() * segments.length)];
-            const colorBase = COLORS[Math.floor(Math.random() * COLORS.length)];
-            electrons.push({
-                seg,
-                t: immediate ? Math.random() : 0,
-                speed: 0.003 + Math.random() * 0.006,
-                trail: 0.18 + Math.random() * 0.22,
-                color: colorBase,
-                size: 1.5 + Math.random() * 2,
-                trailPoints: [],
-            });
-        }
-
-        function drawGrid() {
+        function drawHexGrid() {
             ctx!.save();
-            ctx!.strokeStyle = 'rgba(100,190,230,0.09)';
-            ctx!.lineWidth = 0.8;
-            for (const seg of segments) {
-                ctx!.beginPath();
-                ctx!.moveTo(seg.a.x, seg.a.y);
-                ctx!.lineTo(seg.b.x, seg.b.y);
-                ctx!.stroke();
+            ctx!.strokeStyle = 'rgba(80,185,220,0.18)';
+            ctx!.lineWidth   = 0.9;
+            ctx!.beginPath();
+            for (const s of segs) {
+                ctx!.moveTo(s.a.x, s.a.y);
+                ctx!.lineTo(s.b.x, s.b.y);
+            }
+            ctx!.stroke();
+
+            // Junction dots
+            ctx!.fillStyle = 'rgba(60,180,220,0.22)';
+            const junctions = new Set<string>();
+            for (const s of segs) {
+                for (const p of [s.a, s.b]) {
+                    const k = `${Math.round(p.x)},${Math.round(p.y)}`;
+                    if (!junctions.has(k)) {
+                        junctions.add(k);
+                        ctx!.beginPath();
+                        ctx!.arc(p.x, p.y, 1.4, 0, Math.PI * 2);
+                        ctx!.fill();
+                    }
+                }
             }
             ctx!.restore();
         }
 
         function drawElectrons() {
-            for (const e of electrons) {
-                const x = lerp(e.seg.a.x, e.seg.b.x, e.t);
-                const y = lerp(e.seg.a.y, e.seg.b.y, e.t);
+            for (const e of elecs) {
+                const px = lerp(e.seg.a.x, e.seg.b.x, e.t);
+                const py = lerp(e.seg.a.y, e.seg.b.y, e.t);
 
-                // Add current pos to trail
-                e.trailPoints.unshift({ x, y, alpha: 1 });
-                const maxTrail = Math.floor(e.trail * 40) + 5;
-                if (e.trailPoints.length > maxTrail) e.trailPoints.length = maxTrail;
+                // Keep trail
+                e.trailPts.unshift({ x: px, y: py });
+                if (e.trailPts.length > TRAIL_LEN) e.trailPts.length = TRAIL_LEN;
 
-                // Draw trail
-                for (let i = 1; i < e.trailPoints.length; i++) {
-                    const frac = 1 - i / e.trailPoints.length;
+                const pts = e.trailPts;
+                if (pts.length < 2) continue;
+
+                // Draw trail as a glowing line
+                for (let i = 1; i < pts.length; i++) {
+                    const frac  = 1 - i / pts.length;   // 1 at head, 0 at tail
+                    const alpha = frac * frac * 0.85;   // smooth fade
+                    const w     = frac * 2.2;           // thinner at tail
+
+                    ctx!.save();
+                    ctx!.strokeStyle = `hsla(${e.hue},90%,65%,${alpha})`;
+                    ctx!.lineWidth   = w;
+                    ctx!.shadowColor = `hsla(${e.hue},90%,70%,${alpha * 0.8})`;
+                    ctx!.shadowBlur  = 6;
                     ctx!.beginPath();
-                    ctx!.arc(
-                        e.trailPoints[i].x,
-                        e.trailPoints[i].y,
-                        e.size * frac * 0.7,
-                        0, Math.PI * 2
-                    );
-                    ctx!.fillStyle = e.color + (frac * 0.55) + ')';
-                    ctx!.fill();
+                    ctx!.moveTo(pts[i - 1].x, pts[i - 1].y);
+                    ctx!.lineTo(pts[i].x, pts[i].y);
+                    ctx!.stroke();
+                    ctx!.restore();
                 }
 
-                // Draw electron glow
-                const grd = ctx!.createRadialGradient(x, y, 0, x, y, e.size * 5);
-                grd.addColorStop(0, e.color + '0.95)');
-                grd.addColorStop(0.4, e.color + '0.5)');
-                grd.addColorStop(1, e.color + '0)');
+                // Head glow
+                ctx!.save();
+                const g = ctx!.createRadialGradient(px, py, 0, px, py, 7);
+                g.addColorStop(0, `hsla(${e.hue},100%,80%,0.95)`);
+                g.addColorStop(0.4, `hsla(${e.hue},90%,65%,0.6)`);
+                g.addColorStop(1, `hsla(${e.hue},90%,65%,0)`);
+                ctx!.fillStyle   = g;
+                ctx!.shadowColor = `hsla(${e.hue},100%,80%,0.9)`;
+                ctx!.shadowBlur  = 14;
                 ctx!.beginPath();
-                ctx!.arc(x, y, e.size * 5, 0, Math.PI * 2);
-                ctx!.fillStyle = grd;
+                ctx!.arc(px, py, 7, 0, Math.PI * 2);
                 ctx!.fill();
+                ctx!.restore();
 
-                // Core dot
+                // Tiny core dot
+                ctx!.save();
+                ctx!.fillStyle   = `hsla(${e.hue},100%,92%,0.95)`;
+                ctx!.shadowColor = `hsla(${e.hue},100%,80%,1)`;
+                ctx!.shadowBlur  = 8;
                 ctx!.beginPath();
-                ctx!.arc(x, y, e.size, 0, Math.PI * 2);
-                ctx!.fillStyle = e.color + '1)';
-                ctx!.shadowColor = e.color + '0.9)';
-                ctx!.shadowBlur = 10;
+                ctx!.arc(px, py, 1.5, 0, Math.PI * 2);
                 ctx!.fill();
-                ctx!.shadowBlur = 0;
+                ctx!.restore();
             }
         }
 
         function tick() {
             ctx!.clearRect(0, 0, W, H);
-
-            drawGrid();
+            drawHexGrid();
             drawElectrons();
 
-            // Update electrons
-            for (let i = electrons.length - 1; i >= 0; i--) {
-                const e = electrons[i];
+            // Update each electron
+            for (let i = 0; i < elecs.length; i++) {
+                const e = elecs[i];
                 e.t += e.speed;
+
                 if (e.t >= 1) {
-                    // Electron reached end of segment → jump to a connected or random segment
+                    // Jump to adjacent segment
                     const endPt = e.seg.b;
-                    // Find adjacent segments sharing this endpoint
-                    const adjacent = segments.filter(s =>
-                        (Math.abs(s.a.x - endPt.x) < 1 && Math.abs(s.a.y - endPt.y) < 1) ||
-                        (Math.abs(s.b.x - endPt.x) < 1 && Math.abs(s.b.y - endPt.y) < 1)
-                    );
-                    if (adjacent.length > 0 && Math.random() > 0.1) {
-                        const next = adjacent[Math.floor(Math.random() * adjacent.length)];
-                        // Orient so we start from endPt
-                        const startFromA = Math.abs(next.a.x - endPt.x) < 1 && Math.abs(next.a.y - endPt.y) < 1;
-                        e.seg = startFromA ? next : { a: next.b, b: next.a };
-                        e.t = 0;
-                        e.trailPoints = [];
+                    const adj = adjacent(endPt, segs);
+                    if (adj.length > 0 && Math.random() > 0.08) {
+                        const next = adj[Math.floor(Math.random() * adj.length)];
+                        const fromA = Math.abs(next.a.x - endPt.x) < 1.5 && Math.abs(next.a.y - endPt.y) < 1.5;
+                        e.seg = fromA ? next : { a: next.b, b: next.a };
+                        e.t   = 0;
                     } else {
-                        // Respawn elsewhere
-                        electrons.splice(i, 1);
-                        spawnElectron(false);
+                        elecs[i] = mkElectron(0);
                     }
                 }
             }
 
-            // Maintain electron count
-            while (electrons.length < ELECTRON_COUNT) spawnElectron(false);
-
-            animRef.current = requestAnimationFrame(tick);
+            raf.current = requestAnimationFrame(tick);
         }
 
         window.addEventListener('resize', resize);
         resize();
-        animRef.current = requestAnimationFrame(tick);
-
-        return () => {
-            window.removeEventListener('resize', resize);
-            cancelAnimationFrame(animRef.current);
-        };
+        raf.current = requestAnimationFrame(tick);
+        return () => { window.removeEventListener('resize', resize); cancelAnimationFrame(raf.current); };
     }, []);
 
     return (
         <canvas
-            ref={canvasRef}
+            ref={ref}
             style={{
-                position: 'fixed',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                zIndex: 0,
-                pointerEvents: 'none',
+                position: 'fixed', inset: 0,
+                width: '100%', height: '100%',
+                zIndex: 0, pointerEvents: 'none',
             }}
             aria-hidden="true"
         />
