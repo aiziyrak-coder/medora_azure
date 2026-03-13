@@ -7,6 +7,8 @@ import type { PatientData, FinalReport } from '../types';
 import { normalizeConsensusDiagnosis } from '../types';
 import { runConsilium, type ConsiliumResult, type DebateMessage } from '../services/apiAiService';
 import { useTranslation } from '../i18n/LanguageContext';
+import { generatePdfReport } from '../services/pdfGenerator';
+import { generateDocxReport } from '../services/docxGenerator';
 
 interface Props {
   patientData: PatientData;
@@ -43,6 +45,19 @@ const PHASE_LABELS: Record<string, Record<string, string>> = {
 
 function getPhaseLabels(lang: string) {
   return PHASE_LABELS[lang] || PHASE_LABELS['uz-L'];
+}
+
+/** Download plain text as file */
+function downloadText(filename: string, content: string) {
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 const PROFESSOR_COLORS: Record<string, string> = {
@@ -84,7 +99,7 @@ function PhaseIndicator({
   );
 }
 
-function DebateCard({ msg }: { msg: DebateMessage }) {
+function DebateCard({ msg, onDownload }: { msg: DebateMessage; onDownload?: (msg: DebateMessage) => void }) {
   const agentId = msg.id.split('-')[0];
   const colorClass = PROFESSOR_COLORS[agentId] || 'bg-slate-600';
   const icon       = PROFESSOR_ICONS[agentId]  || 'рџ©є';
@@ -103,6 +118,16 @@ function DebateCard({ msg }: { msg: DebateMessage }) {
         <span className={`ml-auto text-xs px-2 py-0.5 rounded-full ${isDebate ? 'bg-amber-600 text-white' : 'bg-slate-600 text-slate-200'}`}>
           {isDebate ? 'вљ” Bahslar' : 'рџ“‹ Mustaqil'}
         </span>
+        {onDownload && (
+          <button
+            type="button"
+            onClick={() => onDownload(msg)}
+            className="text-slate-400 hover:text-sky-400 text-xs px-2 py-1 rounded border border-slate-500 hover:border-sky-500 transition-colors"
+            title="Yuklab olish"
+          >
+            â†“ Yuklab olish
+          </button>
+        )}
       </div>
       <div className="text-sm text-slate-300 whitespace-pre-wrap leading-relaxed">
         {msg.content}
@@ -247,19 +272,32 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
 
           {activeTab === 'debate' && (
             <div ref={debateRef} className="max-h-[60vh] overflow-y-auto pr-1 space-y-1">
-              {/* Professor summary */}
+              {/* Professor summary + har bir mutaxassis xulosasini yuklab olish */}
               <div className="grid grid-cols-2 gap-2 mb-3">
-                {(Array.isArray(result.professors) ? result.professors : []).filter((p: { id?: string }) => p.id !== 'gpt4o').map(prof => (
+                {(Array.isArray(result.professors) ? result.professors : []).filter((p: { id?: string }) => p.id !== 'gpt4o').map((prof: { id?: string; name?: string; title?: string; initialDiagnosis?: string }) => (
                   <div key={prof.id}
-                       className={`rounded-xl p-3 text-xs ${PROFESSOR_COLORS[prof.id] || 'bg-slate-600'} bg-opacity-20 border border-slate-600/30`}>
+                       className={`rounded-xl p-3 text-xs ${PROFESSOR_COLORS[prof.id] || 'bg-slate-600'} bg-opacity-20 border border-slate-600/30 flex flex-col`}>
                     <p className="font-semibold text-white">{PROFESSOR_ICONS[prof.id]} {prof.name}</p>
                     <p className="text-slate-300 truncate">{prof.title}</p>
+                    {prof.initialDiagnosis && (
+                      <button
+                        type="button"
+                        onClick={() => downloadText(`${(prof.name || prof.id || 'mutaxassis').replace(/\s+/g, '_')}_xulosa.txt`, prof.initialDiagnosis)}
+                        className="mt-2 text-sky-400 hover:text-sky-300 text-xs underline"
+                      >
+                        Yuklab olish
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
 
               {(Array.isArray(result.final_report?.debateHistory) ? result.final_report.debateHistory : []).map(msg => (
-                <DebateCard key={msg.id} msg={msg} />
+                <DebateCard
+                  key={msg.id}
+                  msg={msg}
+                  onDownload={(m) => downloadText(`${m.author.replace(/\s+/g, '_')}_xulosa.txt`, m.content)}
+                />
               ))}
 
               {Array.isArray(result.final_report?.dissentingOpinions) && result.final_report.dissentingOpinions.length > 0 && (
@@ -331,6 +369,49 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
               )}
 
               <p className="text-xs text-slate-600 text-center">{result.final_report.uzbekistanLegislativeNote}</p>
+
+              {/* Umumiy konsilium xulosasini yuklab olish */}
+              <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-600/50">
+                <span className="text-slate-400 text-sm w-full">Yakuniy xulosa:</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const debateAsChat = (result.final_report.debateHistory || []).map((m: DebateMessage) => ({
+                      author: m.author,
+                      content: m.content,
+                      isSystemMessage: false,
+                      isUserIntervention: false,
+                    }));
+                    generatePdfReport(
+                      result.final_report as unknown as FinalReport,
+                      patientData,
+                      debateAsChat
+                    );
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-red-600/80 hover:bg-red-600 text-white text-sm"
+                >
+                  PDF yuklab olish
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const debateAsChat = (result.final_report.debateHistory || []).map((m: DebateMessage) => ({
+                      author: m.author,
+                      content: m.content,
+                      isSystemMessage: false,
+                      isUserIntervention: false,
+                    }));
+                    await generateDocxReport(
+                      result.final_report as unknown as FinalReport,
+                      patientData,
+                      debateAsChat
+                    );
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-blue-600/80 hover:bg-blue-600 text-white text-sm"
+                >
+                  DOCX yuklab olish
+                </button>
+              </div>
             </div>
           )}
 

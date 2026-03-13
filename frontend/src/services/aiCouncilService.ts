@@ -213,6 +213,32 @@ function tryRepairTruncatedJson(raw: string): unknown | null {
         }
     }
 
+    // 0.6) Object root: oxirida ochiq string (masalan reasoningChain ichida kesilgan)
+    if (s.startsWith('{')) {
+        const inString = (str: string): boolean => {
+            let inStr = false, escaped = false;
+            for (let i = 0; i < str.length; i++) {
+                if (escaped) { escaped = false; continue; }
+                if (str[i] === '\\' && inStr) { escaped = true; continue; }
+                if (str[i] === '"') inStr = !inStr;
+            }
+            return inStr;
+        };
+        const trimmed = s.replace(/,\s*$/, '').trim();
+        if (trimmed.length > 10 && inString(trimmed) && !/[\"\]\}]\s*$/.test(trimmed)) {
+            const withQuote = trimmed + '"';
+            try {
+                return JSON.parse(closeBracketsInOrder(withQuote));
+            } catch {
+                try {
+                    return JSON.parse(fixBrackets(withQuote));
+                } catch {
+                    //
+                }
+            }
+        }
+    }
+
     // 1) Umumiy tuzatish: oxiridagi vergulni olib tashlash va figurali/qavslarni yopish
     if (s.startsWith('{') || s.startsWith('[')) {
         s = s.replace(/,\s*$/, '');
@@ -1138,24 +1164,41 @@ export const runCouncilDebate = async (
         4. criticalFinding: hayotga xavf yoki shoshilinch davolash kerak bo'lsa to'ldiring (finding, implication, urgency — barchasi o'zbekcha); yo'q bo'lsa bo'sh qoldiring.
         5. recommendedTests: yetishmayotgan muhim tekshiruvlar (O'zbekiston LITS va standartlariga mos).
         6. uzbekistanLegislativeNote: "O'zbekiston Respublikasi sog'liqni saqlash qonunchiligi va SSV tasdiqlangan klinik protokollariga muvofiq" yoki tegishli qisqacha eslatma.
-        ANIQLIK: consensusDiagnosis da probability ni dalil kuchiga mos qo'ying; reasoningChain har qadamda "nima uchun" javob bersin; uzbekProtocolMatch aniq protokol nomi/yo'nalishi. Taxminiy tashxisni yakuniy deb yozmang.
+        ANIQLIK: consensusDiagnosis da probability ni dalil kuchiga mos qo'ying; reasoningChain har qadamda "nima uchun" javob bersin (HAR BIR ELEMENT 1-2 JUMLADAN OSHMASIN, qisqa holda yozing — to'liq JSON kesilmasin); uzbekProtocolMatch aniq protokol nomi/yo'nalishi. Taxminiy tashxisni yakuniy deb yozmang.
         Debate history: ${JSON.stringify(debateHistory)}
     `;
     
     const finalReportMultimodalPrompt = buildMultimodalPrompt(finalReportTextPrompt, patientData);
 
-    try {
-        const rawReport = await callGemini(finalReportMultimodalPrompt, DEPLOY_PRO, finalReportSchema, false, systemInstr, true, 8192) as FinalReport;
-        const finalReport: FinalReport = {
-            ...rawReport,
-            consensusDiagnosis: normalizeConsensusDiagnosis(rawReport.consensusDiagnosis),
+    const runFinalReport = async (maxTok: number): Promise<FinalReport> => {
+        const raw = await callGemini(finalReportMultimodalPrompt, DEPLOY_PRO, finalReportSchema, false, systemInstr, true, maxTok) as FinalReport;
+        return {
+            ...raw,
+            consensusDiagnosis: normalizeConsensusDiagnosis(raw.consensusDiagnosis),
         };
+    };
 
-        if (finalReport.criticalFinding && finalReport.criticalFinding.finding) {
-            onProgress({ type: 'critical_finding', data: finalReport.criticalFinding });
+    try {
+        let rawReport: FinalReport;
+        try {
+            rawReport = await runFinalReport(16384);
+        } catch (firstErr) {
+            const isParseErr = (firstErr as Error & { cause?: string })?.cause === 'parse_json' || String((firstErr as Error).message).includes('AI_JSON_PARSE_ERROR');
+            if (isParseErr) {
+                logger.warn('Final report JSON kesilgan, qisqaroq reasoningChain bilan qayta urinilmoqda');
+                const shortPrompt = finalReportTextPrompt + '\n\nQISQACHA: reasoningChain da har bir element FAQAT 1 jumla (max 15 so\'z). To\'liq yopilgan JSON qaytaring.';
+                const shortMultimodal = buildMultimodalPrompt(shortPrompt, patientData);
+                const raw = await callGemini(shortMultimodal, DEPLOY_PRO, finalReportSchema, false, systemInstr, true, 8192) as FinalReport;
+                rawReport = { ...raw, consensusDiagnosis: normalizeConsensusDiagnosis(raw.consensusDiagnosis) };
+            } else {
+                throw firstErr;
+            }
+        }
+        if (rawReport.criticalFinding && rawReport.criticalFinding.finding) {
+            onProgress({ type: 'critical_finding', data: rawReport.criticalFinding });
         }
 
-        onProgress({ type: 'report', data: finalReport, detectedMedications: [] });
+        onProgress({ type: 'report', data: rawReport, detectedMedications: [] });
     } catch (e) {
         onProgress({ type: 'error', message: "Report generation error: " + (e instanceof Error ? e.message : String(e)) });
     }
