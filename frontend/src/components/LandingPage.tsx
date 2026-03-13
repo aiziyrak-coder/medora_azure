@@ -20,6 +20,7 @@ import XIcon from './icons/XIcon';
 interface LandingPageProps {
     onLogin: () => void;
     onOpenGuide: () => void;
+    onOpenAbout?: () => void;
 }
 
 // Inline Phone Icon
@@ -48,7 +49,7 @@ const MenuIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenAbout }) => {
     const { t, language, setLanguage } = useTranslation();
     const [scrolled, setScrolled] = useState(false);
     const [showContactModal, setShowContactModal] = useState(false);
@@ -159,6 +160,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide }) => {
                         <button onClick={() => scrollToSection('how-it-works')} className="hover:text-white transition-colors">{t('nav_how_it_works')}</button>
                         <button onClick={() => scrollToSection('testimonials')} className="hover:text-white transition-colors">{t('nav_reviews')}</button>
                         <button onClick={onOpenGuide} className="hover:text-white transition-colors">{t('nav_guide')}</button>
+                        {onOpenAbout && (
+                            <button onClick={onOpenAbout} className="hover:text-blue-400 transition-colors font-semibold text-blue-300">
+                                Institut haqida
+                            </button>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-3 md:gap-4">
@@ -519,39 +525,43 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide }) => {
                     </div>
                     <div>
                         <h4 className="font-bold text-white mb-6 uppercase tracking-wider">{t('landing_footer_contact')}</h4>
-                        <p className="mb-2">{t('landing_contact_address')}</p>
-                        <a href="tel:+998948788878" className="block mb-2 text-white font-bold hover:text-blue-400 transition-colors text-lg">+998 94 878 88 78</a>
-                        <a href="https://t.me/xazrat_bro" target="_blank" rel="noopener noreferrer" className="block mb-6 hover:text-blue-400 transition-colors flex items-center justify-center md:justify-start gap-2">
-                             <TelegramIcon className="w-5 h-5"/> @xazrat_bro
-                        </a>
-                        <div 
-                            onClick={() => setShowContactModal(true)}
-                            className="p-4 bg-blue-900/20 rounded-xl border border-blue-500/20 cursor-pointer hover:bg-blue-900/40 transition-colors group"
-                        >
-                            <p className="text-blue-300 font-bold group-hover:text-blue-200 transition-colors">{t('landing_contact_support')}</p>
-                        </div>
+                        <p className="mb-3 text-sm leading-relaxed">
+                            Farg'ona sh., Yangi Turon, 2-a uy
+                        </p>
+                        <a href="tel:+998950442345" className="block mb-1 text-white font-bold hover:text-blue-400 transition-colors text-sm">+998 95 044-23-45</a>
+                        <a href="tel:+998950482345" className="block mb-3 text-white font-bold hover:text-blue-400 transition-colors text-sm">+998 95 048-23-45</a>
+                        <a href="mailto:info@fjsti.uz" className="block mb-1 text-slate-300 hover:text-blue-400 transition-colors text-sm">info@fjsti.uz</a>
+                        <a href="mailto:fmioz@mail.ru" className="block mb-5 text-slate-300 hover:text-blue-400 transition-colors text-sm">fmioz@mail.ru</a>
+                        {onOpenAbout && (
+                            <button
+                                onClick={onOpenAbout}
+                                className="w-full py-2.5 px-4 rounded-xl text-sm font-bold text-blue-300 hover:text-white transition-all text-center"
+                                style={{ background:'rgba(59,130,246,0.12)', border:'1px solid rgba(59,130,246,0.25)' }}
+                            >
+                                Institut haqida to'liq ma'lumot →
+                            </button>
+                        )}
                     </div>
                 </div>
                 
                 <div className="w-full page-px mt-10 sm:mt-16 pt-6 sm:pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6 flex-wrap">
-                    <p className="text-center md:text-left text-xs sm:text-sm">
-                        <span className="font-bold text-white">{INSTITUTE_NAME_FULL}</span>
-                        <span className="mx-2 text-white/30">·</span>
-                        <span className="font-bold" style={{ background: 'linear-gradient(90deg,#38bdf8,#34d399)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>{PLATFORM_NAME} {PLATFORM_VERSION}</span>
-                        <span className="mx-2 text-white/30">·</span>
-                        &copy; 2026. {t('footer_rights')}
-                    </p>
-                    
-                    {/* Modern Developer Credits */}
-                    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 bg-white/5 px-4 sm:px-6 py-2 rounded-full border border-white/10 backdrop-blur-sm">
-                        <div className="flex items-center gap-2 group">
+                    <div className="text-center md:text-left">
+                        <p className="text-white font-black text-sm">{INSTITUTE_NAME_SHORT}</p>
+                        <p className="text-slate-400 text-xs mt-0.5">{INSTITUTE_NAME_FULL}</p>
+                        <p className="text-slate-500 text-xs mt-2">
+                            &copy; CDCGroup 2026 · {PLATFORM_NAME} {PLATFORM_VERSION}
+                        </p>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 bg-white/5 px-4 sm:px-6 py-2.5 rounded-full border border-white/10 backdrop-blur-sm">
+                        <div className="flex items-center gap-2">
                             <span className="opacity-60 text-xs uppercase tracking-wide">{t('footer_creator')}:</span>
-                            <a href="https://fargana.uz" target="_blank" rel="noopener noreferrer" className="text-white font-bold hover:text-blue-400 transition-colors flex items-center gap-1">
+                            <a href="https://fargana.uz" target="_blank" rel="noopener noreferrer" className="text-white font-bold hover:text-blue-400 transition-colors">
                                 CDCGroup
                             </a>
                         </div>
-                        <span className="hidden sm:block w-px h-4 bg-white/20"></span>
-                        <div className="flex items-center gap-2 group">
+                        <span className="hidden sm:block w-px h-4 bg-white/20" />
+                        <div className="flex items-center gap-2">
                             <span className="opacity-60 text-xs uppercase tracking-wide">{t('footer_support')}:</span>
                             <a href="https://fargana.uz" target="_blank" rel="noopener noreferrer" className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-bold hover:opacity-80 transition-opacity">
                                 CraDev Company

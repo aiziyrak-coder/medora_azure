@@ -15,8 +15,9 @@ import { getAuthToken, clearTokens } from './services/api';
 
 // --- Views & Components ---
 import AuthPage from './components/AuthPage';
-import LandingPage from './components/LandingPage'; // New Import
-import UserGuide from './components/UserGuide'; // New Import
+import LandingPage from './components/LandingPage';
+import UserGuide from './components/UserGuide';
+import AboutInstitutePage from './components/AboutInstitutePage';
 import SubscriptionPage from './components/SubscriptionPage';
 import DoctorDashboard from './components/DoctorDashboard';
 import StaffDashboard from './components/StaffDashboard';
@@ -89,6 +90,7 @@ const AppContent: React.FC = () => {
     // New States for Landing Page Flow
     const [showLanding, setShowLanding] = useState(!currentUser); // Show landing if not logged in
     const [showGuide, setShowGuide] = useState(false);
+    const [showAbout, setShowAbout] = useState(false);
 
     // Sync with API when token exists; clear stale session when no token (avoids 401 on profile/analyses)
     useEffect(() => {
@@ -833,11 +835,14 @@ const AppContent: React.FC = () => {
 
     // --- LANDING PAGE FLOW ---
     if (!currentUser) {
+        if (showAbout) {
+            return <AboutInstitutePage onBack={() => setShowAbout(false)} />;
+        }
         if (showGuide) {
             return <UserGuide onBack={() => setShowGuide(false)} />;
         }
         if (showLanding) {
-            return <LandingPage onLogin={() => setShowLanding(false)} onOpenGuide={() => setShowGuide(true)} />;
+            return <LandingPage onLogin={() => setShowLanding(false)} onOpenGuide={() => setShowGuide(true)} onOpenAbout={() => setShowAbout(true)} />;
         }
         // If not landing, showing AuthPage
         return (
