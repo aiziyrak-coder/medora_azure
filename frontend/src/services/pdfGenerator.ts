@@ -151,7 +151,7 @@ export const generatePdfReport = (
 
     addSectionTitle("Tavsiya Etilgan Davolash Rejasi");
     (Array.isArray(report.treatmentPlan) ? report.treatmentPlan : []).forEach(step => {
-        const s = typeof step === 'string' ? step : (typeof step === 'object' && step !== null ? Object.values(step as Record<string, unknown>).filter(Boolean).join(' — ') : String(step ?? ''));
+        const s = typeof step === 'string' ? step : (typeof step === 'object' && step !== null ? Object.values(step as Record<string, unknown>).filter(Boolean).join(' - ') : String(step ?? ''));
         addText(s, true);
     });
     

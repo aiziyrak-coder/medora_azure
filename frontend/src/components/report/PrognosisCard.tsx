@@ -17,11 +17,11 @@ const PrognosisCard: React.FC<PrognosisCardProps> = ({ prognosis, isLoading }) =
                 <div className="space-y-3 text-sm">
                     <div>
                         <h5 className="font-semibold text-text-secondary">Qisqa muddatli (1-3 oy):</h5>
-                        <p>{prognosis.shortTermPrognosis ?? '—'}</p>
+                        <p>{prognosis.shortTermPrognosis ?? '-'}</p>
                     </div>
                      <div>
                         <h5 className="font-semibold text-text-secondary">Uzoq muddatli (1-5 yil):</h5>
-                        <p>{prognosis.longTermPrognosis ?? '—'}</p>
+                        <p>{prognosis.longTermPrognosis ?? '-'}</p>
                     </div>
                      <div>
                         <h5 className="font-semibold text-text-secondary">Prognozga ta'sir etuvchi asosiy omillar:</h5>

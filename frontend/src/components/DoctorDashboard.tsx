@@ -266,7 +266,7 @@ const PrescriptionTab: React.FC<{ report: FinalReport }> = ({ report }) => {
                     
                     {med.instructions && (
                         <p className="text-xs text-slate-300 bg-black/30 p-3 rounded-lg border border-white/5">
-                            рџ“‹ <span className="font-semibold">{t('report_instructions')}</span> {med.instructions}
+                            рџ"‹ <span className="font-semibold">{t('report_instructions')}</span> {med.instructions}
                         </p>
                     )}
                 </div>
@@ -541,7 +541,7 @@ const ProfileView: React.FC<{ user: User, onLogout: () => void }> = ({ user, onL
 
                     {isPending && (
                         <p className="text-xs text-yellow-200/70 mt-1">
-                            Chekingiz adminlar tomonidan tekshirilmoqda. Odatda 5вЂ“10 daqiqa vaqt oladi.
+                            Chekingiz adminlar tomonidan tekshirilmoqda. Odatda 5-10 daqiqa vaqt oladi.
                         </p>
                     )}
 
@@ -639,7 +639,7 @@ const ProfileView: React.FC<{ user: User, onLogout: () => void }> = ({ user, onL
                                     <CheckCircleIcon className="w-8 h-8 text-green-400" />
                                 </div>
                                 <p className="text-green-400 font-bold">Chek yuborildi!</p>
-                                <p className="text-xs text-slate-400 mt-1">Admin tasdiqlagach obuna faollashadi (5вЂ“10 daqiqa).</p>
+                                <p className="text-xs text-slate-400 mt-1">Admin tasdiqlagach obuna faollashadi (5-10 daqiqa).</p>
                             </div>
                         ) : (
                             <div>
@@ -783,7 +783,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
     const galleryInputRef = useRef<HTMLInputElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { isListening, transcript, startListening, stopListening } = useSpeechToText();
-    /** Diktofon boshlanganda shikoyat matni вЂ” faqat oxirgi transcript yangilanadi, takrorlanmaydi */
+    /** Diktofon boshlanganda shikoyat matni - faqat oxirgi transcript yangilanadi, takrorlanmaydi */
     const complaintsBaseRef = useRef('');
 
     // Init Queue & Settings
@@ -1034,7 +1034,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
         });
     };
 
-    /** Rasmni siqish вЂ” tez tahlil uchun (max 1024px, JPEG) */
+    /** Rasmni siqish - tez tahlil uchun (max 1024px, JPEG) */
     const compressImageToBase64 = (file: File, maxSizePx: number, quality: number): Promise<string> => {
         return new Promise((resolve, reject) => {
             const img = new Image();
@@ -1505,7 +1505,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                 </div>
             )}
 
-            {/* Top Bar (Fixed Header) вЂ” mobil: ixcham, ustma-ust kelmasin */}
+            {/* Top Bar (Fixed Header) - mobil: ixcham, ustma-ust kelmasin */}
             <div className="flex-none px-3 py-2 sm:px-5 sm:py-4 z-50 safe-top">
                 <GlassCard className="flex justify-between items-center gap-2 p-2 sm:p-3 rounded-2xl sm:rounded-full bg-white/5 border-white/10 shadow-lg backdrop-blur-md">
                     <div className="flex items-center gap-2 sm:gap-4 pl-1 sm:pl-2 flex-1 min-w-0 overflow-hidden">
@@ -1664,7 +1664,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                     </div>
                 )}
 
-                {/* VIEW: ZIYRAK вЂ” Raqamli Tibbiy Yordamchi */}
+                {/* VIEW: ZIYRAK - Raqamli Tibbiy Yordamchi */}
                 {view === 'ziyrak' && (
                     <div className="h-full overflow-y-auto custom-scrollbar">
                         <div className="max-w-2xl mx-auto p-4 pb-28">
@@ -1738,7 +1738,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                             </div>
                         )}
 
-                        {/* INPUT MODE вЂ” mobil: scroll qilish mumkin, klaviatura orqasida qolmasin */}
+                        {/* INPUT MODE - mobil: scroll qilish mumkin, klaviatura orqasida qolmasin */}
                         {mode === 'input' && (
                             <div className="flex-grow flex flex-col min-h-0 p-4 flex flex-col h-full">
                                 <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar consultation-scroll mobile-keyboard-pad pb-safe">
@@ -1754,7 +1754,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                                         </div>
                                     </div>
 
-                                    {/* Middle: Shikoyatlar (mobil uchun min-height вЂ” klaviatura uchun joy) */}
+                                    {/* Middle: Shikoyatlar (mobil uchun min-height - klaviatura uchun joy) */}
                                     <div className="flex-none min-h-[220px] mb-3">
                                         <GlassCard className="flex flex-col min-h-[200px] bg-white/5 border border-white/10 overflow-hidden relative">
                                             {isListening && (
@@ -1854,21 +1854,21 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                             </div>
                         )}
 
-                        {/* RESULT VIEW: darhol natija sahifasi, loading вЂ” ingichka qator */}
+                        {/* RESULT VIEW: darhol natija sahifasi, loading - ingichka qator */}
                         {mode === 'result' && (
                             <div className="flex-grow flex flex-col overflow-hidden bg-black/20 backdrop-blur-xl h-full">
-                                {/* Ingichka loading вЂ” "Ma'lumotlar qayta ishlanmoqda" o'rniga */}
+                                {/* Ingichka loading - "Ma'lumotlar qayta ishlanmoqda" o'rniga */}
                                 {isAnalyzing && (
                                     <div className="flex-none flex flex-col gap-0.5 px-4 py-2 bg-blue-500/20 border-b border-blue-500/30">
                                         <div className="flex items-center gap-3">
                                             <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin shrink-0" />
                                             <span className="text-sm font-bold text-blue-200">Tahlil qilinmoqda...</span>
                                         </div>
-                                        <p className="text-[11px] text-white/50">Iltimos, kuting. Sahifani yopmang (10вЂ“20 soniya)</p>
+                                        <p className="text-[11px] text-white/50">Iltimos, kuting. Sahifani yopmang (10-20 soniya)</p>
                                     </div>
                                 )}
 
-                                {/* Bitta sahifa вЂ” 3 bo'lim (Tashxis, Reja, Retsept) */}
+                                {/* Bitta sahifa - 3 bo'lim (Tashxis, Reja, Retsept) */}
                                 {report?.criticalFinding && (
                                     <div className="flex-none mx-4 mt-2 p-4 rounded-2xl bg-red-500/20 border-2 border-red-500/50 shadow-lg">
                                         <div className="flex items-center gap-2 mb-1">
@@ -1938,7 +1938,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                 )}
             </div>
 
-            {/* Bottom Dock вЂ” mobil: ixcham, barcha tugmalar sig'sin */}
+            {/* Bottom Dock - mobil: ixcham, barcha tugmalar sig'sin */}
             {(view !== 'consultation') && (
                 <div className="absolute bottom-3 left-3 right-3 sm:bottom-5 sm:left-5 sm:right-5 z-50">
                     <GlassCard className="flex justify-between sm:justify-around items-center py-2 px-1 sm:py-3 sm:px-2 rounded-2xl sm:rounded-[32px] bg-white/10 border-white/10 backdrop-blur-2xl shadow-2xl">
@@ -1962,7 +1962,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                             {view !== 'ziyrak' && (
                                 <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
                             )}
-                            <span className={`text-base sm:text-lg flex-shrink-0 ${view === 'ziyrak' ? 'drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]' : ''}`}>рџ¤–</span>
+                            <span className={`text-base sm:text-lg flex-shrink-0 ${view === 'ziyrak' ? 'drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]' : ''}`}>рџ¤-</span>
                             <span className="text-[8px] sm:text-[9px] font-bold mt-0.5 sm:mt-1 tracking-wider truncate w-full text-center">Ziyrak</span>
                         </button>
                         <button type="button" onClick={() => setView('profile')} className={`flex flex-col items-center justify-center p-1 sm:p-2 transition-colors min-w-0 flex-1 ${view === 'profile' ? 'text-white' : 'text-white/50 hover:text-white'}`}>

@@ -67,7 +67,7 @@ export const validateName = (name: string, minLength: number = 2): ValidationRes
     return { isValid: false, error: `Ism kamida ${minLength} belgidan iborat bo'lishi kerak.` };
   }
   
-  // Check for valid characters (letters, spaces, hyphens, apostrophes) — any Unicode letter
+  // Check for valid characters (letters, spaces, hyphens, apostrophes) - any Unicode letter
   const nameRegex = /^[\p{L}\s'-]+$/u;
   if (!nameRegex.test(name.trim())) {
     return { isValid: false, error: "Ismda faqat harflar, probellar va tire ishlatilishi mumkin." };

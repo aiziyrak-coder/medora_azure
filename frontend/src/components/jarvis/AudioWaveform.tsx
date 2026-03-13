@@ -1,5 +1,5 @@
 /**
- * AudioWaveform вЂ” Real-time ovoz to'lqini vizualizatsiyasi
+ * AudioWaveform  -  Real-time ovoz to'lqini vizualizatsiyasi
  * Canvas asosida ishlaydi, requestAnimationFrame loop.
  */
 import React, { useRef, useEffect, useCallback } from 'react';

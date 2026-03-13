@@ -41,7 +41,7 @@ export function validatePatientDataSmart(data: Partial<PatientData> | null): Sma
     result.valid = false;
   }
   if (EMPTY(data.age)) {
-    result.warnings.push('Yosh kiritilmagan вЂ“ dozani hisoblashda muhim');
+    result.warnings.push('Yosh kiritilmagan  -  dozani hisoblashda muhim');
   }
 
   // Xavfsizlik: allergiya va dori-darmonlar
@@ -50,7 +50,7 @@ export function validatePatientDataSmart(data: Partial<PatientData> | null): Sma
     result.valid = false;
   }
   if (EMPTY(data.currentMedications)) {
-    result.warnings.push('Joriy dori-darmonlar вЂ“ aralashuv xavfi uchun kiritish tavsiya etiladi');
+    result.warnings.push('Joriy dori-darmonlar  -  aralashuv xavfi uchun kiritish tavsiya etiladi');
   }
 
   // Aqlli maslahatlar

@@ -74,7 +74,7 @@ const getSystemInstruction = (language: Language): string => {
     Vazifangiz: shifokorga ENG ANIQ, DALILLI va XAVFSIZ yechim taqdim etish.
     
     AQLIYAT QOIDALARI:
-    1. Har bir xulosa uchun QADAMMA-QADAM MANTIQIY ZANJIR (chain-of-thought) yozing: "Sabab A в†’ natija B в†’ shuning uchun C."
+    1. Har bir xulosa uchun QADAMMA-QADAM MANTIQIY ZANJIR (chain-of-thought) yozing: "Sabab A в†' natija B в†' shuning uchun C."
     2. Differensial tashxisda har bir variant uchun "Nega bu ehtimol?" va "Nega boshqasi kamroq?" javob bering.
     3. Ishonch darajasini aniq bering (yuqori/o'rta/past) va qaysi ma'lumot yetishmasligi aniqlikni kamaytirishini ayting.
     4. XAVFSIZLIK: Bemor allergiyasi, joriy dori-darmonlar va buyrak/jigar funksiyasi bo'yicha har doim o'ylab bering; xavfli aralashuvlarni darhol bildiring.
@@ -84,7 +84,7 @@ const getSystemInstruction = (language: Language): string => {
        - bunday joylashuvga asoslangan tashxis/davolash bermang;
        - bemor/shifokorga muloyimlik bilan bu anatomik jihatdan mumkin emasligini tushuntiring va kerak bo'lsa to'g'ri joylashuvni aniqlashtirish uchun savol bering.
     7. FIZIOLOGIYA VA FIZIONOMIYA: Har bir holatda bemorning YOSHI, JINSI, VAZNI, VITAL KO'RSATKICHLARI (BP, yurak urishi, harorat, SpO2, nafas soni) va umumiy ko'rinishi (kaxeksiya, semizlik, shish, sianoz, rangparlik, dismorfik belgilar) NI INOBATGA OLING. 
-       - Pediatr bemorlar (0вЂ“18 yosh) va keksalar (65+ yosh) uchun fiziologik chegaralar va dori dozalari boshqacha bo'lishini hisobga oling.
+       - Pediatr bemorlar (0-18 yosh) va keksalar (65+ yosh) uchun fiziologik chegaralar va dori dozalari boshqacha bo'lishini hisobga oling.
        - Homiladorlik, buyrak/jigar yetishmovchiligi, yurak yetishmovchiligi, diabet va boshqa surunkali kasalliklar fonida dori tanlash va dozalashni moslashtiring.
        - FIZIONOMIK BELGILAR (teri rangi, shish, nafas qisilishi, qiyofadagi og'riq ifodasi, nevrologik holat va h.k.) tashxis ehtimolini oshirishi yoki kamaytirishini mantiqan izohlab bering, lekin hech qachon diskriminatsion xulosa chiqarmang.
     8. MANTIQIY TROLLING VA MOS KELMASLIK: Agar foydalanuvchi ataylab chalg'ituvchi, o'zaro zid yoki fiziologik/anatomik jihatdan bir-biriga to'g'ri kelmaydigan ma'lumotlar kiritsa:
@@ -96,24 +96,24 @@ const getSystemInstruction = (language: Language): string => {
 
     const specificInstructions: Record<Language, string> = {
         'uz-L': `
-        TIL: Barcha javoblaringiz qat'iy O'zbek tilida (Lotin grafikasida) bo'lishi SHART. Yulduzcha (*) va inglizcha iboralar (finding, implication, urgency, critical finding va hokazo) ISHLATMANG — ularni o'zbekcha yozing (topilma, oqibat, shoshilinchlik, muhim topilma). Tibbiy atamalar ham o'zbekcha yoki SSV qabul qilgan atamalar bo'lsin.
+        TIL: Barcha javoblaringiz qat'iy O'zbek tilida (Lotin grafikasida) bo'lishi SHART. Yulduzcha (*) va inglizcha iboralar (finding, implication, urgency, critical finding va hokazo) ISHLATMANG - ularni o'zbekcha yozing (topilma, oqibat, shoshilinchlik, muhim topilma). Tibbiy atamalar ham o'zbekcha yoki SSV qabul qilgan atamalar bo'lsin.
         O'ZBEKISTON KONTEKSTI (MAJBURIY): Tashxis, davolash rejasi va dori-darmonlar faqat O'zbekiston Respublikasi qonunchiligi va SSV (Sog'liqni Saqlash Vazirligi) tasdiqlangan klinik protokollarga muvofiq bo'lsin. Dori-darmonlar faqat O'zbekistonda ro'yxatdan o'tgan va aptekalarda mavjud savdo nomlari bilan (Nimesil, Sumamed, Augmentin, Metformin, Enalapril, Amlodipin, Omeprazol va hokazo).
         TERMINOLOGIYA: O'zbek tibbiyot terminologiyasi va SSV qabul qilgan atamalar.
         `,
         'uz-C': `
-        РўРР›: Р‘Р°СЂС‡Р° Р¶Р°РІРѕР±Р»Р°СЂРёРЅРіРёР· Т›Р°С‚СЉРёР№ РЋР·Р±РµРє С‚РёР»РёРґР° (РљРёСЂРёР»Р» РіСЂР°С„РёРєР°СЃРёРґР°) Р±СћР»РёС€Рё РЁРђР Рў.
-        РЋР—Р‘Р•РљРРЎРўРћРќ РљРћРќРўР•РљРЎРўР (РњРђР–Р‘РЈР РР™): РўР°С€С…РёСЃ, РґР°РІРѕР»Р°С€ СЂРµР¶Р°СЃРё РІР° РґРѕСЂРё-РґР°СЂРјРѕРЅР»Р°СЂ С„Р°Т›Р°С‚ РЋР·Р±РµРєРёСЃС‚РѕРЅ Р РµСЃРїСѓР±Р»РёРєР°СЃРё Т›РѕРЅСѓРЅС‡РёР»РёРіРё РІР° РЎРЎР’ С‚Р°СЃРґРёТ›Р»Р°РіР°РЅ РєР»РёРЅРёРє РїСЂРѕС‚РѕРєРѕР»Р»Р°СЂРіР° РјСѓРІРѕС„РёТ› Р±СћР»СЃРёРЅ. Р”РѕСЂРё-РґР°СЂРјРѕРЅР»Р°СЂ С„Р°Т›Р°С‚ РЋР·Р±РµРєРёСЃС‚РѕРЅРґР° СЂСћР№С…Р°С‚РґР°РЅ СћС‚РіР°РЅ РІР° Р°РїС‚РµРєР°Р»Р°СЂРґР° РјР°РІР¶СѓРґ СЃР°РІРґРѕ РЅРѕРјР»Р°СЂРё Р±РёР»Р°РЅ.
-        РўР•Р РњРРќРћР›РћР“РРЇ: РЋР·Р±РµРє С‚РёР±Р±РёС‘С‚ С‚РµСЂРјРёРЅРѕР»РѕРіРёСЏСЃРё РІР° РЎРЎР’ Т›Р°Р±СѓР» Т›РёР»РіР°РЅ Р°С‚Р°РјР°Р»Р°СЂ.
+        РўРР›: Р'Р°СЂС‡Р° Р¶Р°РІРѕР±Р»Р°СЂРёРЅРіРёР· Т›Р°С‚СЉРёР№ РЋР·Р±РµРє С‚РёР»РёРґР° (РљРёСЂРёР»Р» РіСЂР°С„РёРєР°СЃРёРґР°) Р±СћР»РёС€Рё РЁРђР Рў.
+        РЋР-Р'Р•РљРРЎРўРћРќ РљРћРќРўР•РљРЎРўР (РњРђР-Р'РЈР РР™): РўР°С€С…РёСЃ, РґР°РІРѕР»Р°С€ СЂРµР¶Р°СЃРё РІР° РґРѕСЂРё-РґР°СЂРјРѕРЅР»Р°СЂ С„Р°Т›Р°С‚ РЋР·Р±РµРєРёСЃС‚РѕРЅ Р РµСЃРїСѓР±Р»РёРєР°СЃРё Т›РѕРЅСѓРЅС‡РёР»РёРіРё РІР° РЎРЎР' С‚Р°СЃРґРёТ›Р»Р°РіР°РЅ РєР»РёРЅРёРє РїСЂРѕС‚РѕРєРѕР»Р»Р°СЂРіР° РјСѓРІРѕС„РёТ› Р±СћР»СЃРёРЅ. Р"РѕСЂРё-РґР°СЂРјРѕРЅР»Р°СЂ С„Р°Т›Р°С‚ РЋР·Р±РµРєРёСЃС‚РѕРЅРґР° СЂСћР№С…Р°С‚РґР°РЅ СћС‚РіР°РЅ РІР° Р°РїС‚РµРєР°Р»Р°СЂРґР° РјР°РІР¶СѓРґ СЃР°РІРґРѕ РЅРѕРјР»Р°СЂРё Р±РёР»Р°РЅ.
+        РўР•Р РњРРќРћР›РћР"РРЇ: РЋР·Р±РµРє С‚РёР±Р±РёС'С‚ С‚РµСЂРјРёРЅРѕР»РѕРіРёСЏСЃРё РІР° РЎРЎР' Т›Р°Р±СѓР» Т›РёР»РіР°РЅ Р°С‚Р°РјР°Р»Р°СЂ.
         `,
         'kaa': `
         TIL: BarlД±q juwaplarД±Е„Д±z qataЕ„ Qaraqalpaq tilinde (Lotin grafikasД±nda) bolД±wД± SHГЃRT.
-        Г“ZBEKISTAN KONTEKSTI (MAJBГљRI): Tashxis, emlew rejasi hГЎm dГЎri-darmonlar tek Г“zbekistan RespublikasД± qonunshД±lД±ЗµД± hГЎm SSV tasdД±qlagan klinikalД±q protokollarga sГЎykes bolsД±n. DГЎri-darmonlar tek Г“zbekistonda dizimnen Гіtken hГЎm aptekalarda bar savdo atlarД± menen.
+        Г"ZBEKISTAN KONTEKSTI (MAJBГљRI): Tashxis, emlew rejasi hГЎm dГЎri-darmonlar tek Г"zbekistan RespublikasД± qonunshД±lД±ЗµД± hГЎm SSV tasdД±qlagan klinikalД±q protokollarga sГЎykes bolsД±n. DГЎri-darmonlar tek Г"zbekistonda dizimnen Гіtken hГЎm aptekalarda bar savdo atlarД± menen.
         TERMINOLOGIYA: Qaraqalpaq/O'zbek medicinalД±q terminologiyasД±.
         `,
         'ru': `
-        РЇР—Р«Рљ: Р’СЃРµ РІР°С€Рё РѕС‚РІРµС‚С‹ Р”РћР›Р–РќР« Р±С‹С‚СЊ СЃС‚СЂРѕРіРѕ РЅР° Р СѓСЃСЃРєРѕРј СЏР·С‹РєРµ.
-        РљРћРќРўР•РљРЎРў РЈР—Р‘Р•РљРРЎРўРђРќРђ (РћР‘РЇР—РђРўР•Р›Р¬РќРћ): Р”РёР°РіРЅРѕР·, РїР»Р°РЅ Р»РµС‡РµРЅРёСЏ Рё РїСЂРµРїР°СЂР°С‚С‹ вЂ“ СЃС‚СЂРѕРіРѕ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ Р·Р°РєРѕРЅРѕРґР°С‚РµР»СЊСЃС‚РІРѕРј Р РµСЃРїСѓР±Р»РёРєРё РЈР·Р±РµРєРёСЃС‚Р°РЅ Рё РєР»РёРЅРёС‡РµСЃРєРёРјРё РїСЂРѕС‚РѕРєРѕР»Р°РјРё, СѓС‚РІРµСЂР¶РґС‘РЅРЅС‹РјРё РњРёРЅР·РґСЂР°РІРѕРј (РЎРЎР’). РџСЂРµРїР°СЂР°С‚С‹ вЂ“ С‚РѕР»СЊРєРѕ Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹Рµ РІ РЈР·Р±РµРєРёСЃС‚Р°РЅРµ Рё РґРѕСЃС‚СѓРїРЅС‹Рµ РІ Р°РїС‚РµРєР°С… (С‚РѕСЂРіРѕРІС‹Рµ РЅР°Р·РІР°РЅРёСЏ: РќРёРјРёСЃРёР», РЎСѓРјР°РјРµРґ, РђСѓРіРјРµРЅС‚РёРЅ, РњРµС‚С„РѕСЂРјРёРЅ, Р­РЅР°Р»Р°РїСЂРёР» Рё С‚.Рґ.).
-        РўР•Р РњРРќРћР›РћР“РРЇ: РџСЂРѕС„РµСЃСЃРёРѕРЅР°Р»СЊРЅР°СЏ РјРµРґРёС†РёРЅСЃРєР°СЏ С‚РµСЂРјРёРЅРѕР»РѕРіРёСЏ РЅР° СЂСѓСЃСЃРєРѕРј; РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё вЂ“ С‚РµСЂРјРёРЅС‹, РїСЂРёРЅСЏС‚С‹Рµ РІ РЈР·Р±РµРєРёСЃС‚Р°РЅРµ.
+        РЇР-Р«Рљ: Р'СЃРµ РІР°С€Рё РѕС‚РІРµС‚С‹ Р"РћР›Р-РќР« Р±С‹С‚СЊ СЃС‚СЂРѕРіРѕ РЅР° Р СѓСЃСЃРєРѕРј СЏР·С‹РєРµ.
+        РљРћРќРўР•РљРЎРў РЈР-Р'Р•РљРРЎРўРђРќРђ (РћР'РЇР-РђРўР•Р›Р¬РќРћ): Р"РёР°РіРЅРѕР·, РїР»Р°РЅ Р»РµС‡РµРЅРёСЏ Рё РїСЂРµРїР°СЂР°С‚С‹ - СЃС‚СЂРѕРіРѕ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ Р·Р°РєРѕРЅРѕРґР°С‚РµР»СЊСЃС‚РІРѕРј Р РµСЃРїСѓР±Р»РёРєРё РЈР·Р±РµРєРёСЃС‚Р°РЅ Рё РєР»РёРЅРёС‡РµСЃРєРёРјРё РїСЂРѕС‚РѕРєРѕР»Р°РјРё, СѓС‚РІРµСЂР¶РґС'РЅРЅС‹РјРё РњРёРЅР·РґСЂР°РІРѕРј (РЎРЎР'). РџСЂРµРїР°СЂР°С‚С‹ - С‚РѕР»СЊРєРѕ Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹Рµ РІ РЈР·Р±РµРєРёСЃС‚Р°РЅРµ Рё РґРѕСЃС‚СѓРїРЅС‹Рµ РІ Р°РїС‚РµРєР°С… (С‚РѕСЂРіРѕРІС‹Рµ РЅР°Р·РІР°РЅРёСЏ: РќРёРјРёСЃРёР», РЎСѓРјР°РјРµРґ, РђСѓРіРјРµРЅС‚РёРЅ, РњРµС‚С„РѕСЂРјРёРЅ, Р­РЅР°Р»Р°РїСЂРёР» Рё С‚.Рґ.).
+        РўР•Р РњРРќРћР›РћР"РРЇ: РџСЂРѕС„РµСЃСЃРёРѕРЅР°Р»СЊРЅР°СЏ РјРµРґРёС†РёРЅСЃРєР°СЏ С‚РµСЂРјРёРЅРѕР»РѕРіРёСЏ РЅР° СЂСѓСЃСЃРєРѕРј; РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё - С‚РµСЂРјРёРЅС‹, РїСЂРёРЅСЏС‚С‹Рµ РІ РЈР·Р±РµРєРёСЃС‚Р°РЅРµ.
         `,
         'en': `
         LANGUAGE: All your responses MUST be strictly in English.
@@ -322,7 +322,7 @@ function tryRepairTruncatedJson(raw: string): unknown | null {
     return null;
 }
 
-/** Mobil qurilma (telefon) вЂ” sekin tarmoq va kesilishlarda ko'proq qayta urinish kerak */
+/** Mobil qurilma (telefon) - sekin tarmoq va kesilishlarda ko'proq qayta urinish kerak */
 const isMobile = (): boolean => {
     if (typeof navigator === 'undefined') return false;
     const ua = navigator.userAgent || '';
@@ -514,7 +514,7 @@ const buildMultimodalPrompt = (introText: string, data: PatientData) => {
     return { parts };
 };
 
-/** Doktor tez tahlili uchun: tarix kontekstisiz, minimal prompt вЂ” maksimal tezlik */
+/** Doktor tez tahlili uchun: tarix kontekstisiz, minimal prompt - maksimal tezlik */
 const buildFastDoctorPrompt = (introText: string, data: PatientData) => {
     const { attachments, ...rest } = data;
     const textData = JSON.stringify(rest);
@@ -533,8 +533,8 @@ const buildFastDoctorPrompt = (introText: string, data: PatientData) => {
 };
 
 
-// --- SINGLE DOCTOR MODE (TEZKOR вЂ” faqat doktor profilida) ---
-/** Tez tahlil: qisqa tizim вЂ” tez qaytish uchun */
+// --- SINGLE DOCTOR MODE (TEZKOR - faqat doktor profilida) ---
+/** Tez tahlil: qisqa tizim - tez qaytish uchun */
 const getFastDoctorSystemInstruction = (language: Language): string => {
     const til = langMap[language];
     return `Siz shifokor uchun amaliy tibbiy yordamchisiz. Javob: ${til}, FAQAT JSON.
@@ -771,7 +771,7 @@ export const runDoctorSupportViaGemini = async (
             },
         },
         diagnosis: {
-            prompt: `3–5 ta differensial tashxis bering. Har biri: name, probability (%) — dalil kuchiga mos, justification — nega shunday, evidence_level, reasoning_chain — har qadam "nima uchun", uzbek_protocol — aniq SSV protokol nomi/yo'nalishi. red_flags agar bor. Eng ehtimolini birinchi qo'ying. Til: ${langLabel}.`,
+            prompt: `3-5 ta differensial tashxis bering. Har biri: name, probability (%) - dalil kuchiga mos, justification - nega shunday, evidence_level, reasoning_chain - har qadam "nima uchun", uzbek_protocol - aniq SSV protokol nomi/yo'nalishi. red_flags agar bor. Eng ehtimolini birinchi qo'ying. Til: ${langLabel}.`,
             schema: {
                 type: 'object',
                 properties: {
@@ -781,7 +781,7 @@ export const runDoctorSupportViaGemini = async (
             },
         },
         treatment_plan: {
-            prompt: `SSV protokoliga mos davolash rejasi: treatment_plan (aniq qadamlar), medications (name, dosage, frequency, duration, timing, instructions), non_pharmacological, monitoring, uzbek_protocol_ref — aniq protokol havolasi. Til: ${langLabel}.`,
+            prompt: `SSV protokoliga mos davolash rejasi: treatment_plan (aniq qadamlar), medications (name, dosage, frequency, duration, timing, instructions), non_pharmacological, monitoring, uzbek_protocol_ref - aniq protokol havolasi. Til: ${langLabel}.`,
             schema: {
                 type: 'object',
                 properties: {
@@ -853,7 +853,7 @@ export const runDoctorSupportViaGemini = async (
 
 
 export const generateClarifyingQuestions = async (data: PatientData, language: Language): Promise<string[]> => {
-    // Minimal text prompt — no images, no heavy system instruction to save tokens
+    // Minimal text prompt - no images, no heavy system instruction to save tokens
     const patientSummary = [
         data.complaints ? `Shikoyat: ${data.complaints}` : '',
         data.history    ? `Anamnez: ${data.history}`    : '',
@@ -933,7 +933,7 @@ export const generateInitialDiagnoses = async (data: PatientData, language: Lang
         `Analyze the patient data. Generate 3-5 most likely differential diagnoses. O'ZBEKISTON KONTEKSTI MAJBURIY.
         MANDATORY FIELDS (keep each string SHORT to avoid truncation):
         1. "name": Diagnosis name in ${langMap[language]} (aniq, qisqa).
-        2. "justification": 1-2 jumla — nega shunday tashxis; dalil asosida.
+        2. "justification": 1-2 jumla - nega shunday tashxis; dalil asosida.
         3. "reasoningChain": 2-3 qisqa qadam: simptom → sabab → tashxis.
         4. "uzbekProtocolMatch": SSV protokol nomi yoki yo'nalishi (qisqa).
         ANIQLIK: probability ni dalil kuchiga mos qo'ying. Eng ehtimolini birinchi qo'ying.
@@ -985,8 +985,8 @@ function normalizePrognosisReport(raw: unknown): PrognosisReport | null {
     const keyFactors = Array.isArray(obj.keyFactors) ? obj.keyFactors.filter((f: unknown) => typeof f === 'string') as string[] : [];
     const confidenceScore = typeof obj.confidenceScore === 'number' && obj.confidenceScore >= 0 && obj.confidenceScore <= 1 ? obj.confidenceScore : 0.5;
     return {
-        shortTermPrognosis: shortTerm || '—',
-        longTermPrognosis: longTerm || '—',
+        shortTermPrognosis: shortTerm || '-',
+        longTermPrognosis: longTerm || '-',
         keyFactors,
         confidenceScore,
     };
@@ -1100,17 +1100,17 @@ export const runCouncilDebate = async (
                 ? `\n\nBoshqa mutaxassislarning OXIRGI fikrlari (ularga to'g'ridan-to'g'ri munosabat bildiring, ismlari bilan):\n${otherSpecialistMessages.map(m => `${m.author}: "${m.content.slice(0, 200)}..."`).join('\n')}`
                 : '';
 
-            const textPrompt = `Siz — ${specialist?.name || spec.role} (${specialist?.title || 'mutaxassis'}).
+            const textPrompt = `Siz - ${specialist?.name || spec.role} (${specialist?.title || 'mutaxassis'}).
 
 VAZIFANGIZ: Konsilium raisi savoli: "${currentTopic}"${rebuttalContext}
 
 MUHIM QOIDALAR:
 1. O'z mutaxassislik sohangizdagi KUCHLi, ANIQ KLINIK FIKR bildiring. Umumiy gaplar kerak emas.
-2. Agar boshqa mutaxassis NOTO'G'RI yoki CHALA yozgan bo'lsa — ismi bilan, DALIL asosida RAD ETING: "Dr. [ism] ning [narsa] haqidagi fikridan farqli o'laroq..."
+2. Agar boshqa mutaxassis NOTO'G'RI yoki CHALA yozgan bo'lsa - ismi bilan, DALIL asosida RAD ETING: "Dr. [ism] ning [narsa] haqidagi fikridan farqli o'laroq..."
 3. O'z tashxisingizni HIMOYA qiling, lekin yangi dalillar bo'lsa fikringizni YANGILANG.
 4. Faqat O'zbekistonda mavjud dori-darmonlar (Nimesil, Sumamed, Metformin, Enalapril va h.k.).
 5. SSV klinik protokollariga aniq havola bering.
-6. Agar MUHIM ma'lumot yetishmasa: "Shifokordan so'rashim kerak: [savol]" — deb yozing.
+6. Agar MUHIM ma'lumot yetishmasa: "Shifokordan so'rashim kerak: [savol]" - deb yozing.
 7. TIL: ${langMap[language]} FAQAT.
 
 Bahslar tarixi: ${JSON.stringify(debateHistory.slice(-6))}`;
@@ -1135,13 +1135,13 @@ Bahslar tarixi: ${JSON.stringify(debateHistory.slice(-6))}`;
         }
         
         if (round < DEBATE_ROUNDS) {
-            const summarizationPrompt = `Siz — Konsilium raisi. ${round}-bosqich tugadi.
+            const summarizationPrompt = `Siz - Konsilium raisi. ${round}-bosqich tugadi.
 
 VAZIFANGIZ:
 1. Mutaxassislar o'rtasidagi ASOSIY ZIDDIYAT yoki KELISHMOVCHILIKNI ko'rsating.
 2. Eng munozarali TASHXIS yoki DAVOLASH masalasini ANIQ YO'NALTIRING.
 3. Agar shifokordan ma'lumot kerak bo'lsa: "FOYDALANUVCHI UCHUN SAVOL: [savol]" formatida yozing.
-4. Keyingi bosqich uchun KESKIN, ANIQ savol bering — mutaxassislarni bahslashishga undasin.
+4. Keyingi bosqich uchun KESKIN, ANIQ savol bering - mutaxassislarni bahslashishga undasin.
 
 TIL: ${langMap[language]}.
 Tarixi: ${JSON.stringify(debateHistory.slice(-8))}`;
@@ -1192,10 +1192,10 @@ Tarixi: ${JSON.stringify(debateHistory.slice(-8))}`;
         1. consensusDiagnosis: har biri uchun reasoningChain, justification, evidenceLevel. uzbekProtocolMatch: qaysi SSV klinik protokoliga mos (masalan: "Arterial gipertenziya / Qandli diabet bo'yicha SSV klinik protokoliga muvofiq") yoki "SSV tasdiqlangan milliy klinik protokollariga muvofiq" deb yozing.
         2. treatmentPlan: SSV protokollariga muvofiq, batafsil va tartibli; shoshilinch bo'lsa birinchi qadamlar aniq.
         3. medicationRecommendations: FAQAT O'zbekiston Respublikasida ro'yxatdan o'tgan va aptekalarda mavjud savdo nomlari (Nimesil, Sumamed, Augmentin, Metformin, Enalapril, Amlodipin, Omeprazol, Paratsetamol, Ibuprofen va hokazo). Allergiya va dori aralashuvini hisobga oling. localAvailability: "O'zbekistonda mavjud" yoki qisqacha izoh.
-        4. criticalFinding: hayotga xavf yoki shoshilinch davolash kerak bo'lsa to'ldiring (finding, implication, urgency — barchasi o'zbekcha); yo'q bo'lsa bo'sh qoldiring.
+        4. criticalFinding: hayotga xavf yoki shoshilinch davolash kerak bo'lsa to'ldiring (finding, implication, urgency - barchasi o'zbekcha); yo'q bo'lsa bo'sh qoldiring.
         5. recommendedTests: yetishmayotgan muhim tekshiruvlar (O'zbekiston LITS va standartlariga mos).
         6. uzbekistanLegislativeNote: "O'zbekiston Respublikasi sog'liqni saqlash qonunchiligi va SSV tasdiqlangan klinik protokollariga muvofiq" yoki tegishli qisqacha eslatma.
-        ANIQLIK: consensusDiagnosis da probability ni dalil kuchiga mos qo'ying; reasoningChain har qadamda "nima uchun" javob bersin (HAR BIR ELEMENT 1-2 JUMLADAN OSHMASIN, qisqa holda yozing — to'liq JSON kesilmasin); uzbekProtocolMatch aniq protokol nomi/yo'nalishi. Taxminiy tashxisni yakuniy deb yozmang.
+        ANIQLIK: consensusDiagnosis da probability ni dalil kuchiga mos qo'ying; reasoningChain har qadamda "nima uchun" javob bersin (HAR BIR ELEMENT 1-2 JUMLADAN OSHMASIN, qisqa holda yozing - to'liq JSON kesilmasin); uzbekProtocolMatch aniq protokol nomi/yo'nalishi. Taxminiy tashxisni yakuniy deb yozmang.
         Debate history: ${JSON.stringify(debateHistory)}
     `;
     
@@ -1279,7 +1279,7 @@ export const getIcd10Codes = async (diagnosis: string, language: Language): Prom
 export const searchClinicalGuidelines = async (query: string, language: Language): Promise<GuidelineSearchResult> => {
     const systemInstr = getSystemInstruction(language);
     const prompt = `Summarize clinical guidelines for "${query}". Prefer and prioritize: (1) Uzbekistan SSV (Sog'liqni Saqlash Vazirligi) approved national clinical protocols, (2) WHO and international guidelines adopted in Uzbekistan. Output Language: ${langMap[language]}.`;
-    // Azure OpenAI doesn't support Google Search grounding вЂ“ plain text call
+    // Azure OpenAI doesn't support Google Search grounding - plain text call
     const summary = await callGemini(prompt, DEPLOY_PRO, undefined, false, systemInstr) as string;
     return {
         summary,
@@ -1620,7 +1620,7 @@ export const runResearchCouncilDebate = async (
     };
 
     try {
-        // Azure OpenAI вЂ“ JSON response (no grounding/web search available)
+        // Azure OpenAI - JSON response (no grounding/web search available)
         const rawText = await callGemini(prompt, DEPLOY_PRO, {}, false, systemInstr) as string;
         const cleanedText = (rawText || '').replace(/^```json\s*|```\s*$/g, '').trim();
 
@@ -1723,7 +1723,7 @@ Talablar:
 - Har bir dori nomini matnda qayta tilga oling.
 - O'zaro ta'sirning asosiy farmakodinamik va/yoki farmakokinetik mexanizmini tushuntiring.
 - Klinik misol(lar) keltiring: qaysi holatlarda ayniqsa xavfli bo'ladi.
-- Kamida 3вЂ“4 jumla yozing.
+- Kamida 3-4 jumla yozing.
 
 Faqat soddalashtirilgan matn yozing, hech qanday ro'yxat, bullet, JSON yoki kod ishlatmang.
 Javob tili: ${langMap[language]}.
@@ -1748,7 +1748,7 @@ Talablar:
 - Qaysi bemor guruhlari uchun (yoshi katta, surunkali buyrak/jigar yetishmovchiligi, yurak yetishmovchiligi va h.k.) xavf yuqori bo'lishi mumkinligini aniq yozing.
 - Qanday monitoring zarur: qon bosimi, yurak urishi, EKG, INR, buyrak/jigar funksiyasi va h.k.
 - Qachon dozani o'zgartirish yoki dori(lar)ni almashtirish kerak bo'lishi mumkinligini tushuntiring.
-- Kamida 3вЂ“4 jumla yozing.
+- Kamida 3-4 jumla yozing.
 
 Faqat izoh matnini yozing, ro'yxat va JSON ishlatmang.
 Javob tili: ${langMap[language]}.

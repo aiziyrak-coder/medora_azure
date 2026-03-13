@@ -114,7 +114,7 @@ const planItemToString = (item: unknown): string => {
         const o = item as Record<string, unknown>;
         return [o.step, o.details, o.urgency, o.action, o.description, o.text]
             .filter(v => v && typeof v === 'string')
-            .join(' — ') || JSON.stringify(item);
+            .join(' - ') || JSON.stringify(item);
     }
     return String(item ?? '');
 };

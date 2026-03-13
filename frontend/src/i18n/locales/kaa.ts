@@ -40,7 +40,7 @@ export const kaa: TranslationSet = {
 
   // Auth Page & Marketing
   auth_marketing_title: 'KlinikalД±q pikirlew revolyuciyasД±.',
-  auth_marketing_desc: 'Farg\'ona JSTIAi вЂ” bul ГЎpiwayД± sanlД± jГЎrdemshi emes, bul medicinanД±Е„ jaЕ„a dГЎwiri. Biz mД±Е„laЗµan klinikalД±q protokollar, global medicinalД±q izertlewler hГЎm xalД±qaralД±q ekspertiza bazasД±n birden-bir intellektual ekotizimge birlestirdik. Tizim hГЎr bir nawqasqa individual jandasip, quramalД± diagnostikalД±q jumbaqlardД± sheshiwde, emlew taktikasД±n optimallastД±rД±wda hГЎм medicinalД±q qГЎtelerdi minimallastД±rД±wda shД±pakerdiЕ„ eЕ„ isenimli serigine aylanadД±.',
+  auth_marketing_desc: 'Farg\'ona JSTIAi - bul ГЎpiwayД± sanlД± jГЎrdemshi emes, bul medicinanД±Е„ jaЕ„a dГЎwiri. Biz mД±Е„laЗµan klinikalД±q protokollar, global medicinalД±q izertlewler hГЎm xalД±qaralД±q ekspertiza bazasД±n birden-bir intellektual ekotizimge birlestirdik. Tizim hГЎr bir nawqasqa individual jandasip, quramalД± diagnostikalД±q jumbaqlardД± sheshiwde, emlew taktikasД±n optimallastД±rД±wda hГЎм medicinalД±q qГЎtelerdi minimallastД±rД±wda shД±pakerdiЕ„ eЕ„ isenimli serigine aylanadД±.',
   auth_mode_select: 'Rejimni taЕ„laЕ„:',
   auth_mode_clinic: 'Klinika',
   auth_mode_clinic_desc: 'ShГіlkemler hГЎm konsilium ushД±n.',
@@ -163,7 +163,7 @@ export const kaa: TranslationSet = {
   dashboard_new_analysis_title: 'JaЕ„a Konsilium',
   dashboard_new_analysis_desc: 'QuramalД± jaЗµday ushД±н jaЕ„a AI konsiliumin baslaЕ„.',
   dashboard_archive_title: 'Analizler Arxivi',
-  dashboard_archive_desc: 'Г“tkerilgen barlД±q analizler hГЎм juwmaqlardД± kГіrip shД±ЗµД±Е„.',
+  dashboard_archive_desc: 'Г"tkerilgen barlД±q analizler hГЎм juwmaqlardД± kГіrip shД±ЗµД±Е„.',
   dashboard_tools_title: 'Instrumentler Paneli',
   dashboard_tools_desc: 'KГєndelik wazД±ypalar ushД±н AI jГЎrdemshi quraldarД±nan paydalanД±Е„.',
   dashboard_start: 'Baslaw',
@@ -232,7 +232,7 @@ export const kaa: TranslationSet = {
   data_input_suggestions_symptoms: 'Tiysli Simptomlar',
   data_input_suggestions_questions: 'ГЃhmiyetli Sorawlar',
   data_input_history_label: 'Kesellik tariyxД± (Anamnez morbi)',
-  data_input_history_placeholder: 'Г“tkergen kesellikleri, operaciyalar...',
+  data_input_history_placeholder: 'Г"tkergen kesellikleri, operaciyalar...',
   data_input_objective_label: 'Obyektiv kГіrik maЗµlД±wmatlarД±',
   data_input_objective_placeholder: 'UlД±wma jaЗµdayД±, teri qaplamalarД±, dem alД±w, puls...',
   data_input_labs_structured_title: 'Laboratoriya NГЎtiyjeleri (Struktur.)',
@@ -300,7 +300,7 @@ export const kaa: TranslationSet = {
   ddx_feedback_less_likely: 'ItimalД± tГімен',
   ddx_feedback_needs_review: 'QosД±msha tekseriw kerek',
   ddx_inject_hypothesis: 'Gipoteza qosД±w',
-  ddx_inject_placeholder: 'Г“z gipotezaЕ„Д±zdД± kiritiЕ„...',
+  ddx_inject_placeholder: 'Г"z gipotezaЕ„Д±zdД± kiritiЕ„...',
   ddx_add: 'QosД±w',
   ddx_start_debate: 'MunozaranД± Baslaw',
   
@@ -399,7 +399,7 @@ export const kaa: TranslationSet = {
   landing_testimonials_title: 'QГЎnigeler Isenimi',
   landing_partners_title: 'Bizge isenetuЗµД±n klinikalar',
   
-  landing_cta_bottom_title: 'MedicinalД±q ГЃmeliyatД±Е„Д±zdД± BГєgin Г“zgertiЕ„',
+  landing_cta_bottom_title: 'MedicinalД±q ГЃmeliyatД±Е„Д±zdД± BГєgin Г"zgertiЕ„',
   landing_cta_bottom_desc: 'Farg\'ona JSTIAi menen islewdi baslaЕ„ hГЎм hГЎr bir nawqasqa joqarД± anД±qlД±qtaЗµД± diagnoz qoyД±Е„.',
   landing_cta_bottom_btn: 'Tizimge Kiriw',
   
@@ -427,7 +427,7 @@ export const kaa: TranslationSet = {
   alert_min_drugs: 'Keminde 2 dori kiritiЕ„.',
   
   // Drug interaction tool
-  drug_interaction_title: 'Dori Г“zara TГЎsiri',
+  drug_interaction_title: 'Dori Г"zara TГЎsiri',
   drug_interaction_desc: 'Bir waqД±тД±Е„ Гізinde qabД±л qД±лД±naatqan dorilardД± kiritiЕ„. Tizim olardД±Е„ Гізara tГЎsirin tahlil qД±lД±p, xawf dГЎrejesi hГЎм amalД±y tawsД±yalardД± (qaysД± dori menen ehtiyat bolД±w kerek, dozanД± Гізгertiw kerekmi hГЎм h.k.) kГірсетedi. Bul qural klinikalД±q qarornД± toltД±radД±, biraq shД±пaker qararД±n almastД±rmaydД±.',
   drug_name_placeholder: 'Dori atД± (Aspirin, Metformin...)',
   drug_add_button: '+ Dori qosД±w',
@@ -435,8 +435,8 @@ export const kaa: TranslationSet = {
   drug_checking: 'Tekshirilmekte...',
   drug_safe: 'Xawfsiz',
   drug_severity_label: 'Xawf dГЎrejesi:',
-  drug_clinical_significance: 'рџ”¬ KlinikalД±q ГЎhmiyeti:',
-  drug_recommendations: 'рџ“‹ TawsД±yalar:',
+  drug_clinical_significance: 'рџ"¬ KlinikalД±q ГЎhmiyeti:',
+  drug_recommendations: 'рџ"‹ TawsД±yalar:',
   drug_tools_title: 'рџ§Є Dori qurallarД±',
   
   // Doctor Dashboard
@@ -451,7 +451,7 @@ export const kaa: TranslationSet = {
   assistant_registrator: 'JardamshД± (Registrator)',
   assistant_name_placeholder: 'JardamshД± atД±',
   assistant_added_success: 'JardamshД± muvafaqД±yatlД± qosД±ldД±! Ol Гіz telefonД± hГЎм parolД± menen kiriw mГємkin.',
-  assistant_delete_disabled: 'Г“shiriw funksiyasД± hГЎzirshe isleydi.',
+  assistant_delete_disabled: 'Г"shiriw funksiyasД± hГЎzirshe isleydi.',
   assistant_deleted: 'JardamshД± Гіshirildi.',
   tv_settings: 'TV Ekran SazlamalarД±',
   tv_settings_saved: 'Sazlamalar saqlandД±.',
@@ -480,11 +480,11 @@ export const kaa: TranslationSet = {
   report_treatment_tactics: 'Emlew taktikasi',
   report_additional_tests: 'QosД±msha tekshiriwler',
   report_no_medication: 'Dori tawsД±ya qД±lД±nbaЗµan.',
-  report_uzbekistan_badge: 'Г“zbekistan',
-  report_dosage: 'рџ’Љ Dozasi',
-  report_frequency: 'рџ”Ѓ Chastota',
+  report_uzbekistan_badge: 'Г"zbekistan',
+  report_dosage: 'рџ'Љ Dozasi',
+  report_frequency: 'рџ"Ѓ Chastota',
   report_timing: 'вЏ° WaqД±t',
-  report_duration: 'рџ“… DawamlД±ЗµД±',
+  report_duration: 'рџ"… DawamlД±ЗµД±',
   report_instructions: 'YarД±qnama:',
   report_disclaimer: 'Diqqat: Bul elektron retsept tawsД±yaviy xarakterge iye.',
   doc_no_documents: 'Hujjatlar joq.',
@@ -605,8 +605,8 @@ export const kaa: TranslationSet = {
   testimonial_1_text: 'Farg\'ona JSTIAi quramalД± jaЗµdaylarda ekinshi pikir alД±w ushın ГЎjayД±p qural. ГЃsirese EKG tahlili juda anД±q hГЎм tez.',
   testimonial_2_name: 'Dr. S. Umarova',
   testimonial_2_role: 'Nevrolog',
-  testimonial_2_text: 'Noyob keselliklerdi diagnoz qoyД±wda waqД±tnД± tejewge jГЎrdem beredi. Izertlew bГіlimi naxД±z hazД±na вЂ“ eЕ„ soЕ„ЗµД± maqalalar hГЎr waqД±t qol astД±nda.',
+  testimonial_2_text: 'Noyob keselliklerdi diagnoz qoyД±wda waqД±tnД± tejewge jГЎrdem beredi. Izertlew bГіlimi naxД±z hazД±na - eЕ„ soЕ„ЗµД± maqalalar hГЎr waqД±t qol astД±nda.',
   testimonial_3_name: 'ShД±пakerler AssociasiyasД±',
   testimonial_3_role: 'Seriktes',
-  testimonial_3_text: 'Biz usД± platformanД± Г“zbekistandagi barlД±q klinikalarga tawsД±ya etemiz. Zamonaviy medicina kelajegi dГЎsz usД± jerde.',
+  testimonial_3_text: 'Biz usД± platformanД± Г"zbekistandagi barlД±q klinikalarga tawsД±ya etemiz. Zamonaviy medicina kelajegi dГЎsz usД± jerde.',
 };

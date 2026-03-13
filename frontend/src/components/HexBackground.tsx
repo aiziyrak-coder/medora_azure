@@ -1,5 +1,5 @@
 /**
- * HexBackground — To'g'ri ari uyali (honeycomb) + kichik elektron zarrachalar
+ * HexBackground - To'g'ri ari uyali (honeycomb) + kichik elektron zarrachalar
  * Pointy-top hexagon geometriyasi, elektronlar kichik va kam
  */
 import React, { useEffect, useRef } from 'react';
@@ -121,7 +121,7 @@ const HexBackground: React.FC = () => {
                 ctx!.fill();
                 ctx!.restore();
 
-                // Core dot — very small
+                // Core dot - very small
                 ctx!.save();
                 ctx!.fillStyle   = `hsla(${e.hue},100%,85%,0.9)`;
                 ctx!.shadowColor = `hsla(${e.hue},100%,75%,0.9)`;

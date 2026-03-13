@@ -1,5 +1,5 @@
 /**
- * DoctorSupportView вЂ“ Doktorlar uchun Tezkor Yordamchi
+ * DoctorSupportView  -  Doktorlar uchun Tezkor Yordamchi
  * GPT-4o + O'zbekiston SSV protokollari + real-time SSE streaming
  */
 import React, { useState, useRef, useCallback } from 'react';
@@ -27,11 +27,11 @@ interface Props {
 
 const TASK_OPTIONS: Array<{ value: DoctorTaskType; label: string; icon: string; desc: string }> = [
   { value: TASK_QUICK_CONSULT,  icon: 'вљЎ', label: 'Tezkor Maslahat',    desc: 'Tez tashxis va choralar' },
-  { value: TASK_DIAGNOSIS,      icon: 'рџ”Ќ', label: 'Differensial Tashxis', desc: '3вЂ“5 ta tashxis + ehtimollik' },
-  { value: TASK_TREATMENT,      icon: 'рџ’Љ', label: 'Davolash Rejasi',     desc: 'To\'liq SSV protokol rejasi' },
-  { value: TASK_DRUG_CHECK,     icon: 'вљ—',  label: 'Dori Tekshiruvi',     desc: 'O\'zaro ta\'sir + xavfsizlik' },
+  { value: TASK_DIAGNOSIS,      icon: 'рџ"Ќ', label: 'Differensial Tashxis', desc: '3 - 5 ta tashxis + ehtimollik' },
+  { value: TASK_TREATMENT,      icon: 'рџ'Љ', label: 'Davolash Rejasi',     desc: 'To\'liq SSV protokol rejasi' },
+  { value: TASK_DRUG_CHECK,     icon: 'вљ-',  label: 'Dori Tekshiruvi',     desc: 'O\'zaro ta\'sir + xavfsizlik' },
   { value: TASK_LAB_INTERPRET,  icon: 'рџ§Є', label: 'Lab Tahlili',         desc: 'Laboratoriya natijalarini izohlash' },
-  { value: TASK_FOLLOW_UP,      icon: 'рџ“…', label: 'Kuzatuv Rejasi',      desc: 'Keyingi qabul va ogohlantirishlar' },
+  { value: TASK_FOLLOW_UP,      icon: 'рџ"…', label: 'Kuzatuv Rejasi',      desc: 'Keyingi qabul va ogohlantirishlar' },
 ];
 
 function ResultCard({ result }: { result: DoctorSupportResult }) {
@@ -60,7 +60,7 @@ function ResultCard({ result }: { result: DoctorSupportResult }) {
         <>
           {result.summary && (
             <div className="rounded-2xl bg-slate-800/60 border border-slate-600/30 p-4">
-              <h4 className="font-semibold text-sky-300 mb-2">рџ“‹ Xulosa</h4>
+              <h4 className="font-semibold text-sky-300 mb-2">рџ"‹ Xulosa</h4>
               <p className="text-slate-200 text-sm">{result.summary}</p>
               {result.primary_diagnosis && (
                 <p className="mt-2 text-white font-medium">
@@ -88,7 +88,7 @@ function ResultCard({ result }: { result: DoctorSupportResult }) {
       {/* Diagnosis */}
       {task === TASK_DIAGNOSIS && result.diagnoses && (
         <div className="rounded-2xl bg-slate-800/60 border border-slate-600/30 p-4">
-          <h4 className="font-semibold text-sky-300 mb-3">рџ”Ќ Differensial Tashxislar</h4>
+          <h4 className="font-semibold text-sky-300 mb-3">рџ"Ќ Differensial Tashxislar</h4>
           <div className="space-y-3">
             {result.diagnoses.map((d, i) => (
               <div key={i} className="p-3 rounded-xl bg-slate-700/50">
@@ -98,7 +98,7 @@ function ResultCard({ result }: { result: DoctorSupportResult }) {
                 </div>
                 <p className="text-slate-400 text-xs">{d.justification}</p>
                 {d.uzbek_protocol && (
-                  <p className="text-sky-500 text-xs mt-1">рџ“Њ {d.uzbek_protocol}</p>
+                  <p className="text-sky-500 text-xs mt-1">рџ"Њ {d.uzbek_protocol}</p>
                 )}
               </div>
             ))}
@@ -117,7 +117,7 @@ function ResultCard({ result }: { result: DoctorSupportResult }) {
         <>
           {result.treatment_plan && result.treatment_plan.length > 0 && (
             <div className="rounded-2xl bg-slate-800/60 border border-slate-600/30 p-4">
-              <h4 className="font-semibold text-emerald-300 mb-2">рџ“‹ Davolash Rejasi</h4>
+              <h4 className="font-semibold text-emerald-300 mb-2">рџ"‹ Davolash Rejasi</h4>
               <ol className="space-y-1">
                 {result.treatment_plan.map((step, i) => (
                   <li key={i} className="text-slate-200 text-sm flex gap-2">
@@ -128,7 +128,7 @@ function ResultCard({ result }: { result: DoctorSupportResult }) {
             </div>
           )}
           {result.uzbek_protocol_ref && (
-            <p className="text-sky-500 text-xs px-1">рџ“Њ {result.uzbek_protocol_ref}</p>
+            <p className="text-sky-500 text-xs px-1">рџ"Њ {result.uzbek_protocol_ref}</p>
           )}
         </>
       )}
@@ -148,7 +148,7 @@ function ResultCard({ result }: { result: DoctorSupportResult }) {
           )}
           {result.interactions && result.interactions.length > 0 && (
             <div className="rounded-2xl bg-slate-800/60 border border-slate-600/30 p-4">
-              <h4 className="font-semibold text-amber-300 mb-2">вљ— O'zaro Ta'sirlar</h4>
+              <h4 className="font-semibold text-amber-300 mb-2">вљ- O'zaro Ta'sirlar</h4>
               {result.interactions.map((it, i) => (
                 <div key={i} className="mb-2 p-2 rounded-lg bg-slate-700/50">
                   <p className="text-white text-xs font-medium">{it.drugs.join(' + ')}</p>
@@ -168,11 +168,11 @@ function ResultCard({ result }: { result: DoctorSupportResult }) {
       {/* Medications (shared) */}
       {result.medications && result.medications.length > 0 && (
         <div className="rounded-2xl bg-slate-800/60 border border-slate-600/30 p-4">
-          <h4 className="font-semibold text-white mb-2">рџ’Љ Dori-darmonlar</h4>
+          <h4 className="font-semibold text-white mb-2">рџ'Љ Dori-darmonlar</h4>
           <div className="space-y-2">
             {result.medications.map((med, i) => (
               <div key={i} className="p-2 rounded-lg bg-slate-700/50">
-                <p className="text-white text-sm font-medium">{med.name} вЂ” {med.dosage}</p>
+                <p className="text-white text-sm font-medium">{med.name}  -  {med.dosage}</p>
                 <p className="text-slate-400 text-xs">{med.frequency}, {med.duration}</p>
                 {med.instructions && <p className="text-slate-400 text-xs italic">{med.instructions}</p>}
               </div>
@@ -194,7 +194,7 @@ function ResultCard({ result }: { result: DoctorSupportResult }) {
       {/* Follow-up */}
       {result.follow_up && (
         <div className="rounded-2xl bg-slate-800/60 border border-slate-600/30 p-4">
-          <h4 className="font-semibold text-slate-300 mb-1">рџ“… Kuzatuv</h4>
+          <h4 className="font-semibold text-slate-300 mb-1">рџ"… Kuzatuv</h4>
           <p className="text-slate-400 text-sm">{result.follow_up}</p>
         </div>
       )}
@@ -329,7 +329,7 @@ export const DoctorSupportView: React.FC<Props> = ({ patientData, language, onEr
           className="flex-1 py-3 rounded-2xl bg-sky-600 hover:bg-sky-500
                      text-white font-semibold transition-all active:scale-95 disabled:opacity-50"
         >
-          {streaming ? 'вџі Javob kelmoqda...' : 'в–¶ Streaming Tahlil'}
+          {streaming ? 'вџі Javob kelmoqda...' : 'в-¶ Streaming Tahlil'}
         </button>
         <button
           onClick={handleSync}
@@ -337,14 +337,14 @@ export const DoctorSupportView: React.FC<Props> = ({ patientData, language, onEr
           className="px-4 py-3 rounded-2xl bg-slate-700 hover:bg-slate-600
                      text-white font-medium transition-all active:scale-95 disabled:opacity-50"
         >
-          {loading ? 'вџі' : 'рџ“Ґ'}
+          {loading ? 'вџі' : 'рџ"Ґ'}
         </button>
         {streaming && (
           <button
             onClick={handleStop}
             className="px-4 py-3 rounded-2xl bg-red-700 hover:bg-red-600 text-white transition-all"
           >
-            в– 
+            в- 
           </button>
         )}
       </div>
@@ -352,7 +352,7 @@ export const DoctorSupportView: React.FC<Props> = ({ patientData, language, onEr
       {/* Streaming text output */}
       {streamText && (
         <div className="rounded-2xl bg-slate-900/80 border border-slate-600/30 p-4 max-h-64 overflow-y-auto">
-          <p className="text-xs text-slate-500 mb-2 font-mono">в—Џ Javob kelmoqda...</p>
+          <p className="text-xs text-slate-500 mb-2 font-mono">в-Џ Javob kelmoqda...</p>
           <pre className="text-slate-300 text-xs whitespace-pre-wrap font-mono leading-relaxed">
             {streamText}
           </pre>

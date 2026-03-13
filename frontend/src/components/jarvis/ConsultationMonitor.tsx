@@ -1,11 +1,11 @@
 /**
- * ConsultationMonitor вЂ” Passiv Tinglash Rejimi
+ * ConsultationMonitor  -  Passiv Tinglash Rejimi
  * ================================================
  * Doktor va bemor suhbatini yozib oladi va real-vaqtda transkript yaratadi.
  *
  * Flow:
- *  "Tinglashni Boshlash" в†’ mic yoqiladi в†’ STT ishlaydi в†’
- *  transkript to'planadi в†’ "Yakunlash" в†’ auto-diagnosis
+ *  "Tinglashni Boshlash" в†' mic yoqiladi в†' STT ishlaydi в†'
+ *  transkript to'planadi в†' "Yakunlash" в†' auto-diagnosis
  */
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import type { PatientData } from '../../types';
@@ -179,7 +179,7 @@ export const ConsultationMonitor: React.FC<Props> = ({
           </p>
         </div>
         <span className="text-sky-400 font-mono text-sm">
-          {isListening ? `рџ”ґ ${formatDuration(duration)}` : formatDuration(duration)}
+          {isListening ? `рџ"ґ ${formatDuration(duration)}` : formatDuration(duration)}
         </span>
       </div>
 
@@ -237,7 +237,7 @@ export const ConsultationMonitor: React.FC<Props> = ({
             onClick={clearTranscript}
             className="px-4 py-3 rounded-2xl bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm"
           >
-            рџ—‘
+            рџ-'
           </button>
         )}
       </div>
@@ -273,7 +273,7 @@ export const ConsultationMonitor: React.FC<Props> = ({
               }`}>
                 {labels[currentSpeaker]}
               </span>
-              <span className="text-slate-400 italic">{interim}в–‹</span>
+              <span className="text-slate-400 italic">{interim}в-‹</span>
             </div>
           )}
         </div>

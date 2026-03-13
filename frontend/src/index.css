@@ -32,7 +32,7 @@
 }
 
 /* =====================================================
-   SAHIFA FONI — ANIMATSION GRADIENT
+   SAHIFA FONI - ANIMATSION GRADIENT
    ===================================================== */
 
 @keyframes bg-shift {
@@ -245,7 +245,7 @@
   animation: count-up 0.6s ease-out forwards;
 }
 
-/* Dashboard dark panels — solid enough to show text clearly */
+/* Dashboard dark panels - solid enough to show text clearly */
 .dash-panel {
   background: linear-gradient(145deg, #0D1E32 0%, #0A1628 100%);
   border: 1px solid rgba(0, 210, 255, 0.18);

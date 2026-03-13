@@ -91,7 +91,7 @@ export const uzL: TranslationSet = {
 
   // Auth Page & Marketing
   auth_marketing_title: 'Klinik tafakkur inqilobi.',
-  auth_marketing_desc: 'Farg\'ona JSTI вЂ” bu shunchaki raqamli yordamchi emas, bu tibbiyotning yangi davri. Biz minglab klinik protokollar, global tibbiy tadqiqotlar va xalqaro ekspertiza bazasini yagona intellektual ekotizimga birlashtirdik. Tizim har bir bemorga individual yondashib, murakkab diagnostik jumboqlarni yechishda, davolash taktikasini optimallashtirishda va tibbiy xatolarni minimallashtirishda shifokorning eng ishonchli hamkoriga aylanadi.',
+  auth_marketing_desc: 'Farg\'ona JSTI - bu shunchaki raqamli yordamchi emas, bu tibbiyotning yangi davri. Biz minglab klinik protokollar, global tibbiy tadqiqotlar va xalqaro ekspertiza bazasini yagona intellektual ekotizimga birlashtirdik. Tizim har bir bemorga individual yondashib, murakkab diagnostik jumboqlarni yechishda, davolash taktikasini optimallashtirishda va tibbiy xatolarni minimallashtirishda shifokorning eng ishonchli hamkoriga aylanadi.',
   auth_mode_select: 'Rejimni tanlang:',
   auth_mode_clinic: 'Klinika',
   auth_mode_clinic_desc: 'Tashkilotlar va konsilium uchun.',
@@ -400,7 +400,7 @@ export const uzL: TranslationSet = {
   specialist_name_system: 'Konsilium Raisi (Orkestrator)',
   specialty_system: 'Boshqaruvchi',
 
-  // All specialists (name + specialty) — o'zbekcha
+  // All specialists (name + specialty) - o'zbekcha
   specialist_name_allergist: 'Allergist',
   specialty_allergist: 'Allergologiya va immunologiya',
   specialist_name_anesthesiology: 'Anesteziolog',
@@ -534,8 +534,8 @@ export const uzL: TranslationSet = {
   drug_checking: 'Tekshirilmoqda...',
   drug_safe: 'Xavfsiz',
   drug_severity_label: 'Xavf darajasi:',
-  drug_clinical_significance: 'рџ”¬ Klinik ahamiyati:',
-  drug_recommendations: 'рџ“‹ Tavsiyalar:',
+  drug_clinical_significance: 'рџ"¬ Klinik ahamiyati:',
+  drug_recommendations: 'рџ"‹ Tavsiyalar:',
   drug_tools_title: 'рџ§Є Dori Vositalari',
   
   // Doctor Dashboard
@@ -580,10 +580,10 @@ export const uzL: TranslationSet = {
   report_additional_tests: "Qo'shimcha Tekshiruvlar",
   report_no_medication: 'Dori tavsiya qilinmagan.',
   report_uzbekistan_badge: "O'zbekiston",
-  report_dosage: 'рџ’Љ Dozasi',
-  report_frequency: 'рџ”Ѓ Chastota',
+  report_dosage: 'рџ'Љ Dozasi',
+  report_frequency: 'рџ"Ѓ Chastota',
   report_timing: 'вЏ° Vaqt',
-  report_duration: 'рџ“… Davomiyligi',
+  report_duration: 'рџ"… Davomiyligi',
   report_instructions: "Yo'riqnoma:",
   report_disclaimer: 'Diqqat: Ushbu elektron retsept tavsiyaviy xarakterga ega.',
   doc_no_documents: 'Hujjatlar mavjud emas.',
@@ -662,19 +662,19 @@ export const uzL: TranslationSet = {
 
   // Legal & marketing extended content
   legal_terms_title: 'Foydalanish Shartlari va Ommaviy Oferta',
-  legal_terms_p1: '1. Umumiy qoidalar: Ushbu platforma faqat tibbiy maвЂ™lumotga ega boвЂlgan mutaxassislar (shifokorlar, rezidentlar, talabalar) uchun moвЂljallangan yordamchi vositadir.',
-  legal_terms_p2: '2. MasвЂ™uliyatni cheklash: "Farg\'ona JSTI" tizimi (Farg\'ona jamoat salomatligi tibbiyot instituti) (keyingi oвЂrinlarda "Tizim") tomonidan taqdim etilgan har qanday tashxis, davolash rejasi yoki tavsiya faqat axborot xarakteriga ega. Tizim shifokor oвЂrnini bosmaydi. Yakuniy klinik qaror uchun toвЂliq javobgarlik foydalanuvchi (shifokor) zimmasidadir.',
-  legal_terms_p3: '3. MaвЂ™lumotlar xavfsizligi: Biz foydalanuvchi kiritgan bemor maвЂ™lumotlarini (F.I.Sh va boshqa shaxsiy identifikatorlar) anonimlashtirishga harakat qilamiz, ammo internet tarmogвЂida xavfsizlik uchun mutlaq kafolat berilmaydi.',
-  legal_terms_p4: '4. Rozilik: Tizimdan foydalanish orqali siz sunвЂ™iy intellekt tomonidan yuzaga kelishi mumkin boвЂlgan xatoliklar (gallyutsinatsiyalar) ehtimolini tushunasiz va qabul qilasiz.',
+  legal_terms_p1: '1. Umumiy qoidalar: Ushbu platforma faqat tibbiy ma-™lumotga ega bo-lgan mutaxassislar (shifokorlar, rezidentlar, talabalar) uchun mo-ljallangan yordamchi vositadir.',
+  legal_terms_p2: '2. Mas-™uliyatni cheklash: "Farg\'ona JSTI" tizimi (Farg\'ona jamoat salomatligi tibbiyot instituti) (keyingi o-rinlarda "Tizim") tomonidan taqdim etilgan har qanday tashxis, davolash rejasi yoki tavsiya faqat axborot xarakteriga ega. Tizim shifokor o-rnini bosmaydi. Yakuniy klinik qaror uchun to-liq javobgarlik foydalanuvchi (shifokor) zimmasidadir.',
+  legal_terms_p3: '3. Ma-™lumotlar xavfsizligi: Biz foydalanuvchi kiritgan bemor ma-™lumotlarini (F.I.Sh va boshqa shaxsiy identifikatorlar) anonimlashtirishga harakat qilamiz, ammo internet tarmog-ida xavfsizlik uchun mutlaq kafolat berilmaydi.',
+  legal_terms_p4: '4. Rozilik: Tizimdan foydalanish orqali siz sun-™iy intellekt tomonidan yuzaga kelishi mumkin bo-lgan xatoliklar (gallyutsinatsiyalar) ehtimolini tushunasiz va qabul qilasiz.',
 
   legal_privacy_title: 'Maxfiylik Siyosati',
-  legal_privacy_p1: '1. MaвЂ™lumotlarni toвЂplash: Biz telefon raqamingiz, ismingiz, rol va mutaxassislik maвЂ™lumotlaringizni faqat hisob yaratish va xizmat koвЂrsatish uchun saqlaymiz.',
-  legal_privacy_p2: '2. MaвЂ™lumotlardan foydalanish: Shaxsiy maвЂ™lumotlaringiz faqat tizim ishlashi, xavfsizlik va qonuniy talablar uchun ishlatiladi. Uchinchi tomonlarga sotilmaydi.',
-  legal_privacy_p3: '3. Himoya: MaвЂ™lumotlaringiz shifrlash va xavfsiz saqlash orqali himoyalanadi. Faqat avtorizatsiya qilingan xodimlar kirishi mumkin.',
-  legal_privacy_p4: '4. Huquqlaringiz: Hisobingizni oвЂchirish yoki maвЂ™lumotlaringizni koвЂrish/oвЂzgartirish soвЂrovini yuborishingiz mumkin.',
+  legal_privacy_p1: '1. Ma-™lumotlarni to-plash: Biz telefon raqamingiz, ismingiz, rol va mutaxassislik ma-™lumotlaringizni faqat hisob yaratish va xizmat ko-rsatish uchun saqlaymiz.',
+  legal_privacy_p2: '2. Ma-™lumotlardan foydalanish: Shaxsiy ma-™lumotlaringiz faqat tizim ishlashi, xavfsizlik va qonuniy talablar uchun ishlatiladi. Uchinchi tomonlarga sotilmaydi.',
+  legal_privacy_p3: '3. Himoya: Ma-™lumotlaringiz shifrlash va xavfsiz saqlash orqali himoyalanadi. Faqat avtorizatsiya qilingan xodimlar kirishi mumkin.',
+  legal_privacy_p4: '4. Huquqlaringiz: Hisobingizni o-chirish yoki ma-™lumotlaringizni ko-rish/o-zgartirish so-rovini yuborishingiz mumkin.',
 
-  legal_faq_title: 'KoвЂp soвЂraladigan savollar (FAQ)',
-  legal_faq_p1: 'Tizim notoвЂgвЂri tashxis qoвЂyishi mumkinmi? Ha. AI yordamchi vositadir, yakuniy qaror esa shifokorga tegishli.',
+  legal_faq_title: 'Ko-p so-raladigan savollar (FAQ)',
+  legal_faq_p1: 'Tizim noto-g-ri tashxis qo-yishi mumkinmi? Ha. AI yordamchi vositadir, yakuniy qaror esa shifokorga tegishli.',
 
   // Dashboard hero
   dashboard_hero_badge: 'AI Konsilium 2.0 Tizimi',

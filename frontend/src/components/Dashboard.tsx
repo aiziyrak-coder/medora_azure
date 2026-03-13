@@ -53,7 +53,7 @@ function getTimeStr() {
     return new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 }
 
-/* Glassmorphism panel style — och oq shaffof */
+/* Glassmorphism panel style - och oq shaffof */
 const glass: React.CSSProperties = {
     background: 'rgba(255,255,255,0.62)',
     backdropFilter: 'blur(18px)',
@@ -128,7 +128,7 @@ const Dashboard: React.FC<DashboardProps> = ({
             {/* ── Grid ──────────────────────────────────────── */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
-                {/* Hero — span 8 */}
+                {/* Hero - span 8 */}
                 <div
                     onClick={onNewAnalysis}
                     className="lg:col-span-8 relative overflow-hidden rounded-[24px] cursor-pointer"
@@ -211,7 +211,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                     </div>
                 </div>
 
-                {/* Stats — span 4 */}
+                {/* Stats - span 4 */}
                 <div className="lg:col-span-4">
                     {stats
                         ? <UserStatsComponent stats={stats} />
@@ -226,7 +226,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                     }
                 </div>
 
-                {/* Recent Analyses — span 8 */}
+                {/* Recent Analyses - span 8 */}
                 <div className="lg:col-span-8">
                     <div className="flex justify-between items-center mb-3 px-1">
                         <div className="flex items-center gap-2.5">
@@ -301,7 +301,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                     </div>
                 </div>
 
-                {/* CME — span 4 */}
+                {/* CME - span 4 */}
                 <div className="lg:col-span-4 flex flex-col gap-3">
                     <div className="flex items-center gap-2.5 px-1">
                         <div className="w-1 h-5 rounded-full"

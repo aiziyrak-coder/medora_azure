@@ -213,7 +213,7 @@ const TvDisplay: React.FC<{ doctorId: string }> = ({ doctorId }) => {
                             alt="Medical Promo"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-16">
-                            <h2 className="text-5xl font-bold text-white mb-6 leading-tight">Salomatligingiz вЂ” <br/>Bizning Oliy Maqsadimiz</h2>
+                            <h2 className="text-5xl font-bold text-white mb-6 leading-tight">Salomatligingiz  -  <br/>Bizning Oliy Maqsadimiz</h2>
                             <p className="text-2xl text-slate-300 max-w-2xl font-light">
                                 Eng zamonaviy tibbiy xizmatlar va xalqaro darajadagi mutaxassislar sizning xizmatingizda.
                             </p>

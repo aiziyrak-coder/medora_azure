@@ -179,7 +179,7 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
                 )}
             </div>
             
-            {/* Right Panel: Final Report — faqat tahlil tugaganda ko'rinadi */}
+            {/* Right Panel: Final Report - faqat tahlil tugaganda ko'rinadi */}
             {fr && (
                 <div className="xl:col-span-4 glass-panel overflow-hidden flex flex-col h-full">
                     <div className="p-5 border-b border-white/20 bg-white/30 backdrop-blur-md">

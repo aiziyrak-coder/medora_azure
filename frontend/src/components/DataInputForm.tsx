@@ -15,7 +15,7 @@ interface DataInputFormProps {
     onSubmit: (data: PatientData) => void;
 }
 
-// Ultra-compact Input component (label/placeholder yaxshi koвЂrinishi uchun qorongвЂu matn)
+// Ultra-compact Input component (label/placeholder yaxshi ko-rinishi uchun qorong-u matn)
 const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { id: string; label: string }> = ({ id, label, className, ...props }) => (
     <div className={`flex flex-col ${className}`}>
         <label htmlFor={id} className="text-[10px] font-bold text-slate-700 uppercase tracking-wide ml-1 mb-0.5">

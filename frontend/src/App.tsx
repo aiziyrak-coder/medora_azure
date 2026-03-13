@@ -688,7 +688,7 @@ const AppContent: React.FC = () => {
         setStatusMessage("Arxivdan yuklandi. Munozarani davom ettirishingiz mumkin.");
     };
 
-    /** Sahifa ichidagi qaytish paneli — faqat dashboard da ko'rinmaydi */
+    /** Sahifa ichidagi qaytish paneli - faqat dashboard da ko'rinmaydi */
     const BackBar: React.FC<{
         title: string;
         subtitle?: string;
@@ -887,7 +887,7 @@ const AppContent: React.FC = () => {
             {isApiConfigured() && !apiHealthy && !isProcessing && (
                 <div className="flex-none flex items-center justify-center gap-2 sm:gap-3 py-2 page-px bg-amber-500/90 text-white text-xs sm:text-sm font-medium z-40 flex-wrap">
                     {healthStatus === 400 ? (
-                        <span className="break-words">Domen boshqa serverga yo&apos;naltirilgan. DNS tekshiring: <code className="bg-black/20 px-1 rounded">nslookup medora.cdcgroup.uz</code> в†’ <code className="bg-black/20 px-1 rounded">167.71.53.238</code> bo&apos;lishi kerak.</span>
+                        <span className="break-words">Domen boshqa serverga yo&apos;naltirilgan. DNS tekshiring: <code className="bg-black/20 px-1 rounded">nslookup medora.cdcgroup.uz</code> в†' <code className="bg-black/20 px-1 rounded">167.71.53.238</code> bo&apos;lishi kerak.</span>
                     ) : (
                         <span>Server bilan bog&apos;lanish yo&apos;q. Ma&apos;lumotlar mahalliy saqlanadi.</span>
                     )}
@@ -906,7 +906,7 @@ const AppContent: React.FC = () => {
                         </div>
                         <div className="min-w-0 hidden sm:block">
                             <h1 className="text-base font-black tracking-tight text-slate-800 leading-none">{t('appName')}</h1>
-                            <p className="text-[9px] text-slate-400 font-medium tracking-wide leading-none mt-0.5">{PLATFORM_NAME} — AI Konsilium</p>
+                            <p className="text-[9px] text-slate-400 font-medium tracking-wide leading-none mt-0.5">{PLATFORM_NAME} - AI Konsilium</p>
                         </div>
                         <h1 className="text-base font-black tracking-tight text-slate-800 sm:hidden">{t('appName')}</h1>
                     </button>
@@ -970,7 +970,7 @@ const AppContent: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Center — copyright */}
+                        {/* Center - copyright */}
                         <div className="flex items-center gap-2 text-[10px] text-slate-400 font-medium">
                             <CopyrightIcon className="w-3 h-3 opacity-60 flex-shrink-0" />
                             <span>2026 · {t('footer_rights')}</span>
@@ -987,7 +987,7 @@ const AppContent: React.FC = () => {
                             </span>
                         </div>
 
-                        {/* Right — partners */}
+                        {/* Right - partners */}
                         <div className="flex items-center gap-4 sm:gap-5 text-[10px] flex-wrap justify-center">
                             <div className="flex items-center gap-1.5">
                                 <span className="text-slate-400 font-medium">{t('footer_creator')}:</span>

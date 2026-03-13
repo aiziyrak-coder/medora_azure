@@ -1,5 +1,5 @@
 /**
- * ZiyrakConsultation вЂ” Passiv Konsultatsiya Monitori
+ * ZiyrakConsultation  -  Passiv Konsultatsiya Monitori
  * Shifokor-bemor suhbatini yozib oladi va real-vaqt transkript yaratadi.
  */
 import React, { useState, useRef, useCallback, useEffect } from 'react';
@@ -26,9 +26,9 @@ interface Props {
 }
 
 const SPEAKERS = {
-  doctor:  { label: "рџ‘ЁвЂЌвљ•пёЏ Shifokor", color: "text-sky-400" },
-  patient: { label: "рџ§‘ Bemor",     color: "text-violet-400" },
-  system:  { label: "рџ¤– Ziyrak",    color: "text-emerald-400" },
+  doctor:  { label: "рџ'Ё-Ќвљ•пёЏ Shifokor", color: "text-sky-400" },
+  patient: { label: "рџ§' Bemor",     color: "text-violet-400" },
+  system:  { label: "рџ¤- Ziyrak",    color: "text-emerald-400" },
 };
 
 export const ZiyrakConsultation: React.FC<Props> = ({
@@ -174,7 +174,7 @@ export const ZiyrakConsultation: React.FC<Props> = ({
       }`}>
         <div className="flex items-center justify-between mb-2">
           <span className={`text-xs font-medium ${isListening ? "text-sky-400" : "text-slate-500"}`}>
-            {isListening ? `рџ”ґ ${formatDur(duration)}` : "Tayyorlanmoqda..."}
+            {isListening ? `рџ"ґ ${formatDur(duration)}` : "Tayyorlanmoqda..."}
           </span>
           <span className="text-xs text-slate-500">{transcript.length} gap</span>
         </div>
@@ -223,7 +223,7 @@ export const ZiyrakConsultation: React.FC<Props> = ({
               <span className={`shrink-0 text-xs font-medium mt-0.5 ${SPEAKERS[speaker].color}`}>
                 {SPEAKERS[speaker].label}
               </span>
-              <span className="text-slate-400 italic">{interim}в–‹</span>
+              <span className="text-slate-400 italic">{interim}в-‹</span>
             </div>
           )}
         </div>
@@ -242,7 +242,7 @@ export const ZiyrakConsultation: React.FC<Props> = ({
         <div className="rounded-2xl bg-emerald-950/30 border border-emerald-500/30 p-4 space-y-2">
           <div className="flex items-center justify-between">
             <h4 className="font-bold text-emerald-300 text-sm">рџ§  Ziyrak Tashxis Xulosasi</h4>
-            <button onClick={() => setDiagnosis(null)} className="text-slate-500 text-lg">Г—</button>
+            <button onClick={() => setDiagnosis(null)} className="text-slate-500 text-lg">Г-</button>
           </div>
           {diagnosis.patient_complaints_summary && (
             <p className="text-slate-300 text-sm">{String(diagnosis.patient_complaints_summary)}</p>

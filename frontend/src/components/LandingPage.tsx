@@ -3,7 +3,19 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import LanguageSwitcher from './LanguageSwitcher';
 import { Language } from '../i18n/LanguageContext';
-import { INSTITUTE_NAME_FULL, INSTITUTE_NAME_SHORT, PLATFORM_NAME, PLATFORM_VERSION } from '../constants/brand';
+import {
+    INSTITUTE_NAME_FULL,
+    INSTITUTE_NAME_SHORT,
+    INSTITUTE_LOGO_TEXT,
+    INSTITUTE_PHONE_1,
+    INSTITUTE_PHONE_2,
+    INSTITUTE_EMAIL_1,
+    INSTITUTE_EMAIL_2,
+    INSTITUTE_ADDRESS,
+    FOOTER_COPYRIGHT,
+    PLATFORM_NAME,
+    PLATFORM_VERSION,
+} from '../constants/brand';
 import BrainCircuitIcon from './icons/BrainCircuitIcon';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
 import GlobeIcon from './icons/GlobeIcon';
@@ -104,13 +116,26 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                                 {t('landing_contact_modal_desc')}
                             </p>
 
-                            <a 
-                                href="tel:+998948788878"
-                                className="block w-full py-4 bg-green-600 hover:bg-green-500 text-white font-bold rounded-2xl text-lg shadow-lg hover:shadow-green-500/25 transition-all transform hover:scale-105 mb-4 flex items-center justify-center gap-3"
+                            <a
+                                href="tel:+998950442345"
+                                className="block w-full py-4 bg-green-600 hover:bg-green-500 text-white font-bold rounded-2xl text-lg shadow-lg hover:shadow-green-500/25 transition-all transform hover:scale-105 mb-3 flex items-center justify-center gap-3"
                             >
                                 <PhoneCallIcon className="w-6 h-6" />
-                                +998 94 878 88 78
+                                {INSTITUTE_PHONE_1}
                             </a>
+                            <a
+                                href="tel:+998950482345"
+                                className="block w-full py-4 bg-green-600/80 hover:bg-green-500/90 text-white font-bold rounded-2xl text-lg shadow-lg hover:shadow-green-500/25 transition-all transform hover:scale-105 mb-4 flex items-center justify-center gap-3"
+                            >
+                                <PhoneCallIcon className="w-6 h-6" />
+                                {INSTITUTE_PHONE_2}
+                            </a>
+                            <p className="text-slate-400 text-xs mb-1">
+                                <a href={`mailto:${INSTITUTE_EMAIL_1}`} className="hover:text-white">{INSTITUTE_EMAIL_1}</a>
+                                {' · '}
+                                <a href={`mailto:${INSTITUTE_EMAIL_2}`} className="hover:text-white">{INSTITUTE_EMAIL_2}</a>
+                            </p>
+                            <p className="text-slate-500 text-xs">{INSTITUTE_ADDRESS}</p>
 
                             <p className="text-xs text-slate-500">
                                 {t('landing_contact_modal_call')}
@@ -150,7 +175,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
             <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full ${scrolled ? 'bg-slate-900/90 backdrop-blur-xl border-b border-white/10 py-3 shadow-lg' : 'bg-transparent py-4 md:py-6'}`}>
                 <div className="w-full page-px flex flex-wrap justify-between items-center gap-2 min-w-0">
                     <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className="text-lg sm:text-xl md:text-2xl font-black tracking-tighter text-white truncate">{INSTITUTE_NAME_SHORT}</span>
+                        <span className="text-sm sm:text-base md:text-lg font-black tracking-tight text-white truncate uppercase">{INSTITUTE_LOGO_TEXT}</span>
                         <span className="text-[10px] md:text-xs font-medium text-slate-400 tracking-wide hidden sm:block truncate">{INSTITUTE_NAME_FULL}</span>
                     </div>
                     
@@ -423,20 +448,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                 </div>
             </section>
 
-            {/* --- PARTNERS --- */}
-            <section className="py-12 sm:py-20 border-t border-white/5 bg-slate-950 w-full">
-                <div className="w-full page-px text-center">
-                    <p className="text-sm font-bold text-slate-500 uppercase tracking-[0.2em] mb-12">{t('landing_partners_title')}</p>
-                    <div className="flex flex-wrap justify-center gap-10 md:gap-16 opacity-40 hover:opacity-100 transition-opacity duration-500">
-                        {/* Placeholders for logos */}
-                        <div className="text-2xl md:text-3xl font-black text-white flex items-center gap-2"><div className="w-3 h-3 md:w-4 md:h-4 bg-white rounded-full"></div> AKFA MEDLINE</div>
-                        <div className="text-2xl md:text-3xl font-black text-white flex items-center gap-2"><div className="w-3 h-3 md:w-4 md:h-4 bg-white rounded-full"></div> SHOX MED</div>
-                        <div className="text-2xl md:text-3xl font-black text-white flex items-center gap-2"><div className="w-3 h-3 md:w-4 md:h-4 bg-white rounded-full"></div> EZGU NIYAT</div>
-                        <div className="text-2xl md:text-3xl font-black text-white flex items-center gap-2"><div className="w-3 h-3 md:w-4 md:h-4 bg-white rounded-full"></div> ERA MED</div>
-                    </div>
-                </div>
-            </section>
-
             {/* --- CTA --- */}
             <section className="py-16 sm:py-24 md:py-32 relative overflow-hidden w-full">
                 <div className="absolute inset-0 bg-blue-600/20"></div>
@@ -462,8 +473,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                     <div>
                         <div className="flex flex-col gap-1 mb-6">
                             <div className="flex items-center justify-center md:justify-start gap-2">
-                                <BrainCircuitIcon className="w-8 h-8 text-blue-500" />
-                                <span className="text-2xl font-bold text-white tracking-tight">{INSTITUTE_NAME_SHORT}</span>
+                                <BrainCircuitIcon className="w-8 h-8 text-blue-500 flex-shrink-0" />
+                                <span className="text-lg font-black text-white tracking-tight uppercase">{INSTITUTE_LOGO_TEXT}</span>
                             </div>
                             <p className="text-sm font-semibold text-blue-300/90">{INSTITUTE_NAME_FULL}</p>
                         </div>
@@ -525,13 +536,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                     </div>
                     <div>
                         <h4 className="font-bold text-white mb-6 uppercase tracking-wider">{t('landing_footer_contact')}</h4>
-                        <p className="mb-3 text-sm leading-relaxed">
-                            Farg'ona sh., Yangi Turon, 2-a uy
-                        </p>
-                        <a href="tel:+998950442345" className="block mb-1 text-white font-bold hover:text-blue-400 transition-colors text-sm">+998 95 044-23-45</a>
-                        <a href="tel:+998950482345" className="block mb-3 text-white font-bold hover:text-blue-400 transition-colors text-sm">+998 95 048-23-45</a>
-                        <a href="mailto:info@fjsti.uz" className="block mb-1 text-slate-300 hover:text-blue-400 transition-colors text-sm">info@fjsti.uz</a>
-                        <a href="mailto:fmioz@mail.ru" className="block mb-5 text-slate-300 hover:text-blue-400 transition-colors text-sm">fmioz@mail.ru</a>
+                        <p className="mb-3 text-sm leading-relaxed">{INSTITUTE_ADDRESS}</p>
+                        <a href="tel:+998950442345" className="block mb-1 text-white font-bold hover:text-blue-400 transition-colors text-sm">{INSTITUTE_PHONE_1}</a>
+                        <a href="tel:+998950482345" className="block mb-3 text-white font-bold hover:text-blue-400 transition-colors text-sm">{INSTITUTE_PHONE_2}</a>
+                        <a href={`mailto:${INSTITUTE_EMAIL_1}`} className="block mb-1 text-slate-300 hover:text-blue-400 transition-colors text-sm">{INSTITUTE_EMAIL_1}</a>
+                        <a href={`mailto:${INSTITUTE_EMAIL_2}`} className="block mb-5 text-slate-300 hover:text-blue-400 transition-colors text-sm">{INSTITUTE_EMAIL_2}</a>
                         {onOpenAbout && (
                             <button
                                 onClick={onOpenAbout}
@@ -546,11 +555,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                 
                 <div className="w-full page-px mt-10 sm:mt-16 pt-6 sm:pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6 flex-wrap">
                     <div className="text-center md:text-left">
-                        <p className="text-white font-black text-sm">{INSTITUTE_NAME_SHORT}</p>
-                        <p className="text-slate-400 text-xs mt-0.5">{INSTITUTE_NAME_FULL}</p>
-                        <p className="text-slate-500 text-xs mt-2">
-                            &copy; CDCGroup 2026 · {PLATFORM_NAME} {PLATFORM_VERSION}
-                        </p>
+                        <p className="text-white font-black text-sm uppercase">{INSTITUTE_LOGO_TEXT}</p>
+                        <p className="text-slate-500 text-xs mt-2">{FOOTER_COPYRIGHT}</p>
+                        <p className="text-slate-500 text-xs mt-0.5">{PLATFORM_NAME} {PLATFORM_VERSION}</p>
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 bg-white/5 px-4 sm:px-6 py-2.5 rounded-full border border-white/10 backdrop-blur-sm">

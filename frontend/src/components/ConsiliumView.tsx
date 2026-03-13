@@ -1,5 +1,5 @@
 /**
- * ConsiliumView вЂ“ Multi-Agent Medical Consilium
+ * ConsiliumView - Multi-Agent Medical Consilium
  * Vizual ko'rsatish: 3 faza progress + professorlar bahsi + yakuniy xulosa
  */
 import React, { useState, useRef, useEffect } from 'react';
@@ -33,7 +33,7 @@ const PHASE_LABELS: Record<string, Record<string, string>> = {
   },
   ru: {
     independent: 'Р¤Р°Р·Р° 1: РќРµР·Р°РІРёСЃРёРјС‹Р№ Р°РЅР°Р»РёР·',
-    debate:      'Р¤Р°Р·Р° 2: Р”РµР±Р°С‚С‹',
+    debate:      'Р¤Р°Р·Р° 2: Р"РµР±Р°С‚С‹',
     consensus:   'Р¤Р°Р·Р° 3: РљРѕРЅСЃРµРЅСЃСѓСЃ',
   },
   en: {
@@ -70,10 +70,10 @@ const PROFESSOR_COLORS: Record<string, string> = {
 
 const PROFESSOR_ICONS: Record<string, string> = {
   deepseek: 'рџ§ ',
-  llama:    'рџ“љ',
+  llama:    'рџ"љ',
   mistral:  'вљ•пёЏ',
-  mini:     'рџ’Љ',
-  gpt4o:    'рџЋ“',
+  mini:     'рџ'Љ',
+  gpt4o:    'рџЋ"',
 };
 
 function PhaseIndicator({
@@ -86,10 +86,10 @@ function PhaseIndicator({
     error:   'bg-red-600 text-white',
   };
   const icons: Record<PhaseStatus, string> = {
-    waiting: 'в—‹',
+    waiting: 'в-‹',
     running: 'вџі',
-    done:    'вњ“',
-    error:   'вњ—',
+    done:    'вњ"',
+    error:   'вњ-',
   };
   return (
     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${colors[status]}`}>
@@ -116,7 +116,7 @@ function DebateCard({ msg, onDownload }: { msg: DebateMessage; onDownload?: (msg
           <p className="text-xs text-slate-400">{msg.authorTitle}</p>
         </div>
         <span className={`ml-auto text-xs px-2 py-0.5 rounded-full ${isDebate ? 'bg-amber-600 text-white' : 'bg-slate-600 text-slate-200'}`}>
-          {isDebate ? 'вљ” Bahslar' : 'рџ“‹ Mustaqil'}
+          {isDebate ? 'вљ" Bahslar' : 'рџ"‹ Mustaqil'}
         </span>
         {onDownload && (
           <button
@@ -125,7 +125,7 @@ function DebateCard({ msg, onDownload }: { msg: DebateMessage; onDownload?: (msg
             className="text-slate-400 hover:text-sky-400 text-xs px-2 py-1 rounded border border-slate-500 hover:border-sky-500 transition-colors"
             title="Yuklab olish"
           >
-            â†“ Yuklab olish
+            â†" Yuklab olish
           </button>
         )}
       </div>
@@ -216,7 +216,7 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
         <div>
           <h2 className="text-xl font-bold text-white">рџЏ› Tibbiy Konsilium</h2>
           <p className="text-sm text-slate-400 mt-0.5">
-            5 ta mustaqil AI professor вЂ” Bahslar вЂ” Konsensus
+            5 ta mustaqil AI professor - Bahslar - Konsensus
           </p>
         </div>
         {loading && (
@@ -247,7 +247,7 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
         <div className="rounded-2xl border border-slate-600/40 bg-slate-800/40 p-6 text-center">
           <div className="animate-spin text-4xl mb-3">вџі</div>
           <p className="text-slate-300">Professorlar mustaqil tahlil qilmoqda...</p>
-          <p className="text-slate-500 text-sm mt-1">Bu jarayon 30вЂ“90 soniya davom etishi mumkin</p>
+          <p className="text-slate-500 text-sm mt-1">Bu jarayon 30-90 soniya davom etishi mumkin</p>
         </div>
       )}
 
@@ -265,7 +265,7 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
                     ? 'bg-slate-700 text-white'
                     : 'text-slate-400 hover:text-white'}`}
               >
-                {tab === 'debate' ? 'вљ” Bahslar' : 'рџ“‹ Xulosa Hisobot'}
+                {tab === 'debate' ? 'вљ" Bahslar' : 'рџ"‹ Xulosa Hisobot'}
               </button>
             ))}
           </div>
@@ -339,7 +339,7 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
               {/* Medications */}
               {Array.isArray(result.final_report?.medicationRecommendations) && result.final_report.medicationRecommendations.length > 0 && (
                 <div className="rounded-2xl bg-slate-800/60 border border-slate-600/30 p-4">
-                  <h3 className="font-bold text-white mb-2">рџ’Љ Dori-darmonlar</h3>
+                  <h3 className="font-bold text-white mb-2">рџ'Љ Dori-darmonlar</h3>
                   {result.final_report.pharmacologyWarnings?.length > 0 && (
                     <div className="mb-2 p-2 rounded-lg bg-amber-900/40 border border-amber-500/30">
                       <p className="text-amber-300 text-xs font-semibold">вљ  Farmakolog ogohlantirishlari:</p>
@@ -351,7 +351,7 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
                   <div className="space-y-2">
                     {(result.final_report.medicationRecommendations || []).map((med, i) => (
                       <div key={i} className="p-2 rounded-lg bg-slate-700/50">
-                        <p className="text-white text-sm font-medium">{med.name} вЂ” {med.dosage}</p>
+                        <p className="text-white text-sm font-medium">{med.name} - {med.dosage}</p>
                         <p className="text-slate-400 text-xs">{med.frequency}, {med.duration}</p>
                         {med.instructions && <p className="text-slate-400 text-xs italic">{med.instructions}</p>}
                       </div>
@@ -363,7 +363,7 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
               {/* Follow-up */}
               {result.final_report.followUpPlan && (
                 <div className="rounded-2xl bg-slate-800/60 border border-slate-600/30 p-4">
-                  <h3 className="font-bold text-white mb-1">рџ“… Kuzatuv Rejasi</h3>
+                  <h3 className="font-bold text-white mb-1">рџ"… Kuzatuv Rejasi</h3>
                   <p className="text-slate-300 text-sm">{result.final_report.followUpPlan}</p>
                 </div>
               )}
@@ -422,7 +422,7 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
             className="w-full py-2 rounded-xl border border-slate-600 text-slate-400 text-sm
                        hover:border-sky-500 hover:text-sky-400 transition-colors"
           >
-            рџ”„ Qayta O'tkazish
+            рџ"„ Qayta O'tkazish
           </button>
         </>
       )}
