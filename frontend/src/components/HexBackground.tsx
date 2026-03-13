@@ -1,59 +1,44 @@
 /**
- * HexBackground — Ari uyali chiziqlar + ingichka elektron zarralar
- * Elektronlar hex qirralar bo'ylab yorug' chiziq sifatida yuguradi
+ * HexBackground — Haqiqiy ari uyali (honeycomb) + random yo'nalishli elektron zarrachalar
  */
 import React, { useEffect, useRef } from 'react';
 
-interface Point    { x: number; y: number }
-interface Segment  { a: Point; b: Point }
+const HEX_R      = 38;       // hexagon radius (px)
+const EL_COUNT   = 48;       // elektron soni
+const TRAIL      = 28;       // trail uzunligi
+
+interface Vec2 { x: number; y: number }
 interface Electron {
-    seg:    Segment;
-    t:      number;   // 0‒1 progress
-    speed:  number;
-    hue:    number;   // HSL hue
-    trailPts: Point[];
+    x: number; y: number;
+    vx: number; vy: number;
+    hue: number;
+    size: number;
+    trail: Vec2[];
+    pulse: number;   // pulsing phase
 }
 
-const ELECTRON_COUNT = 55;
-const HEX_SIZE       = 42;
-const TRAIL_LEN      = 26;   // kanta uzunligi (segment soni)
-
-/* Hexagon grid segmentlari */
-function buildSegments(W: number, H: number, size: number): Segment[] {
-    const segs: Segment[] = [];
-    const hx = size * 1.5;
-    const hy = size * Math.sqrt(3);
-    const cols = Math.ceil(W / hx) + 3;
-    const rows = Math.ceil(H / hy) + 3;
-
-    for (let c = -1; c < cols; c++) {
-        for (let r = -1; r < rows; r++) {
-            const cx = c * hx;
-            const cy = r * hy + (c % 2 !== 0 ? hy / 2 : 0);
-            const verts: Point[] = Array.from({ length: 6 }, (_, i) => {
-                const a = (Math.PI / 3) * i - Math.PI / 6;
-                return { x: cx + size * Math.cos(a), y: cy + size * Math.sin(a) };
-            });
-            for (let i = 0; i < 6; i++) {
-                const a = verts[i], b = verts[(i + 1) % 6];
-                if (a.x < b.x || (Math.abs(a.x - b.x) < 0.5 && a.y < b.y))
-                    segs.push({ a, b });
-            }
-        }
-    }
-    return segs;
+/* Hexagon vertex points (flat-top) */
+function hexPts(cx: number, cy: number, r: number): Vec2[] {
+    return Array.from({ length: 6 }, (_, i) => {
+        const a = (Math.PI / 180) * (60 * i);
+        return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+    });
 }
 
-/* Nuqtaga yaqin segment uchlarini topish */
-function adjacent(pt: Point, segs: Segment[]): Segment[] {
-    const EPS = 1.5;
-    return segs.filter(s =>
-        (Math.abs(s.a.x - pt.x) < EPS && Math.abs(s.a.y - pt.y) < EPS) ||
-        (Math.abs(s.b.x - pt.x) < EPS && Math.abs(s.b.y - pt.y) < EPS)
-    );
+function mkElectron(W: number, H: number): Electron {
+    const speed = 0.6 + Math.random() * 1.2;
+    const angle = Math.random() * Math.PI * 2;
+    return {
+        x:     Math.random() * W,
+        y:     Math.random() * H,
+        vx:    Math.cos(angle) * speed,
+        vy:    Math.sin(angle) * speed,
+        hue:   155 + Math.random() * 85,
+        size:  2 + Math.random() * 2.5,
+        trail: [],
+        pulse: Math.random() * Math.PI * 2,
+    };
 }
-
-function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
 
 const HexBackground: React.FC = () => {
     const ref = useRef<HTMLCanvasElement>(null);
@@ -65,139 +50,169 @@ const HexBackground: React.FC = () => {
         const ctx = cv.getContext('2d');
         if (!ctx) return;
 
-        let W = 0, H = 0;
-        let segs: Segment[] = [];
-        const elecs: Electron[] = [];
-
-        function mkElectron(t0?: number): Electron {
-            const seg = segs[Math.floor(Math.random() * segs.length)];
-            return {
-                seg,
-                t:    t0 ?? Math.random(),
-                speed: 0.0055 + Math.random() * 0.009,
-                hue:  160 + Math.random() * 80,   // cyan–teal–green zone
-                trailPts: [],
-            };
-        }
+        let W = 0, H = 0, frame = 0;
+        const els: Electron[] = [];
 
         function resize() {
             W = window.innerWidth;
             H = window.innerHeight;
             cv!.width  = W;
             cv!.height = H;
-            segs = buildSegments(W, H, HEX_SIZE);
-            elecs.length = 0;
-            for (let i = 0; i < ELECTRON_COUNT; i++) elecs.push(mkElectron());
+            els.length = 0;
+            for (let i = 0; i < EL_COUNT; i++) els.push(mkElectron(W, H));
         }
 
-        function drawHexGrid() {
-            ctx!.save();
-            ctx!.strokeStyle = 'rgba(80,185,220,0.18)';
-            ctx!.lineWidth   = 0.9;
-            ctx!.beginPath();
-            for (const s of segs) {
-                ctx!.moveTo(s.a.x, s.a.y);
-                ctx!.lineTo(s.b.x, s.b.y);
-            }
-            ctx!.stroke();
+        /* ─── Draw honeycomb grid ─── */
+        function drawHoneycomb() {
+            const w = HEX_R * Math.sqrt(3);    // hex width (flat-top)
+            const h = HEX_R * 2;               // hex height
 
-            // Junction dots
-            ctx!.fillStyle = 'rgba(60,180,220,0.22)';
-            const junctions = new Set<string>();
-            for (const s of segs) {
-                for (const p of [s.a, s.b]) {
-                    const k = `${Math.round(p.x)},${Math.round(p.y)}`;
-                    if (!junctions.has(k)) {
-                        junctions.add(k);
-                        ctx!.beginPath();
-                        ctx!.arc(p.x, p.y, 1.4, 0, Math.PI * 2);
-                        ctx!.fill();
-                    }
+            const cols = Math.ceil(W / w) + 2;
+            const rows = Math.ceil(H / (h * 0.75)) + 3;
+
+            ctx!.save();
+
+            // Slight pulse based on frame
+            const pulse = 0.04 + Math.sin(frame * 0.008) * 0.02;
+
+            for (let row = -1; row < rows; row++) {
+                for (let col = -1; col < cols; col++) {
+                    const cx = col * w + (row % 2 === 0 ? 0 : w / 2);
+                    const cy = row * h * 0.75;
+                    const pts = hexPts(cx, cy, HEX_R);
+
+                    // Subtle alternating fill
+                    const alt = (row + col) % 3;
+                    const fillAlpha = alt === 0 ? pulse * 0.6 : alt === 1 ? pulse * 0.4 : pulse * 0.2;
+
+                    ctx!.beginPath();
+                    ctx!.moveTo(pts[0].x, pts[0].y);
+                    for (let i = 1; i < 6; i++) ctx!.lineTo(pts[i].x, pts[i].y);
+                    ctx!.closePath();
+
+                    // Fill — very subtle tinted
+                    const fillH = 185 + alt * 15;
+                    ctx!.fillStyle = `hsla(${fillH},60%,65%,${fillAlpha})`;
+                    ctx!.fill();
+
+                    // Stroke — hex edges
+                    ctx!.strokeStyle = `rgba(56,189,220,0.2)`;
+                    ctx!.lineWidth   = 1;
+                    ctx!.stroke();
                 }
             }
+
             ctx!.restore();
         }
 
+        /* ─── Draw electrons ─── */
         function drawElectrons() {
-            for (const e of elecs) {
-                const px = lerp(e.seg.a.x, e.seg.b.x, e.t);
-                const py = lerp(e.seg.a.y, e.seg.b.y, e.t);
-
-                // Keep trail
-                e.trailPts.unshift({ x: px, y: py });
-                if (e.trailPts.length > TRAIL_LEN) e.trailPts.length = TRAIL_LEN;
-
-                const pts = e.trailPts;
+            for (const e of els) {
+                const pts = e.trail;
                 if (pts.length < 2) continue;
 
-                // Draw trail as a glowing line
-                for (let i = 1; i < pts.length; i++) {
-                    const frac  = 1 - i / pts.length;   // 1 at head, 0 at tail
-                    const alpha = frac * frac * 0.85;   // smooth fade
-                    const w     = frac * 2.2;           // thinner at tail
+                // Trail line
+                ctx!.save();
+                ctx!.lineCap  = 'round';
+                ctx!.lineJoin = 'round';
 
-                    ctx!.save();
-                    ctx!.strokeStyle = `hsla(${e.hue},90%,65%,${alpha})`;
-                    ctx!.lineWidth   = w;
-                    ctx!.shadowColor = `hsla(${e.hue},90%,70%,${alpha * 0.8})`;
-                    ctx!.shadowBlur  = 6;
+                for (let i = 1; i < pts.length; i++) {
+                    const frac = 1 - i / pts.length;
                     ctx!.beginPath();
                     ctx!.moveTo(pts[i - 1].x, pts[i - 1].y);
                     ctx!.lineTo(pts[i].x, pts[i].y);
+                    ctx!.strokeStyle = `hsla(${e.hue},90%,65%,${frac * frac * 0.8})`;
+                    ctx!.lineWidth   = frac * e.size * 1.2;
+                    ctx!.shadowColor = `hsla(${e.hue},90%,70%,${frac * 0.5})`;
+                    ctx!.shadowBlur  = 6;
                     ctx!.stroke();
-                    ctx!.restore();
                 }
+                ctx!.restore();
 
-                // Head glow
+                // Glow halo
                 ctx!.save();
-                const g = ctx!.createRadialGradient(px, py, 0, px, py, 7);
-                g.addColorStop(0, `hsla(${e.hue},100%,80%,0.95)`);
-                g.addColorStop(0.4, `hsla(${e.hue},90%,65%,0.6)`);
-                g.addColorStop(1, `hsla(${e.hue},90%,65%,0)`);
-                ctx!.fillStyle   = g;
-                ctx!.shadowColor = `hsla(${e.hue},100%,80%,0.9)`;
-                ctx!.shadowBlur  = 14;
+                const glow = ctx!.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.size * 6);
+                glow.addColorStop(0, `hsla(${e.hue},100%,80%,0.9)`);
+                glow.addColorStop(0.5, `hsla(${e.hue},90%,65%,0.4)`);
+                glow.addColorStop(1, `hsla(${e.hue},90%,65%,0)`);
+                ctx!.fillStyle   = glow;
+                ctx!.shadowColor = `hsla(${e.hue},100%,75%,0.8)`;
+                ctx!.shadowBlur  = 18;
                 ctx!.beginPath();
-                ctx!.arc(px, py, 7, 0, Math.PI * 2);
+                ctx!.arc(e.x, e.y, e.size * 6, 0, Math.PI * 2);
                 ctx!.fill();
                 ctx!.restore();
 
-                // Tiny core dot
+                // Core
                 ctx!.save();
-                ctx!.fillStyle   = `hsla(${e.hue},100%,92%,0.95)`;
+                const bright = Math.sin(e.pulse) * 0.5 + 0.5;
+                ctx!.fillStyle   = `hsla(${e.hue},100%,${85 + bright * 15}%,0.95)`;
                 ctx!.shadowColor = `hsla(${e.hue},100%,80%,1)`;
-                ctx!.shadowBlur  = 8;
+                ctx!.shadowBlur  = 12;
                 ctx!.beginPath();
-                ctx!.arc(px, py, 1.5, 0, Math.PI * 2);
+                ctx!.arc(e.x, e.y, e.size, 0, Math.PI * 2);
                 ctx!.fill();
                 ctx!.restore();
             }
         }
 
-        function tick() {
-            ctx!.clearRect(0, 0, W, H);
-            drawHexGrid();
-            drawElectrons();
+        /* ─── Update electrons ─── */
+        function updateElectrons() {
+            for (const e of els) {
+                e.pulse += 0.08;
 
-            // Update each electron
-            for (let i = 0; i < elecs.length; i++) {
-                const e = elecs[i];
-                e.t += e.speed;
-
-                if (e.t >= 1) {
-                    // Jump to adjacent segment
-                    const endPt = e.seg.b;
-                    const adj = adjacent(endPt, segs);
-                    if (adj.length > 0 && Math.random() > 0.08) {
-                        const next = adj[Math.floor(Math.random() * adj.length)];
-                        const fromA = Math.abs(next.a.x - endPt.x) < 1.5 && Math.abs(next.a.y - endPt.y) < 1.5;
-                        e.seg = fromA ? next : { a: next.b, b: next.a };
-                        e.t   = 0;
-                    } else {
-                        elecs[i] = mkElectron(0);
-                    }
+                // Random direction nudge
+                if (Math.random() < 0.02) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.hypot(e.vx, e.vy);
+                    e.vx = e.vx * 0.7 + Math.cos(angle) * speed * 0.3;
+                    e.vy = e.vy * 0.7 + Math.sin(angle) * speed * 0.3;
                 }
+
+                // Gentle hexagon center attraction (makes them follow honeycomb vaguely)
+                if (Math.random() < 0.015) {
+                    const w = HEX_R * Math.sqrt(3);
+                    const h = HEX_R * 2;
+                    const col = Math.round(e.x / w);
+                    const row = Math.round(e.y / (h * 0.75));
+                    const cx  = col * w + (row % 2 === 0 ? 0 : w / 2);
+                    const cy  = row * h * 0.75;
+                    const dx  = cx - e.x, dy = cy - e.y;
+                    const dist= Math.hypot(dx, dy) || 1;
+                    e.vx += (dx / dist) * 0.3;
+                    e.vy += (dy / dist) * 0.3;
+                }
+
+                // Speed cap
+                const spd = Math.hypot(e.vx, e.vy);
+                if (spd > 2.2) { e.vx = e.vx / spd * 2.2; e.vy = e.vy / spd * 2.2; }
+                if (spd < 0.5) {
+                    const a = Math.random() * Math.PI * 2;
+                    e.vx = Math.cos(a) * 0.8; e.vy = Math.sin(a) * 0.8;
+                }
+
+                e.x += e.vx; e.y += e.vy;
+
+                // Bounce off edges
+                if (e.x < 0)     { e.x = 0;  e.vx =  Math.abs(e.vx); }
+                if (e.x > W)     { e.x = W;  e.vx = -Math.abs(e.vx); }
+                if (e.y < 0)     { e.y = 0;  e.vy =  Math.abs(e.vy); }
+                if (e.y > H)     { e.y = H;  e.vy = -Math.abs(e.vy); }
+
+                // Trail
+                e.trail.unshift({ x: e.x, y: e.y });
+                if (e.trail.length > TRAIL) e.trail.length = TRAIL;
             }
+        }
+
+        /* ─── Animation loop ─── */
+        function tick() {
+            frame++;
+            ctx!.clearRect(0, 0, W, H);
+
+            drawHoneycomb();
+            drawElectrons();
+            updateElectrons();
 
             raf.current = requestAnimationFrame(tick);
         }
