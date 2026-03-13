@@ -42,6 +42,7 @@ import PlusCircleIcon from './components/icons/PlusCircleIcon';
 import DocumentReportIcon from './components/icons/DocumentReportIcon';
 import LightBulbIcon from './components/icons/LightBulbIcon';
 import CopyrightIcon from './components/icons/CopyrightIcon';
+import HexBackground from './components/HexBackground';
 import MonitorIcon from './components/icons/MonitorIcon'; 
 
 import { AIModel } from './constants/specialists';
@@ -766,6 +767,8 @@ const AppContent: React.FC = () => {
 
     return (
         <div className="flex flex-col h-screen w-full max-w-[100vw] font-sans text-text-primary app-bg relative overflow-hidden">
+            {/* Animatsion ari uyali + elektron fon */}
+            <HexBackground />
             {/* Third ambient orb */}
             <div className="app-orb3" aria-hidden="true" />
             {criticalFinding && <CriticalFindingAlert finding={criticalFinding} onClose={() => setCriticalFinding(null)} />}
@@ -780,7 +783,7 @@ const AppContent: React.FC = () => {
                     <button type="button" onClick={checkNow} className="underline font-semibold hover:no-underline shrink-0">Qayta tekshirish</button>
                 </div>
             )}
-            <header className="flex-none pt-3 sm:pt-4 pb-2 z-30 w-full">
+            <header className="flex-none pt-3 sm:pt-4 pb-2 z-30 w-full relative">
                  <div className="glass-panel page-px py-3 flex flex-wrap justify-between items-center gap-2 sm:gap-4 shadow-lg shadow-blue-500/5 w-full min-w-0">
                         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
@@ -801,7 +804,7 @@ const AppContent: React.FC = () => {
                 </div>
             </header>
 
-            <main className="flex-grow flex flex-col overflow-hidden w-full min-w-0 relative z-10">
+            <main className="flex-grow flex flex-col overflow-hidden w-full min-w-0 relative z-10 isolate">
                {renderMainContent()}
             </main>
             
