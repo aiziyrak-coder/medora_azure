@@ -57,24 +57,31 @@ const apiToAnalysisRecord = (api: ApiAnalysisRecord): AnalysisRecord => {
 /**
  * Convert frontend AnalysisRecord to API format
  */
+const safeArr = <T>(v: unknown): T[] => (Array.isArray(v) ? v as T[] : []);
+
 const analysisRecordToApi = (record: Partial<AnalysisRecord>): Partial<ApiAnalysisRecord> & { external_patient_id?: string } => {
   const fr = record.finalReport || {} as FinalReport;
+  const pd = record.patientData || {};
+  // Strip large binary fields (attachments) from patient_data before sending to backend
+  const { attachments: _att, ...patientDataClean } = pd as Record<string, unknown> & { attachments?: unknown };
+  // Limit debate_history to last 50 messages to avoid request size limits
+  const dh = safeArr(record.debateHistory).slice(-50);
   return {
     patient_id: record.patientId || '',
     external_patient_id: record.patientId || '',
-    patient_data: (record.patientData || {}) as Record<string, unknown>,
-    debate_history: Array.isArray(record.debateHistory) ? record.debateHistory : [],
+    patient_data: patientDataClean as Record<string, unknown>,
+    debate_history: dh,
     final_report: {
       ...fr,
-      treatmentPlan: Array.isArray(fr.treatmentPlan) ? fr.treatmentPlan : [],
-      medicationRecommendations: Array.isArray(fr.medicationRecommendations) ? fr.medicationRecommendations : [],
-      recommendedTests: Array.isArray(fr.recommendedTests) ? fr.recommendedTests : [],
-      rejectedHypotheses: Array.isArray(fr.rejectedHypotheses) ? fr.rejectedHypotheses : [],
-      consensusDiagnosis: Array.isArray(fr.consensusDiagnosis) ? fr.consensusDiagnosis : [],
+      treatmentPlan: safeArr(fr.treatmentPlan).map(s => typeof s === 'string' ? s : JSON.stringify(s)),
+      medicationRecommendations: safeArr(fr.medicationRecommendations),
+      recommendedTests: safeArr(fr.recommendedTests),
+      rejectedHypotheses: safeArr(fr.rejectedHypotheses),
+      consensusDiagnosis: safeArr(fr.consensusDiagnosis),
     } as FinalReport,
-    follow_up_history: record.followUpHistory || [],
-    selected_specialists: record.selectedSpecialists?.map(s => s.toString()) || [],
-    detected_medications: record.detectedMedications || [],
+    follow_up_history: safeArr(record.followUpHistory),
+    selected_specialists: safeArr(record.selectedSpecialists).map(s => String(s)),
+    detected_medications: safeArr(record.detectedMedications),
   };
 };
 

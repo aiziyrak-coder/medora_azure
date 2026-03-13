@@ -150,18 +150,21 @@ export const generatePdfReport = (
     }
 
     addSectionTitle("Tavsiya Etilgan Davolash Rejasi");
-    report.treatmentPlan.forEach(step => addText(step, true));
+    (Array.isArray(report.treatmentPlan) ? report.treatmentPlan : []).forEach(step => {
+        const s = typeof step === 'string' ? step : (typeof step === 'object' && step !== null ? Object.values(step as Record<string, unknown>).filter(Boolean).join(' — ') : String(step ?? ''));
+        addText(s, true);
+    });
     
     y += 5;
     addSectionTitle("Dori-Darmonlar bo'yicha Tavsiyalar");
-    report.medicationRecommendations.forEach(med => {
+    (Array.isArray(report.medicationRecommendations) ? report.medicationRecommendations : []).forEach(med => {
         addKeyValue("Nomi", med.name);
         addKeyValue("Doza", med.dosage);
         addKeyValue("Izoh", med.notes);
         y += 3;
     });
 
-    if(report.unexpectedFindings) {
+    if (report.unexpectedFindings) {
         y += 5;
         addSectionTitle("Kutilmagan Bog'liqliklar va Gipotezalar");
         addText(report.unexpectedFindings);
@@ -169,15 +172,15 @@ export const generatePdfReport = (
     
     y += 5;
     addSectionTitle("Inkor Etilgan Gipotezalar");
-    report.rejectedHypotheses.forEach(hyp => {
+    (Array.isArray(report.rejectedHypotheses) ? report.rejectedHypotheses : []).forEach(hyp => {
         addKeyValue("Gipoteza", hyp.name);
         addKeyValue("Rad etish sababi", hyp.reason);
-        y+= 3;
+        y += 3;
     });
 
     y += 5;
     addSectionTitle("Tavsiya Etiladigan Qo'shimcha Tekshiruvlar");
-    report.recommendedTests.forEach(test => addText(test, true));
+    (Array.isArray(report.recommendedTests) ? report.recommendedTests : []).forEach(test => addText(test, true));
 
     if (report.uzbekistanLegislativeNote) {
         y += 5;
