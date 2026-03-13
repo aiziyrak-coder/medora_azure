@@ -851,13 +851,6 @@ export const runDoctorSupportViaGemini = async (
     }
 };
 
-const CLARIFY_FALLBACK: Record<Language, string[]> = {
-    'uz-L': ["Allergiyangiz bormi?", "Hozir qanday dori ichyapsiz?", "Belgilar qachondan boshlangan?"],
-    'uz-C': ["Аллергиянгиз борми?", "Ҳозир қандай дори ичяпсиз?", "Белгилар қачондан бошланган?"],
-    'ru':   ["Есть ли у вас аллергия?", "Какие принимаете лекарства?", "Когда начались симптомы?"],
-    'kaa':  ["Allergiyanız barma?", "Házir qanday dári ishleysiñ?", "Belgiler qashan baslandı?"],
-    'en':   ["Do you have any allergies?", "What medications are you taking?", "When did symptoms start?"],
-};
 
 export const generateClarifyingQuestions = async (data: PatientData, language: Language): Promise<string[]> => {
     // Minimal text prompt — no images, no heavy system instruction to save tokens
@@ -891,7 +884,7 @@ ${patientSummary}`;
         return questions.length >= 2 ? questions.slice(0, 4) : CLARIFY_FALLBACK[language];
     } catch (e) {
         logger.warning('generateClarifyingQuestions error', e);
-        return CLARIFY_FALLBACK[language];
+        return [];
     }
 };
 

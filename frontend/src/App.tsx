@@ -474,63 +474,65 @@ const AppContent: React.FC = () => {
         else setAppView(view);
     };
 
-    /** Savollar faqat AI orqali shikoyatdan generatsiya qilinadi; oldindan kiritilgan ro'yxat ishlatilmaydi. */
+    /** Savollar FAQAT AI orqali bemorning kiritgan ma'lumotlaridan generatsiya qilinadi.
+     *  AI savol yarata olmasa → aniqlashtiruv bosqichini o'tkazib yuborib, jamoa tavsiyasiga o'tamiz. */
     const handleGenerateClarificationQuestions = async (data: PatientData) => {
         setError(null);
         setIsProcessing(true);
-        setAppView('clarification');
         setStatusMessage(t('clarification_generating_questions'));
         let questions: string[] = [];
-        let backendErrorMessage: string | null = null;
         try {
+            // Backend orqali
             const { generateClarifyingQuestions } = await import('./services/apiAiService');
             const response = await generateClarifyingQuestions(data);
-            if (response.success && response.data?.length) {
+            if (response.success && Array.isArray(response.data) && response.data.length > 0) {
                 questions = response.data;
-            } else {
-                if (response.success === false && response.error?.message) {
-                    // Translate AI error codes
-                    if (response.error.message.includes('AI_JSON_PARSE_ERROR')) {
-                        backendErrorMessage = t('ai_json_parse_error');
-                    } else if (response.error.message.includes('timeout')) {
-                        backendErrorMessage = t('ai_timeout_error');
-                    } else if (response.error.message.includes('unavailable')) {
-                        backendErrorMessage = t('ai_service_unavailable');
-                    } else {
-                        backendErrorMessage = response.error.message;
-                    }
-                    setError(backendErrorMessage);
-                }
-                try {
-                    questions = await aiService.generateClarifyingQuestions(data, language);
-                    if (questions.length) setError(null);
-                } catch {
-                    setError(backendErrorMessage || t('clarification_question_error'));
-                }
             }
-        } catch (e) {
-            const errMsg = e instanceof Error ? e.message : null;
-            // Translate AI error codes
-            let translatedError: string | null = null;
-            if (errMsg?.includes('AI_JSON_PARSE_ERROR')) {
-                translatedError = t('ai_json_parse_error');
-            } else if (errMsg?.includes('timeout')) {
-                translatedError = t('ai_timeout_error');
-            } else if (errMsg?.includes('unavailable')) {
-                translatedError = t('ai_service_unavailable');
-            }
+        } catch { /* ignore, try Gemini directly */ }
+
+        if (questions.length === 0) {
             try {
                 questions = await aiService.generateClarifyingQuestions(data, language);
-                if (questions.length) setError(null);
-            } catch {
-                setError(backendErrorMessage || translatedError || errMsg || t('clarification_question_error'));
-            }
+            } catch { /* ignore */ }
         }
+
+        if (questions.length === 0) {
+            // AI savol yarata olmadi → aniqlashtiruv o'tkazib yuboriladi
+            setIsProcessing(false);
+            setAppView('team_recommendation');
+            await handleRecommendTeamFromData(data);
+            return;
+        }
+
         setClarificationQuestions(questions);
-        if (questions.length) setError(null);
         setIsProcessing(false);
+        setAppView('clarification');
     };
-    
+
+    const handleRecommendTeamFromData = async (data: PatientData) => {
+        setIsProcessing(true);
+        setStatusMessage(t('team_recommendation_creating'));
+        try {
+            const { recommendSpecialists } = await import('./services/apiAiService');
+            const response = await recommendSpecialists(data);
+            if (response.success && response.data?.recommendations?.length) {
+                setRecommendedTeam(response.data.recommendations);
+                setError(null);
+            } else {
+                throw new Error('API failed');
+            }
+        } catch {
+            try {
+                const team = await aiService.recommendSpecialists(data, language);
+                setRecommendedTeam(team.recommendations);
+                setError(null);
+            } catch {
+                const defaultSpecialists = [AIModel.INTERNAL_MEDICINE, AIModel.FAMILY_MEDICINE, AIModel.EMERGENCY, AIModel.GEMINI, AIModel.CLAUDE, AIModel.GPT];
+                setRecommendedTeam(defaultSpecialists.map(model => ({ model, reason: 'Standart jamoa' })));
+            }
+        } finally { setIsProcessing(false); }
+    };
+
     const handleDataSubmit = async (data: PatientData) => {
         setPatientData(data);
         await handleGenerateClarificationQuestions(data);
@@ -547,31 +549,7 @@ const AppContent: React.FC = () => {
         }
         setPatientData(enrichedPatientData);
         setAppView('team_recommendation');
-        setIsProcessing(true);
-        setStatusMessage(t('team_recommendation_creating'));
-        let teamBackendError: string | null = null;
-        try {
-            const { recommendSpecialists } = await import('./services/apiAiService');
-            const response = await recommendSpecialists(enrichedPatientData);
-            if (response.success && response.data?.recommendations?.length) {
-                setRecommendedTeam(response.data.recommendations);
-            } else {
-                if (response.success === false && response.error?.message) {
-                    teamBackendError = response.error.message;
-                }
-                throw new Error('API failed');
-            }
-        } catch (e) {
-            try {
-                const team = await aiService.recommendSpecialists(enrichedPatientData, language);
-                setRecommendedTeam(team.recommendations);
-                setError(null);
-            } catch (fallbackError) {
-                setError(teamBackendError || t('team_recommendation_auto_error'));
-                const defaultSpecialists = [AIModel.INTERNAL_MEDICINE, AIModel.FAMILY_MEDICINE, AIModel.EMERGENCY, AIModel.GEMINI, AIModel.CLAUDE, AIModel.GPT];
-                setRecommendedTeam(defaultSpecialists.map(model => ({ model, reason: 'Standart jamoa' })));
-            }
-        } finally { setIsProcessing(false); }
+        await handleRecommendTeamFromData(enrichedPatientData);
     };
 
     const handleTeamConfirmation = (confirmedTeam: { role: AIModel, backEndModel: string }[], orchestrator: string) => {
