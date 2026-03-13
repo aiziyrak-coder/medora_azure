@@ -5,8 +5,6 @@ import * as aiService from '../services/aiCouncilService';
 
 // --- Components ---
 import SpinnerIcon from './icons/SpinnerIcon';
-import DifferentialDiagnosisPanel from './DifferentialDiagnosisPanel';
-import DDxTreeView from './DDxTreeView';
 import ChatMessage from './ChatMessage';
 import FinalReportCard from './FinalReportCard';
 import PrognosisCard from './report/PrognosisCard';
@@ -153,25 +151,6 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
                         </div>
                     )}
 
-                    {differentialDiagnoses.length > 0 && (
-                        <div className="bg-white/40 p-4 rounded-[1.5rem] border border-white/40 shadow-sm space-y-6">
-                            <DifferentialDiagnosisPanel 
-                                diagnoses={differentialDiagnoses} 
-                                onFeedback={onDiagnosisFeedback}
-                                feedbackState={diagnosisFeedback}
-                                onStartDebate={onStartDebate}
-                                isDebateStarted={dh.length > 0}
-                                onInjectHypothesis={onInjectHypothesis}
-                            />
-                            <div className="border-t border-white/30 pt-4">
-                                <DDxTreeView 
-                                    diagnoses={differentialDiagnoses} 
-                                    onStartDebate={onStartDebate} 
-                                    isDebateStarted={dh.length > 0} 
-                                />
-                            </div>
-                        </div>
-                    )}
                     {(Array.isArray(dh) ? dh : []).map(msg => <ChatMessage key={msg.id} message={msg} onExplainRationale={onExplainRationale} />)}
                     {isLive && isAnalyzing && dh.length > 0 && !socraticQuestion && (
                         <DebateStatusIndicator message={statusMessage} />

@@ -265,6 +265,7 @@ const AppContent: React.FC = () => {
     
     const [currentAnalysisRecord, setCurrentAnalysisRecord] = useState<AnalysisRecord | null>(null);
     const [clarificationQuestions, setClarificationQuestions] = useState<string[] | null>([]);
+    const [autoStartDebate, setAutoStartDebate] = useState(false);
     
     const debateScrollRef = useRef<HTMLDivElement>(null);
     const { apiHealthy, healthStatus, checkNow } = useApiHealth();
@@ -274,7 +275,14 @@ const AppContent: React.FC = () => {
             debateScrollRef.current.scrollTop = debateScrollRef.current.scrollHeight;
         }
     }, [debateHistory, statusMessage]);
-    
+
+    useEffect(() => {
+        if (appView === 'live_analysis' && autoStartDebate) {
+            setAutoStartDebate(false);
+            handleStartDebate();
+        }
+    }, [appView, autoStartDebate]); // eslint-disable-line react-hooks/exhaustive-deps -- handleStartDebate intentionally not in deps
+
     const handleProgress = useCallback((update: ProgressUpdate) => {
         switch (update.type) {
             case 'status': setStatusMessage(update.message); break;
@@ -589,13 +597,11 @@ const AppContent: React.FC = () => {
             if (hasData) {
                 setDifferentialDiagnoses(response.data);
                 setError(null);
-                setStatusMessage(t('ddx_feedback_prompt'));
             } else {
                 try {
                     const diagnoses = await aiService.generateInitialDiagnoses(patientData, language);
                     setDifferentialDiagnoses(Array.isArray(diagnoses) ? diagnoses : []);
                     setError(null);
-                    setStatusMessage(t('ddx_feedback_prompt'));
                 } catch (fallbackErr) {
                     setError(apiErrorMsg || t('ddx_generation_error'));
                     setStatusMessage(t('error_try_again'));
@@ -604,20 +610,22 @@ const AppContent: React.FC = () => {
         } catch (e) {
             try {
                 const diagnoses = await aiService.generateInitialDiagnoses(patientData, language);
-                setDifferentialDiagnoses(diagnoses);
+                setDifferentialDiagnoses(Array.isArray(diagnoses) ? diagnoses : []);
                 setError(null);
-                setStatusMessage(t('ddx_feedback_prompt'));
             } catch (fallbackErr) {
                 const msg = fallbackErr instanceof Error ? fallbackErr.message : '';
                 setError(msg || t('ddx_generation_error'));
                 setStatusMessage(t('error_try_again'));
             }
-        } 
-        finally { setIsProcessing(false); }
+        }
+        finally {
+            setIsProcessing(false);
+            setAutoStartDebate(true);
+        }
     };
 
     const handleStartDebate = () => {
-        if (!patientData || !differentialDiagnoses.length) return;
+        if (!patientData) return;
         let enrichedPatientData = { ...patientData, userDiagnosisFeedback: diagnosisFeedback };
         setPatientData(enrichedPatientData);
         setIsProcessing(true);
