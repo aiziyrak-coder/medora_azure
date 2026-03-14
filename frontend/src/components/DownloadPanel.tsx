@@ -89,7 +89,7 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({ record, hasError }) => {
     return (
         <div className="space-y-4">
             {hasError && (
-                <p className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-2">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                     {t('export_partial_note' as TranslationKey)}
                 </p>
             )}

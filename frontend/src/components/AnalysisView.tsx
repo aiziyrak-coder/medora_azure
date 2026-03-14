@@ -9,6 +9,7 @@ import ChatMessage from './ChatMessage';
 import FinalReportCard from './FinalReportCard';
 import PrognosisCard from './report/PrognosisCard';
 import DownloadPanel from './DownloadPanel';
+import ErrorReportPlaceholder from './ErrorReportPlaceholder';
 import DebateStatusIndicator from './DebateStatusIndicator';
 import { ObjectiveVitalsCards } from './analysis/ObjectiveVitalsCards';
 import ErrorWithRetry from './ErrorWithRetry';
@@ -62,6 +63,7 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
     }, [record?.debateHistory, statusMessage, socraticQuestion]);
 
     const { patientData: pd, debateHistory: dh = [], finalReport: fr = null } = record ?? {};
+    const showRightPanel = !isAnalyzing && (!!fr || (!!error && (dh?.length ?? 0) > 0));
 
     const handleInterventionSubmit = useCallback((e: React.FormEvent) => {
         e.preventDefault();
@@ -188,18 +190,19 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
                 )}
             </div>
             
-            {/* Right Panel: Yakuniy xulosa — faqat munozara tugagach ko'rinadi; to'liq hisobot, pastida yuklab olish */}
-            {!isAnalyzing && (fr || (!!error && (dh?.length ?? 0) > 0)) && (
+            {/* Right Panel: Yakuniy xulosa — o'ng tomonda; to'liq hisobot tuzilishi (yoki xato bo'lsa placeholder), pastida yuklab olish */}
+            {showRightPanel && (
                 <div className="xl:col-span-4 glass-panel overflow-hidden flex flex-col h-full">
-                    <div className="p-5 border-b border-white/20 bg-white/30 backdrop-blur-md">
+                    <div className="p-5 border-b border-white/20 bg-white/30 backdrop-blur-md flex-shrink-0">
                         <h3 className="text-lg font-bold text-text-primary">Yakuniy Xulosa</h3>
                         {!fr && error && (
-                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">Tahlil xato bilan tugadi. Bemor ma&apos;lumotlari va munozarani yuklab olish mumkin.</p>
+                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">Tahlil xato bilan tugadi. Quyida hisobot bo'limlari va yuklab olish.</p>
                         )}
                     </div>
-                    <div className="p-5 overflow-y-auto flex-grow custom-scrollbar">
+                    <div className="p-5 overflow-y-auto flex-grow custom-scrollbar min-h-0">
                         <div className="space-y-6">
                             {fr && <FinalReportCard report={fr} patientData={pd} onUpdateReport={onUpdateReport} debateHistory={dh} />}
+                            {!fr && error && <ErrorReportPlaceholder message={error} />}
                             {record?.id && !isNaN(parseInt(record.id, 10)) && fr && (
                                 <UsefulnessFeedbackCard analysisId={parseInt(record.id, 10)} />
                             )}
