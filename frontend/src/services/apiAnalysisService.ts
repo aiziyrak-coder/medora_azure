@@ -69,9 +69,9 @@ const MAX_STRING = 8000;
 function sanitizeForJson(obj: unknown, depth = 0): unknown {
   if (depth > 15) return null;
   if (obj === undefined) return null;
-  if (obj === null || typeof obj === 'number' || typeof obj === 'boolean') return obj;
-  if (typeof obj === 'string') return obj.length > MAX_STRING ? obj.slice(0, MAX_STRING) : obj;
+  if (obj === null || typeof obj === 'boolean') return obj;
   if (typeof obj === 'number') return Number.isFinite(obj) ? obj : 0;
+  if (typeof obj === 'string') return obj.length > MAX_STRING ? obj.slice(0, MAX_STRING) : obj;
   if (Array.isArray(obj)) return obj.slice(0, 200).map(item => sanitizeForJson(item, depth + 1));
   if (typeof obj === 'object') {
     const out: Record<string, unknown> = {};
@@ -210,17 +210,23 @@ export const getAnalysis = async (id: number): Promise<ApiResponse<AnalysisRecor
 };
 
 /**
- * Create analysis record
+ * Create analysis record. Payload is limited to backend create serializer fields only.
  */
 export const createAnalysis = async (
   patientId: number,
   record: Partial<AnalysisRecord>
 ): Promise<ApiResponse<AnalysisRecord>> => {
-  const apiData = {
-    ...analysisRecordToApi(record),
-    patient: patientId,
+  const base = analysisRecordToApi(record);
+  const apiData: Record<string, unknown> = {
+    patient: Number(patientId),
+    external_patient_id: base.external_patient_id ?? '',
+    patient_data: base.patient_data ?? {},
+    debate_history: base.debate_history ?? [],
+    final_report: base.final_report ?? {},
+    follow_up_history: base.follow_up_history ?? [],
+    selected_specialists: base.selected_specialists ?? [],
+    detected_medications: base.detected_medications ?? [],
   };
-  
   const response = await apiPost<ApiAnalysisRecord>('/analyses/', apiData);
   
   if (response.success && response.data) {

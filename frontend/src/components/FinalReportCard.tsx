@@ -127,8 +127,7 @@ const FinalReportCard: React.FC<{
   onUpdateReport?: (updatedReport: Partial<FinalReport>) => void;
   /** Agar berilsa, har bir mutaxassisning yakuniy xulosasi alohida hujjat bo'limida ko'rsatiladi */
   debateHistory?: ChatMessage[];
-}> = ({ report, patientData, isScenario = false, onUpdateReport, debateHistory }) => {
-    const { t } = useTranslation();
+}> = ({ report, patientData, isScenario = false, onUpdateReport }) => {
     const safePlan = (Array.isArray(report.treatmentPlan) ? report.treatmentPlan : []).map(planItemToString);
 
     const [isEditingPlan, setIsEditingPlan] = useState(false);
