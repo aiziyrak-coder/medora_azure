@@ -318,27 +318,41 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                         </div>
                     </section>
 
-                    {/* SLIDE 2: HOW IT WORKS — real SVG icons from components */}
-                    <section className={`landing-slide flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 pt-20 pb-20 ${currentSlide === 2 ? 'landing-slide-active' : ''}`} data-slide-index={2}>
-                        <div className="landing-slide-inner w-full max-w-3xl mx-auto text-center">
-                            <h2 className="text-2xl sm:text-4xl font-bold mb-4">{t('landing_how_title')} <span className="text-blue-500">{t('landing_how_subtitle')}</span></h2>
-                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-6 sm:gap-10 mt-10">
+                    {/* SLIDE 2: HOW IT WORKS — 10x boyitilgan ma'lumot */}
+                    <section className={`landing-slide flex flex-col items-center px-4 sm:px-6 md:px-8 pt-20 pb-24 overflow-y-auto ${currentSlide === 2 ? 'landing-slide-active' : ''}`} data-slide-index={2}>
+                        <div className="landing-slide-inner w-full max-w-5xl mx-auto">
+                            <h2 className="text-2xl sm:text-4xl font-bold mb-3 text-center">{t('landing_how_title')} <span className="text-blue-500">{t('landing_how_subtitle')}</span></h2>
+                            <p className="text-slate-400 text-sm sm:text-base text-center max-w-2xl mx-auto mb-8 leading-relaxed">
+                                {t('landing_how_intro' as never)}
+                            </p>
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                                 {[
-                                    { step: '01', title: t('landing_how_step1'), desc: t('landing_how_step1_desc'), Icon: DocumentTextIcon, bg: 'bg-blue-500/20', border: 'border-blue-400/40', iconColor: 'text-blue-400' },
-                                    { step: '02', title: t('landing_how_step2'), desc: t('landing_how_step2_desc'), Icon: BrainCircuitIcon, bg: 'bg-cyan-500/20', border: 'border-cyan-400/40', iconColor: 'text-cyan-400' },
-                                    { step: '03', title: t('landing_how_step3'), desc: t('landing_how_step3_desc'), Icon: ShieldCheckIcon, bg: 'bg-emerald-500/20', border: 'border-emerald-400/40', iconColor: 'text-emerald-400' },
+                                    { step: '01', title: t('landing_how_step1'), desc: t('landing_how_step1_desc' as never), points: [t('landing_how_step1_p1' as never), t('landing_how_step1_p2' as never), t('landing_how_step1_p3' as never), t('landing_how_step1_p4' as never)], Icon: DocumentTextIcon, bg: 'bg-blue-500/20', border: 'border-blue-400/40', iconColor: 'text-blue-400' },
+                                    { step: '02', title: t('landing_how_step2'), desc: t('landing_how_step2_desc' as never), points: [t('landing_how_step2_p1' as never), t('landing_how_step2_p2' as never), t('landing_how_step2_p3' as never), t('landing_how_step2_p4' as never)], Icon: BrainCircuitIcon, bg: 'bg-cyan-500/20', border: 'border-cyan-400/40', iconColor: 'text-cyan-400' },
+                                    { step: '03', title: t('landing_how_step3'), desc: t('landing_how_step3_desc' as never), points: [t('landing_how_step3_p1' as never), t('landing_how_step3_p2' as never), t('landing_how_step3_p3' as never), t('landing_how_step3_p4' as never)], Icon: ShieldCheckIcon, bg: 'bg-emerald-500/20', border: 'border-emerald-400/40', iconColor: 'text-emerald-400' },
                                 ].map((item, i) => (
-                                    <div key={i} className="landing-step-card flex flex-col items-center gap-3 p-4 rounded-2xl bg-slate-800/40 border border-white/5 hover:border-white/10 transition-all" style={{ animationDelay: `${i * 0.12}s` }}>
-                                        <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl ${item.bg} border ${item.border} flex items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg`}>
-                                            <item.Icon className={`w-8 h-8 sm:w-10 sm:h-10 ${item.iconColor}`} />
+                                    <div key={i} className="landing-step-card flex flex-col p-5 rounded-2xl bg-slate-800/50 border border-white/10 hover:border-white/20 transition-all text-left">
+                                        <div className={`w-14 h-14 rounded-xl ${item.bg} border ${item.border} flex items-center justify-center mb-4 flex-shrink-0`}>
+                                            <item.Icon className={`w-7 h-7 ${item.iconColor}`} />
                                         </div>
-                                        <span className="text-xs font-bold text-slate-500">{item.step}</span>
-                                        <p className="text-sm sm:text-base font-bold text-white max-w-[200px] leading-snug text-center">{item.title}</p>
-                                        <p className="text-xs text-slate-400 max-w-[200px] text-center leading-snug">{item.desc}</p>
+                                        <span className="text-xs font-bold text-slate-500 mb-1">{item.step}</span>
+                                        <h3 className="text-base font-bold text-white mb-2 leading-tight">{item.title}</h3>
+                                        <p className="text-xs text-slate-400 mb-3 leading-relaxed">{item.desc}</p>
+                                        <ul className="space-y-1.5 text-[11px] text-slate-500">
+                                            {item.points.map((p, j) => (
+                                                <li key={j} className="flex gap-2">
+                                                    <span className="text-blue-400/80 flex-shrink-0">•</span>
+                                                    <span>{p}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
                                     </div>
                                 ))}
                             </div>
-                            <button onClick={onOpenGuide} className="mt-10 text-blue-400 font-bold hover:text-blue-300 flex items-center gap-2 mx-auto">
+                            <p className="text-center text-xs text-slate-500 mb-6 px-2">
+                                {t('landing_how_benefit' as never)}
+                            </p>
+                            <button onClick={onOpenGuide} className="text-blue-400 font-bold hover:text-blue-300 flex items-center gap-2 mx-auto">
                                 {t('landing_how_cta')} <ChevronRightIcon className="w-5 h-5" />
                             </button>
                         </div>
