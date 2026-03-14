@@ -187,7 +187,7 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
                     </div>
                     <div className="p-5 overflow-y-auto flex-grow custom-scrollbar">
                         <div className="space-y-6">
-                            <FinalReportCard report={fr} patientData={pd} onUpdateReport={onUpdateReport} />
+                            <FinalReportCard report={fr} patientData={pd} onUpdateReport={onUpdateReport} debateHistory={dh} />
                             <DownloadPanel record={record} />
                             <button onClick={onGoToEducation} className="w-full py-4 rounded-[1.25rem] font-bold text-blue-600 bg-white border border-blue-100 hover:bg-blue-50 transition-colors shadow-sm">
                                 Bemor uchun Ma'lumot Portalini Ochish

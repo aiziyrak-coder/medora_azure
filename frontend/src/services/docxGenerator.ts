@@ -16,11 +16,15 @@ const createKeyValue = (key: string, value: string | undefined | null) => new Pa
 });
 const createListItem = (text: string) => new Paragraph({ text, bullet: { level: 0 } });
 
+export type SpecialistNameResolver = (author: string) => string;
+
 export const generateDocxReport = async (
     report: FinalReport,
     patientData: PatientData,
-    debateHistory: ChatMessage[]
+    debateHistory: ChatMessage[],
+    getSpecialistName?: SpecialistNameResolver
 ) => {
+    const specialistName = (author: string) => getSpecialistName ? getSpecialistName(author) : (AI_SPECIALISTS[author]?.name || author);
 
     const children = [
         new Paragraph({
@@ -91,7 +95,7 @@ export const generateDocxReport = async (
             specialistMessages.forEach(m => lastByAuthor.set(m.author, m));
             return Array.from(lastByAuthor.entries()).map(([author, msg]) => new Paragraph({
                 children: [
-                    new TextRun({ text: `${AI_SPECIALISTS[author]?.name || author}: `, bold: true }),
+                    new TextRun({ text: `${specialistName(author)}: `, bold: true }),
                     new TextRun(msg.content),
                 ],
                 spacing: { after: 200 },
@@ -102,7 +106,7 @@ export const generateDocxReport = async (
         createHeading1("Konsilium Munozara Tarixi"),
         ...debateHistory.filter(msg => !msg.isSystemMessage && !msg.isUserIntervention).map(msg => new Paragraph({
             children: [
-                new TextRun({ text: `${AI_SPECIALISTS[msg.author]?.name || 'Foydalanuvchi'}: `, bold: true }),
+                new TextRun({ text: `${msg.author ? specialistName(msg.author) : 'Foydalanuvchi'}: `, bold: true }),
                 new TextRun(msg.content)
             ],
             spacing: { after: 200 }

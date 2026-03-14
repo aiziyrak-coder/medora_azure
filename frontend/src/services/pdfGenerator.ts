@@ -12,11 +12,17 @@ interface jsPDFInternal {
     };
 }
 
+/** Optional: author key -> display name (e.g. translated) for PDF */
+export type SpecialistNameResolver = (author: string) => string;
+
 export const generatePdfReport = (
-    report: FinalReport, 
-    patientData: PatientData, 
-    debateHistory: ChatMessage[]
+    report: FinalReport,
+    patientData: PatientData,
+    debateHistory: ChatMessage[],
+    getSpecialistName?: SpecialistNameResolver
 ) => {
+    const specialistName = (author: string): string =>
+        getSpecialistName ? getSpecialistName(author) : (AI_SPECIALISTS[author]?.name || author);
     const doc = new jsPDF();
     const pageHeight = doc.internal.pageSize.height;
     const pageWidth = doc.internal.pageSize.width;
@@ -188,7 +194,7 @@ export const generatePdfReport = (
         addText(report.uzbekistanLegislativeNote);
     }
 
-    // --- Har bir mutaxassisning yakuniy shaxsiy xulosasi ---
+    // --- Har bir mutaxassisning yakuniy shaxsiy xulosasi (hujjat bo'limi) ---
     const specialistMessages = debateHistory.filter((m: ChatMessage) => !m.isSystemMessage && !m.isUserIntervention);
     const lastByAuthor = new Map<string, ChatMessage>();
     specialistMessages.forEach((m: ChatMessage) => lastByAuthor.set(m.author, m));
@@ -200,14 +206,34 @@ export const generatePdfReport = (
             y += 10;
         }
         addHeader("Har bir mutaxassisning yakuniy shaxsiy xulosasi");
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text("Konsilium ishtirokchilarining tibbiy xulosalari. Har bir mutaxassis o'z so'nggi xulosasini keltiradi.", margin, y);
+        y += 8;
         lastByAuthor.forEach((msg, author) => {
-            const authorName = AI_SPECIALISTS[author]?.name || author;
-            if (y > pageHeight - 40) {
+            const authorName = specialistName(author);
+            if (y > pageHeight - 50) {
                 doc.addPage();
                 y = margin;
             }
-            addKeyValue(authorName, msg.content);
-            y += 2;
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(30, 41, 59);
+            doc.text(authorName, margin, y);
+            y += 6;
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(51, 65, 85);
+            const contentLines = doc.splitTextToSize(String(msg.content || ''), pageWidth - margin * 2);
+            contentLines.forEach((line: string) => {
+                if (y > pageHeight - margin) {
+                    doc.addPage();
+                    y = margin;
+                }
+                doc.text(line, margin, y);
+                y += 6;
+            });
+            y += 6;
         });
         y += 10;
     }
@@ -230,7 +256,7 @@ export const generatePdfReport = (
                 doc.addPage();
                 y = margin;
             }
-            const authorName = AI_SPECIALISTS[item.author]?.name || 'Foydalanuvchi';
+            const authorName = item.author ? specialistName(item.author) : 'Foydalanuvchi';
             addKeyValue(authorName, item.content);
             y += 2;
         });

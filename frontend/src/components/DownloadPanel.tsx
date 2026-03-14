@@ -4,6 +4,7 @@ import { generatePdfReport } from '../services/pdfGenerator';
 import { generateDocxReport } from '../services/docxGenerator';
 import DownloadIcon from './icons/DownloadIcon';
 import { AI_SPECIALISTS } from '../constants';
+import { useTranslation, type TranslationKey } from '../hooks/useTranslation';
 
 interface DownloadPanelProps {
     record: Partial<AnalysisRecord>;
@@ -23,6 +24,7 @@ function downloadTxt(filename: string, content: string) {
 }
 
 const DownloadPanel: React.FC<DownloadPanelProps> = ({ record }) => {
+    const { t } = useTranslation();
     if (!record.finalReport || !record.patientData) {
         return null;
     }
@@ -30,18 +32,20 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({ record }) => {
     const debateHistory: ChatMessage[] = Array.isArray(record.debateHistory) ? record.debateHistory : [];
     const patientName = `${record.patientData.lastName || ''}_${record.patientData.firstName || ''}`.replace(/\s+/g, '_') || 'Bemor';
 
-    // Group last message per specialist
+    const getSpecialistName = (author: string) =>
+        t(`specialist_name_${String(author).toLowerCase()}` as TranslationKey) || AI_SPECIALISTS[author]?.name || author;
+
     const specialistLastMsg = new Map<string, ChatMessage>();
     debateHistory
         .filter(m => !m.isSystemMessage && !m.isUserIntervention)
         .forEach(m => specialistLastMsg.set(m.author, m));
 
     const handlePdfDownload = () => {
-        generatePdfReport(record.finalReport!, record.patientData!, debateHistory);
+        generatePdfReport(record.finalReport!, record.patientData!, debateHistory, getSpecialistName);
     };
 
     const handleDocxDownload = async () => {
-        await generateDocxReport(record.finalReport!, record.patientData!, debateHistory);
+        await generateDocxReport(record.finalReport!, record.patientData!, debateHistory, getSpecialistName);
     };
 
     const handleSpecialistTxt = (author: string, content: string) => {
@@ -78,7 +82,7 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({ record }) => {
                     <h4 className="font-bold text-text-primary mb-3">Har bir mutaxassisning yakuniy xulosasi</h4>
                     <div className="space-y-2">
                         {Array.from(specialistLastMsg.entries()).map(([author, msg]) => {
-                            const specName = AI_SPECIALISTS[author]?.name || author;
+                            const specName = getSpecialistName(author);
                             const specTitle = AI_SPECIALISTS[author]?.title || '';
                             return (
                                 <button

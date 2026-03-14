@@ -1,6 +1,7 @@
 import React from 'react';
 import { AIModel, type ChatMessage as ChatMessageProps } from '../types';
 import { AI_SPECIALISTS } from '../constants';
+import { useTranslation, type TranslationKey } from '../hooks/useTranslation';
 import AIAvatar from './AIAvatar';
 import SpinnerIcon from './icons/SpinnerIcon';
 import InformationCircleIcon from './icons/InformationCircleIcon';
@@ -28,14 +29,15 @@ const EvidenceBadge: React.FC<{level: ChatMessageProps['evidenceLevel']}> = ({ l
 }
 
 const ChatMessage: React.FC<ChatMessageComponentProps> = ({ message, onExplainRationale }) => {
+    const { t } = useTranslation();
     const { author, content, isThinking, isUserIntervention, evidenceLevel, isSystemMessage } = message;
     const config = AI_SPECIALISTS[author];
 
     if (!config) return null;
     if (isThinking && !content) return null;
-    
+
+    const specialistName = t(`specialist_name_${String(author).toLowerCase()}` as TranslationKey) || config.name;
     const animationDelay = `${Math.random() * 0.3}s`;
-    const specialistName = config.name;
     
     if (isSystemMessage || isUserIntervention) {
         return (

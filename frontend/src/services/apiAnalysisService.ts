@@ -59,29 +59,95 @@ const apiToAnalysisRecord = (api: ApiAnalysisRecord): AnalysisRecord => {
  */
 const safeArr = <T>(v: unknown): T[] => (Array.isArray(v) ? v as T[] : []);
 
+const MAX_MSG_LEN = 4000;
+const MAX_DEBATE_ITEMS = 60;
+const MAX_STRING = 8000;
+
+/** Recursively sanitize for JSON: remove undefined, truncate long strings, avoid non-serializable values */
+function sanitizeForJson(obj: unknown, depth = 0): unknown {
+  if (depth > 15) return null;
+  if (obj === undefined) return null;
+  if (obj === null || typeof obj === 'number' || typeof obj === 'boolean') return obj;
+  if (typeof obj === 'string') return obj.length > MAX_STRING ? obj.slice(0, MAX_STRING) : obj;
+  if (Array.isArray(obj)) return obj.slice(0, 200).map(item => sanitizeForJson(item, depth + 1));
+  if (typeof obj === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj)) {
+      if (v === undefined) continue;
+      if (typeof v === 'function' || (typeof v === 'object' && v !== null && (v as object).constructor?.name === 'File')) continue;
+      out[k] = sanitizeForJson(v, depth + 1);
+    }
+    return out;
+  }
+  return null;
+}
+
 const analysisRecordToApi = (record: Partial<AnalysisRecord>): Partial<ApiAnalysisRecord> & { external_patient_id?: string } => {
   const fr = record.finalReport || {} as FinalReport;
   const pd = record.patientData || {};
   // Strip large binary fields (attachments) from patient_data before sending to backend
   const { attachments: _att, ...patientDataClean } = pd as Record<string, unknown> & { attachments?: unknown };
-  // Limit debate_history to last 50 messages to avoid request size limits
-  const dh = safeArr(record.debateHistory).slice(-50);
+  const patientDataSanitized = sanitizeForJson(patientDataClean) as Record<string, unknown>;
+
+  const rawDh = safeArr(record.debateHistory).slice(-MAX_DEBATE_ITEMS);
+  const debate_history = rawDh.map((m: ChatMessage) => ({
+    id: m.id,
+    author: m.author,
+    content: typeof m.content === 'string' ? (m.content.length > MAX_MSG_LEN ? m.content.slice(0, MAX_MSG_LEN) : m.content) : String(m.content ?? ''),
+    isSystemMessage: !!m.isSystemMessage,
+    isUserIntervention: !!m.isUserIntervention,
+    evidenceLevel: m.evidenceLevel,
+  }));
+
+  const consensusDiagnosis = safeArr(fr.consensusDiagnosis).slice(0, 25).map((d: { name?: unknown; probability?: unknown; justification?: unknown; evidenceLevel?: unknown; reasoningChain?: unknown; uzbekProtocolMatch?: unknown }) => ({
+    name: String(d?.name ?? ''),
+    probability: Number(d?.probability ?? 0),
+    justification: String(d?.justification ?? '').slice(0, 3000),
+    evidenceLevel: String(d?.evidenceLevel ?? 'Moderate'),
+    reasoningChain: Array.isArray(d?.reasoningChain) ? (d.reasoningChain as string[]).slice(0, 12).map(s => String(s).slice(0, 500)) : [],
+    uzbekProtocolMatch: String(d?.uzbekProtocolMatch ?? '').slice(0, 1000),
+  }));
+
+  const final_report = sanitizeForJson({
+    criticalFinding: fr.criticalFinding,
+    consensusDiagnosis,
+    rejectedHypotheses: safeArr(fr.rejectedHypotheses).slice(0, 20).map((h: { name?: unknown; reason?: unknown }) => ({ name: String(h?.name ?? ''), reason: String(h?.reason ?? '').slice(0, 2000) })),
+    imageAnalysis: fr.imageAnalysis,
+    prognosisReport: fr.prognosisReport,
+    recommendedTests: safeArr(fr.recommendedTests).slice(0, 30),
+    treatmentPlan: safeArr(fr.treatmentPlan).map(s => typeof s === 'string' ? s.slice(0, 2000) : JSON.stringify(s).slice(0, 2000)),
+    medicationRecommendations: safeArr(fr.medicationRecommendations).slice(0, 30).map((med: Record<string, unknown>) => ({
+      name: String(med?.name ?? ''),
+      dosage: String(med?.dosage ?? ''),
+      frequency: med?.frequency,
+      timing: med?.timing,
+      duration: med?.duration,
+      instructions: med?.instructions,
+      notes: String(med?.notes ?? '').slice(0, 1500),
+      localAvailability: med?.localAvailability,
+      priceEstimate: med?.priceEstimate,
+    })),
+    followUpPlan: fr.followUpPlan,
+    referrals: fr.referrals,
+    unexpectedFindings: String(fr.unexpectedFindings ?? '').slice(0, 3000),
+    costEffectivenessNotes: fr.costEffectivenessNotes != null ? String(fr.costEffectivenessNotes).slice(0, 1500) : undefined,
+    lifestylePlan: fr.lifestylePlan,
+    matchedClinicalTrials: fr.matchedClinicalTrials,
+    adverseEventRisks: fr.adverseEventRisks,
+    simplifiedFamilyExplanation: fr.simplifiedFamilyExplanation,
+    relatedResearch: fr.relatedResearch,
+    uzbekistanLegislativeNote: fr.uzbekistanLegislativeNote != null ? String(fr.uzbekistanLegislativeNote).slice(0, 1000) : undefined,
+  }) as FinalReport;
+
   return {
     patient_id: record.patientId || '',
     external_patient_id: record.patientId || '',
-    patient_data: patientDataClean as Record<string, unknown>,
-    debate_history: dh,
-    final_report: {
-      ...fr,
-      treatmentPlan: safeArr(fr.treatmentPlan).map(s => typeof s === 'string' ? s : JSON.stringify(s)),
-      medicationRecommendations: safeArr(fr.medicationRecommendations),
-      recommendedTests: safeArr(fr.recommendedTests),
-      rejectedHypotheses: safeArr(fr.rejectedHypotheses),
-      consensusDiagnosis: safeArr(fr.consensusDiagnosis),
-    } as FinalReport,
-    follow_up_history: safeArr(record.followUpHistory),
+    patient_data: patientDataSanitized,
+    debate_history,
+    final_report: final_report as FinalReport,
+    follow_up_history: safeArr(record.followUpHistory).slice(0, 50),
     selected_specialists: safeArr(record.selectedSpecialists).map(s => String(s)),
-    detected_medications: safeArr(record.detectedMedications),
+    detected_medications: safeArr(record.detectedMedications).slice(0, 50),
   };
 };
 

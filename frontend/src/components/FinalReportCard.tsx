@@ -1,7 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import type { FinalReport, PatientData } from '../types';
+import type { FinalReport, PatientData, ChatMessage } from '../types';
 import { normalizeConsensusDiagnosis, getReasoningChainArray } from '../types';
+import { useTranslation, type TranslationKey } from '../hooks/useTranslation';
+import { AI_SPECIALISTS } from '../constants';
 import ClipboardListIcon from './icons/ClipboardListIcon';
 import BrainCircuitIcon from './icons/BrainCircuitIcon';
 import ShieldWarningIcon from './icons/ShieldWarningIcon';
@@ -22,15 +24,16 @@ import CheckIcon from './icons/CheckIcon';
 import XIcon from './icons/XIcon';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
 
+/** Hujjat bo'limi — aniq chegaralangan, asosiy matn bilan aralashmasin */
 const Section: React.FC<{ title: string; children: React.ReactNode; icon: React.ReactNode }> = ({ title, children, icon }) => (
-    <div className="animate-fade-in-up mt-8">
-        <div className="flex items-center gap-3">
-            <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-slate-100">
+    <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="px-4 py-3 bg-slate-100 border-b border-slate-200 flex items-center gap-3">
+            <div className="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-lg bg-white border border-slate-200">
                 {icon}
             </div>
-            <h3 className="text-lg font-bold text-text-primary">{title}</h3>
+            <h3 className="text-base font-bold text-slate-800">{title}</h3>
         </div>
-        <div className="mt-3 pl-14 space-y-4 text-sm">
+        <div className="p-4 space-y-4 text-sm">
             {children}
         </div>
     </div>
@@ -119,7 +122,15 @@ const planItemToString = (item: unknown): string => {
     return String(item ?? '');
 };
 
-const FinalReportCard: React.FC<{ report: FinalReport, patientData: Partial<PatientData>, isScenario?: boolean, onUpdateReport?: (updatedReport: Partial<FinalReport>) => void }> = ({ report, patientData, isScenario = false, onUpdateReport }) => {
+const FinalReportCard: React.FC<{
+  report: FinalReport;
+  patientData: Partial<PatientData>;
+  isScenario?: boolean;
+  onUpdateReport?: (updatedReport: Partial<FinalReport>) => void;
+  /** Agar berilsa, har bir mutaxassisning yakuniy xulosasi alohida hujjat bo'limida ko'rsatiladi */
+  debateHistory?: ChatMessage[];
+}> = ({ report, patientData, isScenario = false, onUpdateReport, debateHistory }) => {
+    const { t } = useTranslation();
     const safePlan = (Array.isArray(report.treatmentPlan) ? report.treatmentPlan : []).map(planItemToString);
 
     const [isEditingPlan, setIsEditingPlan] = useState(false);
@@ -158,58 +169,69 @@ const FinalReportCard: React.FC<{ report: FinalReport, patientData: Partial<Pati
 
     return (
         <div className={`animate-fade-in-up mt-8 ${isScenario ? 'p-4 border-2 border-dashed border-purple-300 rounded-2xl bg-purple-50' : ''}`}>
-            <h2 className={`text-3xl font-extrabold mb-6 pb-4 border-b-2 ${isScenario ? 'text-purple-700 border-purple-300' : 'text-transparent bg-clip-text animated-gradient-text border-border-color'}`}>
-                {isScenario ? "Alternativ Senariy Natijasi" : "Yakuniy Xulosa: Konsilium Konsensusi"}
-            </h2>
-            <div className="space-y-10">
-                {report.criticalFinding && (
-                    <div className="p-4 bg-red-100 border-l-4 border-red-500 rounded-r-lg shadow-lg">
-                        <div className="flex items-center gap-3">
-                             <AlertTriangleIcon className="w-8 h-8 text-red-600"/>
-                             <div>
-                                 <h3 className="text-xl font-bold text-red-800">DIQQAT! KRITIK TOPILMA!</h3>
-                                 <p className="font-semibold text-red-700">{report.criticalFinding.finding}</p>
-                             </div>
-                        </div>
-                        <p className="mt-2 text-sm text-red-700 pl-11">{report.criticalFinding.implication}</p>
-                    </div>
-                )}
-                
-                <Section title="Konsensus Tashxis" icon={<ClipboardListIcon className="w-6 h-6 text-purple-600"/>}>
-                    {normalizeConsensusDiagnosis(report.consensusDiagnosis).map((diag, index) => (
-                        <div key={index} className="p-4 bg-white/80 rounded-xl border border-border-color shadow-sm mb-3">
-                            <div className="flex justify-between font-bold text-base text-text-primary">
-                                <span className="text-lg text-blue-900">{diag.name}</span>
-                                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">{diag.probability}%</span>
+            {/* Asosiy sarlavha — hujjat uslubi */}
+            <div className="mb-8">
+                <h1 className={`text-2xl font-bold tracking-tight ${isScenario ? 'text-purple-700' : 'text-slate-800'}`}>
+                    {isScenario ? "Alternativ Senariy Natijasi" : "YAKUNIY KLINIK XULOSA"}
+                </h1>
+                <p className="text-sm text-slate-500 mt-1">Konsilium konsensusi asosida — tibbiy hujjat</p>
+            </div>
+
+            {/* ASOSIY XULOSA — bitta aniq blok, boshqa matn bilan aralashmasin */}
+            <div className="rounded-2xl border-2 border-slate-200 bg-white shadow-md overflow-hidden mb-10">
+                <div className="px-6 py-4 bg-slate-800 text-white">
+                    <h2 className="text-lg font-bold uppercase tracking-wide">Asosiy xulosa</h2>
+                    <p className="text-slate-200 text-sm mt-0.5">Konsensus tashxis va kritik topilmalar</p>
+                </div>
+                <div className="p-6 space-y-6">
+                    {report.criticalFinding && (
+                        <div className="p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                            <div className="flex items-center gap-3">
+                                <AlertTriangleIcon className="w-8 h-8 text-red-600 flex-shrink-0"/>
+                                <div>
+                                    <h3 className="text-base font-bold text-red-800">DIQQAT! KRITIK TOPILMA!</h3>
+                                    <p className="font-semibold text-red-700 text-sm mt-1">{report.criticalFinding.finding}</p>
+                                </div>
                             </div>
-                            
-                            {/* Protocols */}
-                            {diag.uzbekProtocolMatch && (
-                                <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-green-50 border border-green-200 rounded-lg text-xs font-semibold text-green-700">
-                                    <ShieldCheckIcon className="w-4 h-4" />
-                                    {diag.uzbekProtocolMatch}
-                                </div>
-                            )}
-
-                            {/* Deep Reasoning Chain */}
-                            {(() => {
-                                const chain = getReasoningChainArray(diag);
-                                return chain.length > 0 && (
-                                <div className="mt-3 p-3 bg-slate-50 rounded-lg border-l-4 border-blue-400">
-                                    <p className="text-xs font-bold text-slate-500 uppercase mb-1">Mantiqiy Zanjir (Reasoning):</p>
-                                    <ol className="list-decimal list-inside text-sm text-text-secondary space-y-1">
-                                        {chain.map((step, i) => (
-                                            <li key={i}>{step}</li>
-                                        ))}
-                                    </ol>
-                                </div>
-                                );
-                            })()}
-
-                            <p className="text-sm text-text-secondary mt-3 font-medium">Asoslash: {diag.justification}</p>
+                            <p className="mt-2 text-sm text-red-700 pl-11">{report.criticalFinding.implication}</p>
                         </div>
-                    ))}
-                </Section>
+                    )}
+                    <div>
+                        <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Konsensus tashxis(lar)</h3>
+                        {normalizeConsensusDiagnosis(report.consensusDiagnosis).map((diag, index) => (
+                            <div key={index} className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 mb-4 last:mb-0">
+                                <div className="flex justify-between items-start gap-2">
+                                    <span className="text-base font-bold text-slate-900">{diag.name}</span>
+                                    <span className="px-2.5 py-0.5 bg-blue-100 text-blue-800 rounded text-sm font-semibold shrink-0">{diag.probability}%</span>
+                                </div>
+                                {diag.uzbekProtocolMatch && (
+                                    <div className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 bg-green-50 border border-green-200 rounded text-xs font-semibold text-green-700">
+                                        <ShieldCheckIcon className="w-4 h-4" />
+                                        {diag.uzbekProtocolMatch}
+                                    </div>
+                                )}
+                                <p className="text-sm text-slate-700 mt-2 font-medium">Asoslash: {diag.justification}</p>
+                                {(() => {
+                                    const chain = getReasoningChainArray(diag);
+                                    return chain.length > 0 && (
+                                        <div className="mt-3 p-3 bg-white rounded-lg border border-slate-200">
+                                            <p className="text-xs font-bold text-slate-500 uppercase mb-2">Mantiqiy zanjir</p>
+                                            <ol className="list-decimal list-inside text-sm text-slate-600 space-y-1">
+                                                {chain.map((step, i) => (
+                                                    <li key={i}>{step}</li>
+                                                ))}
+                                            </ol>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* Qolgan bo'limlar — alohida hujjat bo'limlari */}
+            <div className="space-y-10">
 
                 {report.imageAnalysis?.findings && (
                     <Section title="Tasvir Tahlili" icon={<ImageIcon className="w-6 h-6"/>}>
@@ -316,6 +338,33 @@ const FinalReportCard: React.FC<{ report: FinalReport, patientData: Partial<Pati
                         </div>
                     ))}
                 </Section>
+
+                {/* Har bir mutaxassisning yakuniy xulosasi — hujjatdek alohida */}
+                {debateHistory && debateHistory.length > 0 && (() => {
+                    const specialistMessages = debateHistory.filter((m) => !m.isSystemMessage && !m.isUserIntervention);
+                    const lastByAuthor = new Map<string, ChatMessage>();
+                    specialistMessages.forEach((m) => lastByAuthor.set(m.author, m));
+                    if (lastByAuthor.size === 0) return null;
+                    return (
+                        <div className="rounded-xl border-2 border-slate-200 bg-white shadow-sm overflow-hidden">
+                            <div className="px-4 py-3 bg-slate-800 text-white">
+                                <h3 className="text-base font-bold uppercase tracking-wide">Har bir mutaxassisning yakuniy xulosasi</h3>
+                                <p className="text-slate-200 text-sm mt-0.5">Konsilium ishtirokchilarining shaxsiy tibbiy xulosalari</p>
+                            </div>
+                            <div className="p-4 space-y-4">
+                                {Array.from(lastByAuthor.entries()).map(([author, msg]) => {
+                                    const displayName = t(`specialist_name_${String(author).toLowerCase()}` as TranslationKey) || AI_SPECIALISTS[author]?.name || author;
+                                    return (
+                                        <div key={author} className="p-4 rounded-lg border border-slate-200 bg-slate-50/50">
+                                            <p className="text-sm font-bold text-slate-800 mb-2">{displayName}</p>
+                                            <p className="text-sm text-slate-700 whitespace-pre-wrap">{msg.content}</p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    );
+                })()}
                 
                 {/* Legal Disclaimer specific to Uzbekistan */}
                 <div className="mt-8 p-4 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-500 text-center">
