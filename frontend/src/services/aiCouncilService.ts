@@ -109,7 +109,7 @@ const getSystemInstruction = (language: Language): string => {
         `,
         'uz-C': `TIL: Barcha javoblaringiz qat'iy O'zbek tilida (Kirill yozuvida) bo'lishi SHART.
         O'ZBEKISTON KONTEKSTI (MAJBURIY): Tashxis, davolash rejasi va dori-darmonlar faqat O'zbekiston Respublikasi qonunchiligi va SSV tasdiqlangan klinik protokollarga muvofiq bo'lsin. Dori-darmonlar faqat O'zbekistonda ro'yxatdan o'tgan va aptekalarda mavjud savdo nomlari bilan (Nimesil, Sumamed, Augmentin va hokazo).
-        TERMINOLOGIYA: O'zbek tibbiyot terminologiyasi va SSV qabul qilgan atamalar.``,
+        TERMINOLOGIYA: O'zbek tibbiyot terminologiyasi va SSV qabul qilgan atamalar.`,
         'ru': `YAZYK: Vse vashi otvety DOLZHNY byt strogo na russkom yazyke.
         KONTEKST UZBEKISTANA (OBYAZATELNO): Diagnoz, plan lecheniya i preparaty - strogo v sootvetstvii s zakonodatelstvom Respubliki Uzbekistan i klinicheskimi protokolami, utverzhdyonnymi Minzdravom (SSV). Prepara ty - tolko zaregistrirovannye v Uzbekistane i dostupnye v aptekah (torgovye nazvaniya: Nimesil, Sumamed, Augmentin, Metformin, Enalapril i t.d.).
         TERMINOLOGIYA: Professionalnaya meditsinskaya terminologiya na russkom; pri neobhodimosti - terminy, prinyatye v Uzbekistane.
