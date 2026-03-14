@@ -9,7 +9,6 @@ import {
     INSTITUTE_ADDRESS,
     FOOTER_COPYRIGHT,
     PLATFORM_NAME,
-    PLATFORM_VERSION,
 } from '../constants/brand';
 
 interface Props {
@@ -244,7 +243,7 @@ const AboutInstitutePage: React.FC<Props> = ({ onBack }) => {
                     <div className="text-center sm:text-left">
                         <p className="text-white font-black text-sm uppercase">{INSTITUTE_LOGO_TEXT}</p>
                         <p className="text-slate-500 text-xs mt-1">{FOOTER_COPYRIGHT}</p>
-                        <p className="text-slate-500 text-xs mt-0.5">{PLATFORM_NAME} {PLATFORM_VERSION}</p>
+                        <p className="text-slate-500 text-xs mt-0.5">{PLATFORM_NAME}</p>
                     </div>
                     <button
                         onClick={onBack}

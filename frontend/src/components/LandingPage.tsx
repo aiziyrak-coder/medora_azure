@@ -14,7 +14,6 @@ import {
     INSTITUTE_ADDRESS,
     FOOTER_COPYRIGHT,
     PLATFORM_NAME,
-    PLATFORM_VERSION,
 } from '../constants/brand';
 import BrainCircuitIcon from './icons/BrainCircuitIcon';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
@@ -67,25 +66,29 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
     const [showContactModal, setShowContactModal] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false);
+    const [transitionDirection, setTransitionDirection] = useState<'next' | 'prev'>('next');
     const viewportRef = useRef<HTMLDivElement>(null);
 
     const goNext = useCallback(() => {
         if (isTransitioning) return;
+        setTransitionDirection('next');
         setIsTransitioning(true);
         setCurrentSlide((prev) => (prev + 1) % SLIDE_COUNT);
-        setTimeout(() => setIsTransitioning(false), 500);
+        setTimeout(() => setIsTransitioning(false), 900);
     }, [isTransitioning]);
     const goPrev = useCallback(() => {
         if (isTransitioning) return;
+        setTransitionDirection('prev');
         setIsTransitioning(true);
         setCurrentSlide((prev) => (prev - 1 + SLIDE_COUNT) % SLIDE_COUNT);
-        setTimeout(() => setIsTransitioning(false), 500);
+        setTimeout(() => setIsTransitioning(false), 900);
     }, [isTransitioning]);
     const goToSlide = useCallback((index: number) => {
         if (isTransitioning || index === currentSlide) return;
+        setTransitionDirection(index > currentSlide ? 'next' : 'prev');
         setIsTransitioning(true);
         setCurrentSlide(index);
-        setTimeout(() => setIsTransitioning(false), 500);
+        setTimeout(() => setIsTransitioning(false), 900);
     }, [currentSlide, isTransitioning]);
 
     useEffect(() => {
@@ -203,13 +206,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                 </div>
             </nav>
 
-            {/* --- SCAN-LINE OVERLAY (medical/tech transition) --- */}
-            {isTransitioning && <div className="landing-scan-overlay" aria-hidden />}
+            {/* --- Yuqori texnologik o'tish: yo'nalishga qarab har xil effektlar --- */}
+            {isTransitioning && (
+                <div className={`landing-scan-overlay landing-transition-${transitionDirection}`} data-direction={transitionDirection} aria-hidden>
+                    <span className="landing-transition-blade" />
+                </div>
+            )}
 
             {/* --- SLIDES CONTAINER (no scroll) --- */}
             <div className="flex-1 min-h-0 w-full overflow-hidden">
                 <div
-                    className="landing-slides-track flex h-full"
+                    className={`landing-slides-track flex h-full ${isTransitioning ? 'landing-track-transitioning' : ''}`}
                     style={{ transform: `translateX(-${currentSlide * 100}vw)` }}
                 >
                     {/* SLIDE 0: HERO */}
@@ -219,7 +226,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                             <div className="absolute bottom-1/4 right-1/4 w-[30vmax] h-[30vmax] rounded-full bg-cyan-500/15 blur-[60px] landing-orb" style={{ animationDelay: '-6s' }} />
                             <div className="absolute top-1/2 left-1/2 w-[25vmax] h-[25vmax] rounded-full bg-indigo-500/10 blur-[50px] landing-orb" style={{ animationDelay: '-12s' }} />
                         </div>
-                        <div className="relative z-10 text-center max-w-4xl mx-auto">
+                        <div className="landing-slide-inner relative z-10 text-center max-w-4xl mx-auto">
                             <div className="landing-content-in inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-bold uppercase tracking-wider mb-4">
                                 <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
                                 {t('landing_hero_badge')}
@@ -227,7 +234,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                             <p className="landing-content-in landing-content-in-delay-1 text-sm text-slate-400 font-semibold mb-2">{INSTITUTE_NAME_FULL}</p>
                             <div className="landing-content-in landing-content-in-delay-2 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/20 mb-6">
                                 <span className="text-sm font-black uppercase" style={{ background: 'linear-gradient(90deg,#38bdf8,#34d399)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                                    {PLATFORM_NAME} {PLATFORM_VERSION}
+                                    {PLATFORM_NAME}
                                 </span>
                             </div>
                             <h1 className="landing-content-in landing-content-in-delay-3 text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] mb-4 px-1">
@@ -263,7 +270,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
 
                     {/* SLIDE 1: FEATURES */}
                     <section className={`landing-slide flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 pt-20 pb-20 overflow-hidden ${currentSlide === 1 ? 'landing-slide-active' : ''}`} data-slide-index={1}>
-                        <div className="w-full max-w-5xl mx-auto">
+                        <div className="landing-slide-inner w-full max-w-5xl mx-auto">
                             <p className="text-xs font-bold text-blue-400/90 mb-2 uppercase tracking-wider text-center">{INSTITUTE_NAME_FULL}</p>
                             <h2 className="text-2xl sm:text-4xl font-bold mb-8 text-center">{t('landing_features_title')}</h2>
                             <p className="text-slate-400 text-sm sm:text-base text-center max-w-xl mx-auto mb-10">{t('landing_features_desc')}</p>
@@ -287,7 +294,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
 
                     {/* SLIDE 2: HOW IT WORKS — real SVG icons from components */}
                     <section className={`landing-slide flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 pt-20 pb-20 ${currentSlide === 2 ? 'landing-slide-active' : ''}`} data-slide-index={2}>
-                        <div className="w-full max-w-3xl mx-auto text-center">
+                        <div className="landing-slide-inner w-full max-w-3xl mx-auto text-center">
                             <h2 className="text-2xl sm:text-4xl font-bold mb-4">{t('landing_how_title')} <span className="text-blue-500">{t('landing_how_subtitle')}</span></h2>
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-10 mt-10">
                                 {[
@@ -312,7 +319,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
 
                     {/* SLIDE 3: CTA + FOOTER */}
                     <section className={`landing-slide flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 pt-20 pb-20 ${currentSlide === 3 ? 'landing-slide-active' : ''}`} data-slide-index={3}>
-                        <div className="flex-1 flex flex-col items-center justify-center text-center max-w-2xl mx-auto">
+                        <div className="landing-slide-inner flex-1 flex flex-col items-center justify-center text-center max-w-2xl mx-auto">
                             <p className="text-xs font-bold text-blue-200/90 mb-3 uppercase tracking-wider">{INSTITUTE_NAME_FULL}</p>
                             <h2 className="text-2xl sm:text-4xl md:text-5xl font-black mb-6 tracking-tight">{t('landing_cta_bottom_title')}</h2>
                             <p className="text-base sm:text-lg text-slate-300 mb-10 font-light">{t('landing_cta_bottom_desc')}</p>
@@ -322,7 +329,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                             <div className="mt-12 pt-8 border-t border-white/10 w-full">
                                 <p className="text-white font-black text-sm uppercase mb-1">{INSTITUTE_LOGO_TEXT}</p>
                                 <p className="text-slate-500 text-xs mb-3">{FOOTER_COPYRIGHT}</p>
-                                <p className="text-slate-600 text-xs mb-4">{PLATFORM_NAME} {PLATFORM_VERSION}</p>
+                                <p className="text-slate-600 text-xs mb-4">{PLATFORM_NAME}</p>
                                 <div className="flex flex-wrap justify-center gap-4 text-xs text-slate-400 mb-4">
                                     <a href={`tel:+998950442345`} className="hover:text-white">{INSTITUTE_PHONE_1}</a>
                                     <a href={`tel:+998950482345`} className="hover:text-white">{INSTITUTE_PHONE_2}</a>

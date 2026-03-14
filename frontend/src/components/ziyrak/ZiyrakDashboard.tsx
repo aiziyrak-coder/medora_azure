@@ -218,7 +218,6 @@ export const ZiyrakDashboard: React.FC<Props> = ({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h2 className="font-bold text-white text-base">{INSTITUTE_NAME_SHORT} - Ziyrak</h2>
-            <span className="text-xs text-slate-500 font-mono">v3.0</span>
           </div>
           <WakeIndicator state={ziyrakState} />
         </div>

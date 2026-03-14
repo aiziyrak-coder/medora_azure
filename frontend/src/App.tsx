@@ -47,7 +47,7 @@ import HexBackground from './components/HexBackground';
 import MonitorIcon from './components/icons/MonitorIcon'; 
 
 import { AIModel } from './constants/specialists';
-import { INSTITUTE_NAME_FULL, INSTITUTE_NAME_SHORT, PLATFORM_NAME, PLATFORM_VERSION } from './constants/brand';
+import { INSTITUTE_NAME_FULL, INSTITUTE_NAME_SHORT, PLATFORM_NAME } from './constants/brand';
 
 const ScrollWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <div className="h-full overflow-y-auto overflow-x-hidden page-px py-6 custom-scrollbar min-w-0">
@@ -983,7 +983,7 @@ const AppContent: React.FC = () => {
                                     WebkitTextFillColor: 'transparent',
                                 }}
                             >
-                                {PLATFORM_NAME} {PLATFORM_VERSION}
+                                {PLATFORM_NAME}
                             </span>
                         </div>
 
