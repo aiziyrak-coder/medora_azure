@@ -1,4 +1,4 @@
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
+import { Document, DocumentDefaults, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
 import type { FinalReport, PatientData, ChatMessage } from '../types';
 import { normalizeConsensusDiagnosis } from '../types';
 import { AI_SPECIALISTS } from '../constants';
@@ -116,6 +116,12 @@ export const generateDocxReport = async (
     ];
     
     const doc = new Document({
+        styles: {
+            default: new DocumentDefaults({
+                run: { font: 'Times New Roman', size: 22 },
+                paragraph: { spacing: { after: 160, line: 276 } },
+            }),
+        },
         sections: [{ children }],
     });
 

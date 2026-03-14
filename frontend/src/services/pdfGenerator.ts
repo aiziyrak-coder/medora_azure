@@ -15,6 +15,10 @@ interface jsPDFInternal {
 /** Optional: author key -> display name (e.g. translated) for PDF */
 export type SpecialistNameResolver = (author: string) => string;
 
+const PDF_FONT = 'times' as const; // Times New Roman — haqiqiy hujjat uslubi
+const LINE_HEIGHT = 8;
+const FOOTER_RESERVE = 18;
+
 export const generatePdfReport = (
     report: FinalReport,
     patientData: PatientData,
@@ -26,91 +30,89 @@ export const generatePdfReport = (
     const doc = new jsPDF();
     const pageHeight = doc.internal.pageSize.height;
     const pageWidth = doc.internal.pageSize.width;
-    const margin = 15;
+    const margin = 18;
     let y = margin;
 
-    // --- Helper Functions ---
     const addHeader = (text: string) => {
-        if (y > pageHeight - 40) {
+        if (y > pageHeight - 50) {
             doc.addPage();
             y = margin;
         }
         doc.setFontSize(18);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(30, 41, 59); // slate-800
+        doc.setFont(PDF_FONT, 'bold');
+        doc.setTextColor(30, 41, 59);
         doc.text(text, margin, y);
-        y += 8;
-        doc.setDrawColor(226, 232, 240); // slate-200
+        y += LINE_HEIGHT + 2;
+        doc.setDrawColor(200, 200, 200);
         doc.line(margin, y, pageWidth - margin, y);
-        y += 10;
+        y += LINE_HEIGHT + 4;
     };
 
     const addSectionTitle = (text: string) => {
-        if (y > pageHeight - 40) {
+        if (y > pageHeight - 50) {
             doc.addPage();
             y = margin;
         }
+        y += 4;
         doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(37, 99, 235); // blue-600
+        doc.setFont(PDF_FONT, 'bold');
+        doc.setTextColor(30, 41, 59);
         doc.text(text, margin, y);
-        y += 7;
+        y += LINE_HEIGHT + 2;
     };
 
     const addText = (text: string, isListItem = false) => {
         doc.setFontSize(11);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(51, 65, 85); // slate-700
-        
+        doc.setFont(PDF_FONT, 'normal');
+        doc.setTextColor(40, 40, 40);
         const textToSplit = text || 'N/A';
-        const splitText = doc.splitTextToSize(textToSplit, pageWidth - margin * 2 - (isListItem ? 5 : 0));
-        
+        const splitText = doc.splitTextToSize(textToSplit, pageWidth - margin * 2 - (isListItem ? 8 : 0));
         splitText.forEach((line: string, index: number) => {
-            if (y > pageHeight - margin) {
+            if (y > pageHeight - margin - FOOTER_RESERVE) {
                 doc.addPage();
                 y = margin;
             }
             let lineX = margin;
             if (isListItem) {
-                lineX += 5;
-                if (index === 0) {
-                    doc.text('\u00B7', margin, y);
-                }
+                lineX += 6;
+                if (index === 0) doc.text('\u00B7', margin, y);
             }
             doc.text(line, lineX, y);
-            y += 6;
+            y += LINE_HEIGHT;
         });
-        y += (isListItem ? 2 : 4);
+        y += 4;
     };
-    
+
     const addKeyValue = (key: string, value: string | undefined | null) => {
         if (!value) return;
-        
         const keyString = `${key}:`;
         doc.setFontSize(11);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(51, 65, 85); // slate-700
-        const keyWidth = doc.getTextWidth(keyString) + 2;
-
-        doc.setFont('helvetica', 'normal');
-        const splitValue = doc.splitTextToSize(value, pageWidth - (margin + keyWidth) - margin);
-
-        const requiredHeight = splitValue.length * 6;
-        if (y + requiredHeight > pageHeight - margin) {
+        doc.setFont(PDF_FONT, 'bold');
+        doc.setTextColor(40, 40, 40);
+        const keyWidth = doc.getTextWidth(keyString) + 4;
+        doc.setFont(PDF_FONT, 'normal');
+        const splitValue = doc.splitTextToSize(value, pageWidth - margin - keyWidth - margin);
+        const requiredHeight = splitValue.length * LINE_HEIGHT;
+        if (y + requiredHeight > pageHeight - margin - FOOTER_RESERVE) {
             doc.addPage();
             y = margin;
         }
-
-        doc.setFont('helvetica', 'bold');
+        doc.setFont(PDF_FONT, 'bold');
         doc.text(keyString, margin, y);
-
-        doc.setFont('helvetica', 'normal');
-        doc.text(splitValue, margin + keyWidth, y);
-        y += requiredHeight + 4;
+        doc.setFont(PDF_FONT, 'normal');
+        splitValue.forEach((line: string, i: number) => {
+            doc.text(line, margin + keyWidth, y + i * LINE_HEIGHT);
+        });
+        y += requiredHeight + 6;
     };
     
-    // --- Page 1: Title and Patient Info ---
+    // --- Page 1: Title and Patient Info (haqiqiy hujjat, doktor tavsiyasi) ---
     addHeader("KONSILIUM: Yakuniy Klinik Xulosa");
+    doc.setFont(PDF_FONT, 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(80, 80, 80);
+    doc.text("Tibbiy maslahat hujjati — doktor tavsiyasi sifatida. Faqat ma'lumot uchun.", margin, y);
+    y += LINE_HEIGHT + 6;
 
     addSectionTitle("Bemor Ma'lumotlari");
     addKeyValue("Bemor", `${patientData.firstName} ${patientData.lastName}`);
@@ -208,38 +210,38 @@ export const generatePdfReport = (
         }
         addHeader("Har bir mutaxassisning yakuniy shaxsiy xulosasi");
         doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(100, 116, 139);
-        doc.text("Konsilium ishtirokchilarining tibbiy xulosalari. Har bir mutaxassis o'z so'nggi xulosasini keltiradi.", margin, y);
-        y += 8;
+        doc.setFont(PDF_FONT, 'normal');
+        doc.setTextColor(80, 80, 80);
+        doc.text("Konsilium ishtirokchilarining tibbiy xulosalari. Har bir mutaxassis o'z so'nggi xulosasini keltiradi (doktor tavsiyasi sifatida).", margin, y);
+        y += LINE_HEIGHT + 4;
         const stripSalutation = (text: string) =>
             text.replace(/^\s*Hurmatli\s+Kengash\s+Raisi\s*,?\s*/i, '').trim();
         lastByAuthor.forEach((msg, author) => {
             const authorName = specialistName(author);
-            if (y > pageHeight - 50) {
+            if (y > pageHeight - 60) {
                 doc.addPage();
                 y = margin;
             }
             doc.setFontSize(11);
-            doc.setFont('helvetica', 'bold');
+            doc.setFont(PDF_FONT, 'bold');
             doc.setTextColor(30, 41, 59);
             doc.text(authorName, margin, y);
-            y += 6;
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(51, 65, 85);
+            y += LINE_HEIGHT;
+            doc.setFont(PDF_FONT, 'normal');
+            doc.setTextColor(40, 40, 40);
             const rawContent = String(msg.content || '');
             const contentLines = doc.splitTextToSize(stripSalutation(rawContent), pageWidth - margin * 2);
             contentLines.forEach((line: string) => {
-                if (y > pageHeight - margin) {
+                if (y > pageHeight - margin - FOOTER_RESERVE) {
                     doc.addPage();
                     y = margin;
                 }
                 doc.text(line, margin, y);
-                y += 6;
+                y += LINE_HEIGHT;
             });
-            y += 6;
+            y += 8;
         });
-        y += 10;
+        y += 8;
     }
 
     // --- Consultation History Section ---
@@ -253,10 +255,8 @@ export const generatePdfReport = (
         addHeader("Konsilium Munozara Tarixi");
         
         debateHistory.forEach(item => {
-            if (item.isSystemMessage || item.isUserIntervention) {
-                return;
-            }
-            if (y > pageHeight - 40) {
+            if (item.isSystemMessage || item.isUserIntervention) return;
+            if (y > pageHeight - margin - FOOTER_RESERVE) {
                 doc.addPage();
                 y = margin;
             }
@@ -266,17 +266,21 @@ export const generatePdfReport = (
         });
     }
 
-    // --- Footer ---
+    const footerText = report.uzbekistanLegislativeNote
+        ? `O'zbekiston Respublikasi sog'liqni saqlash qonunchiligi va SSV klinik protokollariga muvofiq shakllantirilgan va faqat ma'lumot uchun mo'ljallangan. U professional tibbiy maslahat o'rnini bosa olmaydi.`
+        : `Ushbu hisobot ilg'or raqamli tizim yordamida shakllantirilgan, faqat ma'lumot va doktor tavsiyasi sifatida mo'ljallangan. U professional tibbiy maslahat o'rnini bosa olmaydi.`;
     const pageCount = (doc.internal as unknown as jsPDFInternal).pages.length;
-    for(let i = 1; i <= pageCount; i++) {
+    const footerLineHeight = 5;
+    for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(156, 163, 175); // gray-400
-        const footerText = report.uzbekistanLegislativeNote
-            ? `O'zbekiston Respublikasi sog'liqni saqlash qonunchiligi va SSV klinik protokollariga muvofiq. Ushbu hisobot ilg'or raqamli tizim yordamida shakllantirilgan va faqat ma'lumot uchun mo'ljallangan. U professional tibbiy maslahat o'rnini bosa olmaydi.`
-            : `Ushbu hisobot ilg'or raqamli tizim yordamida shakllantirilgan va faqat ma'lumot uchun mo'ljallangan. U professional tibbiy maslahat o'rnini bosa olmaydi.`;
-        const splitFooter = doc.splitTextToSize(footerText, pageWidth - margin*2);
-        doc.text(splitFooter, margin, pageHeight - 10 - ((splitFooter.length -1) * 4));
+        doc.setFontSize(9);
+        doc.setFont(PDF_FONT, 'normal');
+        doc.setTextColor(90, 90, 90);
+        const splitFooter = doc.splitTextToSize(footerText, pageWidth - margin * 2);
+        const footerY = pageHeight - 12 - (splitFooter.length * footerLineHeight);
+        splitFooter.forEach((line: string, idx: number) => {
+            doc.text(line, margin, footerY + idx * footerLineHeight);
+        });
         doc.text(`Sahifa ${i} / ${pageCount}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
     }
 
