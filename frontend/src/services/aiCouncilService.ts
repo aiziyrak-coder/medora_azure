@@ -131,7 +131,9 @@ const getSystemInstruction = (language: Language): string => {
        - ularni AQLGA TO'G'RI KELMAYDIGAN yoki ehtimol noto'g'ri yozilgan deb baholang;
        - bunday joylashuvga asoslangan tashxis/davolash bermang;
        - bemor/shifokorga muloyimlik bilan bu anatomik jihatdan mumkin emasligini tushuntiring va kerak bo'lsa to'g'ri joylashuvni aniqlashtirish uchun savol bering.
-    7. FIZIOLOGIYA VA FIZIONOMIYA: Har bir holatda bemorning YOSHI, JINSI, VAZNI, VITAL KO'RSATKICHLARI (BP, yurak urishi, harorat, SpO2, nafas soni) va umumiy ko'rinishi (kaxeksiya, semizlik, shish, sianoz, rangparlik, dismorfik belgilar) NI INOBATGA OLING. 
+    7. FIZIOLOGIYA VA FIZIONOMIYA: Har bir holatda bemorning YOSHI, JINSI, VAZNI, VITAL KO'RSATKICHLARI (BP, yurak urishi, harorat, SpO2, nafas soni) va umumiy ko'rinishi (kaxeksiya, semizlik, shish, sianoz, rangparlik, dismorfik belgilar) NI INOBATGA OLING.
+       - OB'EKTIV KO'RIK (VITAL): Qon bosimi, puls, harorat, SpO2, nafas soni shifokor tomonidan bemor ma'lumotlariga KIRITILGAN. Konsilium/munozarada shifokordan bu ma'lumotlarni HECH QACHON so'ramang — ular allaqachon berilgan, faqat xulosangizda hisobga oling.
+       - LABORATORIYA VA DIAGNOSTIKA HUJJATLARI: Agar bemor laboratoriya natijalari, rentgen/MRT/CT skaner yoki boshqa tibbiy hujjatlar yuklagan bo'lsa — ularni TO'LIQ TAHLIL QILING, xulosangizda ishlating va shifokordan bu ma'lumotlarni QAYTA SO'RAMANG. Yuklangan hujjatlar allaqachon berilgan; savol sifatida so'ramang.
        - Pediatr bemorlar (0-18 yosh) va keksalar (65+ yosh) uchun fiziologik chegaralar va dori dozalari boshqacha bo'lishini hisobga oling.
        - Homiladorlik, buyrak/jigar yetishmovchiligi, yurak yetishmovchiligi, diabet va boshqa surunkali kasalliklar fonida dori tanlash va dozalashni moslashtiring.
        - FIZIONOMIK BELGILAR (teri rangi, shish, nafas qisilishi, qiyofadagi og'riq ifodasi, nevrologik holat va h.k.) tashxis ehtimolini oshirishi yoki kamaytirishini mantiqan izohlab bering, lekin hech qachon diskriminatsion xulosa chiqarmang.
@@ -540,7 +542,7 @@ const buildMultimodalPrompt = (introText: string, data: PatientData) => {
     ];
 
     if (attachments && attachments.length > 0) {
-        parts[0].text += `\n\n[IMPORTANT]: The patient has attached ${attachments.length} medical file(s). Analyze these precisely.`;
+        parts[0].text += `\n\n[MAJBURIY]: Bemor ${attachments.length} ta tibbiy hujjat (laboratoriya, rentgen, MRT/CT va h.k.) yuklagan. Ularni TO'LIQ TAHLIL QILING va xulosangizda ishlating. Bu hujjatlardagi ma'lumotlarni shifokordan QAYTA SO'RAMANG — ular allaqachon berilgan.`;
         attachments.forEach(att => {
             parts.push({
                 inlineData: {
@@ -1073,17 +1075,34 @@ export const runCouncilDebate = async (
     onProgress({ type: 'status', message: introMessages[language] || introMessages['uz-C'] });
     let debateHistory: ChatMessage[] = [];
 
+    const objectiveFull = (patientData.objectiveData || '').trim();
+    const labText = (patientData.labResults || '').trim();
+    const attachmentCount = patientData.attachments?.length ?? 0;
+    const labAndDocsLine = labText
+        ? `Laboratoriya/tahlil ma'lumoti: ${labText.slice(0, 400)}.`
+        : '';
+    const attachmentsLine = attachmentCount > 0
+        ? `LABORATORIYA VA DIAGNOSTIKA HUJJATLARI: Bemor ${attachmentCount} ta fayl yuklagan (quyida/ilovada). Ularni TO'LIQ TAHLIL QILING, mutaxassislarga qisqacha xulosa bilan yetkazing. Bu hujjatlarni shifokordan QAYTA SO'RAMANG — allaqachon berilgan.`
+        : '';
     const patientSummaryForRais = `Bemor: ${(patientData.firstName || '')} ${(patientData.lastName || '')}, ${patientData.age || '-'} yosh.
 Shikoyat: ${(patientData.complaints || '').slice(0, 500)}.
 Anamnez: ${(patientData.history || '-').slice(0, 300)}.
-Obyektiv/vital: ${(patientData.objectiveData || '-').slice(0, 200)}.
-Dastlabki tashxislar: ${diagnoses.map(d => d.name).join(', ') || '-'}.`;
 
-    // Konsiliumda hech qanday oldindan kiritilgan yozuv yo'q — hammasi AI suhbat va kasallikni o'qib o'zidan yozadi
-    const introContentPrompt = `Siz Konsilium Raisi. QOIDA: Konsiliumda hech bir matn oldindan kiritilmaydi — barcha yozuv faqat siz quyidagi bemor va kasallik ma'lumotlarini O'QIB, TUSHUNIB, umumlashtirib o'zingiz yozasiz. Tayyor ibora yoki shablon ISHLATMANG. Quyidagi ma'lumotlar asosida birinchi ochilish so'zini to'liq o'zingiz yozing (3-5 jumla). Maqsad: eng yaxshi tashxis va davolash, O'zbekiston SSV, ro'yxatdan o'tgan dori. Javobni oxirigacha yozing. TIL: ${langMap[language]}.
+OB'EKTIV KO'RIK (VITAL KO'RSATKICHLAR — SHIFOKOR KIRITGAN, MUNOZARADA QAYTA SO'RAMANG, HISOBGA OLING):
+${objectiveFull || '(kiritilmagan)'}
+
+${labAndDocsLine}
+${attachmentsLine}
+Dastlabki tashxislar: ${diagnoses.map(d => d.name).join(', ') || '-'}.
+
+QOIDA: Ob'ektiv ko'rik va (agar bor bo'lsa) yuklangan laboratoriya/diagnostika hujjatlari berilgan; shifokordan ularni so'ramang. Barcha ma'lumotlardan to'liq foydalaning va mutaxassislarga aniq yetkazing.`;
+
+    // Konsiliumda hech qanday oldindan kiritilgan yozuv yo'q — hammasi AI suhbat va kasallikni o'qib o'zidan yozadi. Hujjatlar bo'lsa Rais ularni ko'radi va tahlil qiladi.
+    const introContentPrompt = `Siz Konsilium Raisi. QOIDA: Konsiliumda hech bir matn oldindan kiritilmaydi — barcha yozuv faqat siz quyidagi bemor va kasallik ma'lumotlarini (va agar ilovada bo'lsa — laboratoriya/diagnostika hujjatlarini) O'QIB, TUSHUNIB, umumlashtirib o'zingiz yozasiz. Tayyor ibora yoki shablon ISHLATMANG. Ob'ektiv ko'rik (vital) va yuklangan hujjatlar allaqachon berilgan — ularni qayta so'ramang. Quyidagi ma'lumotlar (va ilovadagi fayllar) asosida birinchi ochilish so'zini to'liq o'zingiz yozing (3-5 jumla). Agar bemor hujjat yuklagan bo'lsa — ularning asosiy topilmalarini qisqacha aytib, mutaxassislarga ma'lumot bering. Maqsad: eng yaxshi tashxis va davolash, O'zbekiston SSV. Javobni oxirigacha yozing. TIL: ${langMap[language]}.
 
 ${patientSummaryForRais}`;
-    const introContent = await callGemini(introContentPrompt, DEPLOY_PRO, undefined, false, systemInstr, true, 3072) as string;
+    const introMultimodal = attachmentCount > 0 ? buildMultimodalPrompt(introContentPrompt, patientData) : introContentPrompt;
+    const introContent = await callGemini(introMultimodal, DEPLOY_PRO, undefined, false, systemInstr, true, 3072) as string;
 
     const orchestratorIntro: ChatMessage = { id: `sys-intro-${Date.now()}`, author: AIModel.SYSTEM, content: (introContent || '').trim(), isSystemMessage: true };
     onProgress({ type: 'message', message: orchestratorIntro });
@@ -1091,11 +1110,13 @@ ${patientSummaryForRais}`;
     await sleep(12);
 
     const DEBATE_ROUNDS = 3;
-    // Birinchi mavzu — faqat bemor va kasallikni o'qib AI o'zidan yozadi
-    const currentTopicPrompt = `Siz Konsilium raisi. QOIDA: Hech qanday oldindan kiritilgan matn bo'lmasin — faqat quyidagi bemor va kasallik ma'lumotlarini o'qib, o'zingiz umumlashtirib birinchi mavzuni yozing. Mutaxassislarga dastlabki baho va xavf belgilari (har biri o'z sohasida) berishni so'ring. Tayyor matn ishlatmang — bitta to'liq paragrafni faqat shu ma'lumotdan kelib chiqib o'zingiz yozing. TIL: ${langMap[language]}.
+    let lastLivePrognosis: PrognosisReport | null = null;
+    // Birinchi mavzu — bemor, kasallik va (agar bor bo'lsa) hujjatlar asosida; Rais hujjatlarni ko'radi
+    const currentTopicPrompt = `Siz Konsilium raisi. QOIDA: Hech qanday oldindan kiritilgan matn bo'lmasin — faqat quyidagi bemor va kasallik ma'lumotlarini (va ilovadagi laboratoriya/diagnostika hujjatlarini) o'qib, o'zingiz umumlashtirib birinchi mavzuni yozing. Ob'ektiv ko'rik va yuklangan hujjatlar berilgan — shifokordan qayta so'ramang. Mutaxassislarga dastlabki baho va xavf belgilari (har biri o'z sohasida) berishni so'ring; agar hujjatlar bo'lsa, ularning asosiy topilmalarini mutaxassislarga qisqacha yetkazing. Tayyor matn ishlatmang — bitta to'liq paragrafni faqat shu ma'lumotdan kelib chiqib o'zingiz yozing. TIL: ${langMap[language]}.
 
 ${patientSummaryForRais}`;
-    let currentTopic = await callGemini(currentTopicPrompt, DEPLOY_PRO, undefined, false, systemInstr, true, 3072) as string;
+    const topicMultimodal = attachmentCount > 0 ? buildMultimodalPrompt(currentTopicPrompt, patientData) : currentTopicPrompt;
+    let currentTopic = await callGemini(topicMultimodal, DEPLOY_PRO, undefined, false, systemInstr, true, 3072) as string;
 
     for (let round = 1; round <= DEBATE_ROUNDS; round++) {
         const roundMessages: Record<Language, string> = {
@@ -1150,7 +1171,20 @@ ${patientSummaryForRais}`;
                 })
                 .join('\n\n');
 
-            const textPrompt = `Siz - ${specName} (${specTitle}). QOIDA: Konsiliumda hech bir yozuv oldindan kiritilmaydi — hammasi AI o'zi suhbat va kasallikni o'qib, tushunib, umumlashtirib yozadi. Siz ham faqat quyidagi suhbat va bemor ma'lumotlarini O'QIB, o'z fikringizni boshidan yozing. Tayyor ibora yoki shablon (masalan "Bu masala mening soham...", "Tasdiqlayman" va h.k.) ISHLATMANG. Har bir gap faqat suhbat va kasallikdan kelib chiqsin.
+            const objectiveForSpec = (patientData.objectiveData || '').trim();
+            const labForSpec = (patientData.labResults || '').trim().slice(0, 300);
+            const attachmentsNoteForSpec = attachmentCount > 0
+                ? `\nLABORATORIYA/DIAGNOSTIKA HUJJATLARI: Bemor ${attachmentCount} ta fayl yuklagan (quyida ilovada). Ularni TAHLIL QILING, xulosangizda ishlating. Bu hujjatlar allaqachon berilgan — shifokordan SO'RAMANG.`
+                : '';
+            const bemorSummaryForSpec = `Shikoyat: ${(patientData.complaints || '').slice(0, 400)}.
+VITAL KO'RSATKICHLAR (shifokor kiritgan — SO'RAMANG, hisobga oling):
+${objectiveForSpec || '-'}
+${labForSpec ? `Laboratoriya ma'lumoti: ${labForSpec}` : ''}${attachmentsNoteForSpec}`;
+            const textPrompt = `Siz - ${specName} (${specTitle}). QOIDA: Konsiliumda hech bir yozuv oldindan kiritilmaydi — hammasi AI o'zi suhbat va kasallikni o'qib, tushunib, umumlashtirib yozadi. Siz ham faqat quyidagi suhbat va bemor ma'lumotlarini (va agar ilovada bo'lsa — hujjatlarni) O'QIB, o'z fikringizni boshidan yozing. Tayyor ibora yoki shablon ISHLATMANG. Ob'ektiv ko'rik va laboratoriya/hujjatlar berilgan — shifokordan so'ramang.
+
+--- BEMOR MA'LUMOTLARI (ob'ektiv ko'rik, lab va hujjatlar allaqachon kiritilgan — hisobga oling, qayta so'ramang) ---
+${bemorSummaryForSpec}
+--- TUGADI ---
 
 --- SUHBAT TARIXI (avval o'qing, keyin o'z fikringizni yozing) ---
 ${fullDebateText}
@@ -1161,7 +1195,9 @@ Raisning hozirgi mavzusi: "${currentTopic}"
 QOIDALAR:
 1. Aloqasi BOR bo'lsa: Boshqa mutaxassislar gaplariga javob (qo'shilish, rad, savol), o'z sohangizdagi aniq taklif. Hammasi faqat yuqoridagi suhbatdan kelib chiqsin.
 2. Aloqasi YO'Q bo'lsa: Bitta qisqa jumla o'zingiz yozing, keyin to'xtang.
-3. Shifokordan aniq ma'lumot kerak bo'lsa: "FOYDALANUVCHI UCHUN SAVOL: [savol]."
+3. Shifokordan savol: faqat hayotiy xavf yoki tashxisni aniqlash uchun boshqa iloji bo'lmaganda "FOYDALANUVCHI UCHUN SAVOL: [savol]" yozing; aks holda yozmang — savollarni kam qiling.
+4. Ob'ektiv ko'rik (qon bosimi, puls, harorat, SpO2, nafas) yuqorida berilgan — shifokordan HECH QACHON so'ramang, xulosangizda hisobga oling.
+5. Laboratoriya va diagnostika hujjatlari (agar yuklangan bo'lsa) quyida/ilovada — ularni tahlil qiling, xulosangizda ishlating. Bu ma'lumotlarni shifokordan SO'RAMANG — allaqachon berilgan.
 
 Javob 3-6 jumla, oxirigacha. TIL: ${langMap[language]}.`;
 
@@ -1175,22 +1211,7 @@ Javob 3-6 jumla, oxirigacha. TIL: ${langMap[language]}.`;
                 onProgress({ type: 'message', message: specialistMessage });
                 debateHistory.push(specialistMessage);
 
-                const userQuestionMatch = trimmed.match(/FOYDALANUVCHI UCHUN SAVOL:\s*([^\n]+)/i);
-                if (userQuestionMatch && userQuestionMatch[1]) {
-                    const questionForUser = userQuestionMatch[1].trim();
-                    const userQMsg: ChatMessage = { id: `sys-q-${Date.now()}`, author: AIModel.SYSTEM, content: questionForUser, isSystemMessage: true };
-                    onProgress({ type: 'message', message: userQMsg });
-                    debateHistory.push(userQMsg);
-                    onProgress({ type: 'user_question', question: questionForUser });
-                    let userInput: string | null = null;
-                    while (!userInput) {
-                        await sleep(18);
-                        userInput = getUserIntervention();
-                    }
-                    const userMessage: ChatMessage = { id: `user-${Date.now()}`, author: AIModel.SYSTEM, content: `Javob: ${userInput}`, isUserIntervention: true, isSystemMessage: true };
-                    onProgress({ type: 'message', message: userMessage });
-                    debateHistory.push(userMessage);
-                }
+                // Foydalanuvchidan savolni faqat Rais so'raganda so'raymiz; mutaxassis yozgan savolni faqat suhbatga qo'shamiz, javob kutmaymiz
                 await sleep(15);
             } catch (e) {
                 // error handling
@@ -1198,19 +1219,20 @@ Javob 3-6 jumla, oxirigacha. TIL: ${langMap[language]}.`;
         }
         
         const livePrognosis = await generatePrognosisUpdate(debateHistory, patientData, language);
+        lastLivePrognosis = livePrognosis;
         if (livePrognosis) {
             onProgress({ type: 'prognosis_update', data: livePrognosis });
         }
         
         if (round < DEBATE_ROUNDS) {
             const debateSummary = debateHistory.slice(-10).map(m => `[${m.author === AIModel.SYSTEM ? 'Rais' : m.author}]: ${(m.content || '').trim().slice(0, 300)}`).join('\n');
-            const summarizationPrompt = `Siz - Konsilium raisi. QOIDA: Hech qanday oldindan kiritilgan matn bo'lmasin — faqat quyidagi suhbatni o'qib, o'zingiz umumlashtirib keyingi xabaringizni yozing. Tayyor ibora ishlatmang.
+            const summarizationPrompt = `Siz - Konsilium raisi. QOIDA: Hech qanday oldindan kiritilgan matn bo'lmasin — faqat quyidagi suhbatni o'qib, o'zingiz umumlashtirib keyingi xabaringizni yozing. Tayyor ibora ishlatmang. Eslatma: Ob'ektiv ko'rik (vital), laboratoriya va yuklangan hujjatlar allaqachon berilgan — shifokordan ularni qayta so'ramang.
 
 --- ${round}-BOSQICH SUHBATI (o'qing, keyin o'zingiz yozing) ---
 ${debateSummary}
 --- TUGADI ---
 
-VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu yoki savol matnini TO'LIQ yozing — bo'sh qoldirmang. Agar shifokordan aniq ma'lumot kerak bo'lsa: "FOYDALANUVCHI UCHUN SAVOL: [to'liq savol]". Kerak bo'lmasa keyingi mavzuni aniq jumla bilan yozing. Javobni oxirigacha yozing. TIL: ${langMap[language]}.`;
+VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu matnini TO'LIQ yozing — bo'sh qoldirmang. FOYDALANUVCHI UCHUN SAVOLni faqat tashxis yoki shoshilinch qaror uchun mutlaqo zarur bo'lsagina ishlating (juda kam); aksincha doim keyingi mavzuni aniq jumla bilan yozing. Shifokordan savol so'rashni kamaytiring (vital/ob'ektiv ko'rik allaqachon berilgan). Javobni oxirigacha yozing. TIL: ${langMap[language]}.`;
             currentTopic = await callGemini(summarizationPrompt, DEPLOY_PRO, undefined, false, systemInstr, true, 3072) as string;
         }
     }
@@ -1257,11 +1279,12 @@ VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu yoki 
         1. consensusDiagnosis: har biri uchun reasoningChain, justification, evidenceLevel. uzbekProtocolMatch: qaysi SSV klinik protokoliga mos (masalan: "Arterial gipertenziya / Qandli diabet bo'yicha SSV klinik protokoliga muvofiq") yoki "SSV tasdiqlangan milliy klinik protokollariga muvofiq" deb yozing.
         2. treatmentPlan: SSV protokollariga muvofiq, batafsil va tartibli; shoshilinch bo'lsa birinchi qadamlar aniq.
         3. medicationRecommendations: Har bir element uchun MAJBURIY: (a) name — ANIQ SAVDO NOMI (masalan: Nimesil, Sumamed, Metformin, Paratsetamol, Amlodipin, Omeprazol, Enalapril, Augmentin, Ibuprofen). "Dori", "Tabletka" yoki kategoriya yozmang; faqat O'zbekistonda ro'yxatdan o'tgan dori nomi. (b) dosage — aniq doza (masalan "500 mg kuniga 2 marta, 7 kun"). (c) localAvailability — "O'zbekistonda mavjud" yoki muqobil savdo nomlari (masalan "Panadol, Efferalgan"). (d) notes — qisqa yo'riqnoma. Allergiya va dori o'zaro ta'sirini hisobga oling.
-        4. criticalFinding: hayotga xavf yoki shoshilinch davolash kerak bo'lsa to'ldiring (finding, implication, urgency - barchasi o'zbekcha); yo'q bo'lsa bo'sh qoldiring.
+        4. criticalFinding: MAJBURIY. Agar suhbatda yoki bemor ma'lumotlarida hayotga xavf, shoshilinch holat, kritik topilma (masalan anafilaksiya, miokard infarkt, insult, jiddiy qon ketish, septik shok, nafas yetishmovchiligi, xavfli aritmiya va h.k.) tilga olingan yoki ehtimoli bor bo'lsa — to'ldiring: finding (qisqa, aniq), implication (oqibat), urgency ("High" yoki "Medium"). Barchasi o'zbekcha. Yo'q bo'lsa null/bo'sh.
         5. recommendedTests: yetishmayotgan muhim tekshiruvlar (O'zbekiston LITS va standartlariga mos).
         6. uzbekistanLegislativeNote: "O'zbekiston Respublikasi sog'liqni saqlash qonunchiligi va SSV tasdiqlangan klinik protokollariga muvofiq" yoki tegishli qisqacha eslatma.
         7. rejectedHypotheses: MAJBURIY. Munozarada ko'rib chiqilgan lekin rad etilgan tashxislar (differensial tashxislar). Har biri uchun name (tashxis nomi) va reason (nimaga rad etildi, qisqa sabab). Kamida 1-3 ta yozing agar bahsda boshqa variantlar tilga olingan bo'lsa; agar hech qanday rad etilgan tashxis bo'lmasa, bo'sh massiv [] qaytaring.
         ANIQLIK: consensusDiagnosis da probability ni dalil kuchiga mos qo'ying; reasoningChain har qadamda "nima uchun" javob bersin (HAR BIR ELEMENT 1-2 JUMLADAN OSHMASIN, qisqa holda yozing - to'liq JSON kesilmasin); uzbekProtocolMatch aniq protokol nomi/yo'nalishi. Taxminiy tashxisni yakuniy deb yozmang.
+        KRITIK TOPILMA: Suhbat (debate history) yoki bemor ma'lumotlarida shoshilinch, hayotga xavf, kritik holat tilga olingan bo'lsa — criticalFinding ni albatta to'ldiring (finding, implication, urgency). Bo'sh qoldirmang.
         Debate history: ${JSON.stringify(debateHistory)}
     `;
     
@@ -1322,7 +1345,7 @@ VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu yoki 
         const treatmentPlan = rawPlan.map(planItemToStr).filter(s => s.trim());
         const reportWithPrognosis: FinalReport = {
             ...rawReport,
-            prognosisReport: livePrognosis ?? rawReport.prognosisReport,
+            prognosisReport: lastLivePrognosis ?? rawReport.prognosisReport,
             rejectedHypotheses,
             medicationRecommendations,
             treatmentPlan: treatmentPlan.length > 0 ? treatmentPlan : rawPlan.map((x: unknown) => (typeof x === 'string' ? x : JSON.stringify(x))).filter(Boolean),

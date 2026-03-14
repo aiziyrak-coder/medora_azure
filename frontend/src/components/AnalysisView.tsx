@@ -63,7 +63,8 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
     }, [record?.debateHistory, statusMessage, socraticQuestion]);
 
     const { patientData: pd, debateHistory: dh = [], finalReport: fr = null } = record ?? {};
-    const showRightPanel = !isAnalyzing && (!!fr || (!!error && (dh?.length ?? 0) > 0));
+    const hasDebate = (dh?.length ?? 0) > 0;
+    const showRightPanel = !!pd && (!!fr || !!error || isAnalyzing || hasDebate);
 
     const handleInterventionSubmit = useCallback((e: React.FormEvent) => {
         e.preventDefault();
@@ -135,7 +136,7 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
             </div>
 
             {/* Center Panel: Interactive Analysis */}
-            <div className={`${fr ? 'xl:col-span-5' : 'xl:col-span-9'} glass-panel overflow-hidden flex flex-col h-full relative`}>
+            <div className={`${showRightPanel ? 'xl:col-span-5' : 'xl:col-span-9'} glass-panel overflow-hidden flex flex-col h-full relative`}>
                  <div className="p-5 border-b border-white/20 flex-shrink-0 bg-white/30 backdrop-blur-md z-10">
                     <h3 className="text-lg font-bold text-text-primary">Interaktiv Tahlil</h3>
                     <p className="text-xs font-medium text-blue-600 uppercase tracking-wide mt-0.5">{statusMessage || "Konsilium jarayoni"}</p>
@@ -190,11 +191,14 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
                 )}
             </div>
             
-            {/* Right Panel: Yakuniy xulosa — o'ng tomonda; to'liq hisobot tuzilishi (yoki xato bo'lsa placeholder), pastida yuklab olish */}
+            {/* Right Panel: Yakuniy xulosa — munozara paytida ham ochiq; jarayon, raund xulosalari, keyin to'liq hisobot */}
             {showRightPanel && (
                 <div className="xl:col-span-4 glass-panel overflow-hidden flex flex-col h-full">
                     <div className="p-5 border-b border-white/20 bg-white/30 backdrop-blur-md flex-shrink-0">
                         <h3 className="text-lg font-bold text-text-primary">Yakuniy Xulosa</h3>
+                        {isAnalyzing && !fr && (
+                            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">Konsilium davom etmoqda. Jarayon va dastlabki xulosalar quyida.</p>
+                        )}
                         {!fr && error && (
                             <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">Tahlil xato bilan tugadi. Quyida hisobot bo'limlari va yuklab olish.</p>
                         )}
@@ -203,6 +207,31 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
                         <div className="space-y-6">
                             {fr && <FinalReportCard report={fr} patientData={pd} onUpdateReport={onUpdateReport} debateHistory={dh} />}
                             {!fr && error && <ErrorReportPlaceholder message={error} />}
+                            {!fr && !error && (isAnalyzing || hasDebate) && (
+                                <div className="space-y-4">
+                                    <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-800/30">
+                                        <h4 className="text-sm font-bold text-text-primary mb-2">Jarayon</h4>
+                                        <p className="text-xs text-text-secondary">{statusMessage || 'Konsilium jarayoni'}</p>
+                                    </div>
+                                    {hasDebate && (
+                                        <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-white/50 dark:bg-slate-800/30">
+                                            <h4 className="text-sm font-bold text-text-primary mb-2">Dastlabki xulosalar (raundlar bo&apos;yicha)</h4>
+                                            <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+                                                {(Array.isArray(dh) ? dh.slice(-8) : []).map(msg => (
+                                                    <div key={msg.id} className="text-xs border-l-2 border-slate-300 pl-2 py-0.5">
+                                                        <span className="font-semibold text-slate-600 dark:text-slate-400">
+                                                            {msg.author === 'Orchestrator' || msg.isSystemMessage ? 'Rais' : String(msg.author)}:
+                                                        </span>{' '}
+                                                        <span className="text-text-primary line-clamp-2">{(msg.content || '').trim().slice(0, 120)}{(msg.content && msg.content.length > 120 ? '…' : '')}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {livePrognosis && <PrognosisCard prognosis={livePrognosis} />}
+                                    <p className="text-xs text-slate-500 italic">Yakuniy hisobot konsilium tugagach shu yerda chiqadi.</p>
+                                </div>
+                            )}
                             {record?.id && !isNaN(parseInt(record.id, 10)) && fr && (
                                 <UsefulnessFeedbackCard analysisId={parseInt(record.id, 10)} />
                             )}
