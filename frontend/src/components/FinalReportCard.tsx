@@ -333,10 +333,14 @@ const FinalReportCard: React.FC<{
                                <p className="text-xs text-slate-500 mt-1 italic">Taxminiy narxi: {med.priceEstimate}</p>
                            )}
                            
-                           {med.notes && <p className="text-xs text-text-secondary mt-2 border-t pt-2">{med.notes}</p>}
+                           {med.notes && (
+                               <p className="text-sm text-text-secondary mt-2 pt-2 border-t border-slate-200">
+                                   <span className="font-semibold">Qanday qabul qilish (yo&apos;riqnoma):</span> {med.notes}
+                               </p>
+                           )}
                         </div>
                     ); }) : (
-                        <p className="text-slate-500 text-sm italic">Ma'lumot kiritilmagan.</p>
+                        <p className="text-slate-500 text-sm italic">Dori tavsiyalari tashxis asosida hisobotga kiritiladi. Konsiliumni qayta ishga tushiring yoki bir oz kuting.</p>
                     )}
                     </div>
                 </Section>

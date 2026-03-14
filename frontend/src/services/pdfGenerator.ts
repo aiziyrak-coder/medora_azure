@@ -142,12 +142,16 @@ export const generatePdfReport = (
         y += LINE_HEIGHT + 6;
     }
 
-    // --- Page 1: Title and Patient Info (haqiqiy hujjat, doktor tavsiyasi) ---
+    // --- Page 1: Title and Patient Info (rasmiy hujjat uslubi) ---
     addHeader("KONSILIUM: Yakuniy Klinik Xulosa");
     doc.setFont(PDF_FONT, 'normal');
     doc.setFontSize(10);
     doc.setTextColor(80, 80, 80);
-    doc.text("Tibbiy maslahat hujjati - doktor tavsiyasi sifatida. Faqat ma'lumot uchun.", margin, y);
+    doc.text("Rasmiy tibbiy maslahat hujjati - doktor tavsiyasi sifatida. Faqat ma'lumot uchun.", margin, y);
+    y += LINE_HEIGHT;
+    const reportDate = new Date();
+    const dateStr = reportDate.toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    doc.text(`Hisobot sanasi: ${dateStr}`, margin, y);
     y += LINE_HEIGHT + 6;
 
     addSectionTitle("Bemor Ma'lumotlari");

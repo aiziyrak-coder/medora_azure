@@ -94,10 +94,13 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
 
     if (!pd) return <div className="text-center p-8">Ma'lumotlar topilmadi.</div>;
 
+    /** Show downloads only after council has ended and final critical info is ready (final report or error state). */
+    const showDownloadSection = (!!fr || !!error) && !isAnalyzing;
+
     return (
-        <div className={`grid grid-cols-1 gap-6 h-full ${fr ? 'xl:grid-cols-12' : 'xl:grid-cols-12'}`}>
-            {/* Left Panel: Patient Data */}
-            <div className={`${fr ? 'xl:col-span-3' : 'xl:col-span-3'} glass-panel p-6 overflow-y-auto h-full flex flex-col`}>
+        <div className="grid grid-cols-1 gap-6 h-full xl:grid-cols-12">
+            {/* Left Panel: Patient Data — 25% smaller (2 cols instead of 3) */}
+            <div className="xl:col-span-2 glass-panel p-5 overflow-y-auto h-full flex flex-col">
                 <div className="mb-4">
                     <h3 className="text-lg font-bold text-text-primary">Bemor Ma'lumotlari</h3>
                     <div className="h-1 w-12 bg-blue-500 rounded-full mt-1"></div>
@@ -136,7 +139,7 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
             </div>
 
             {/* Center Panel: Interactive Analysis */}
-            <div className={`${showRightPanel ? 'xl:col-span-5' : 'xl:col-span-9'} glass-panel overflow-hidden flex flex-col h-full relative`}>
+            <div className={`${showRightPanel ? 'xl:col-span-6' : 'xl:col-span-10'} glass-panel overflow-hidden flex flex-col h-full relative`}>
                  <div className="p-5 border-b border-white/20 flex-shrink-0 bg-white/30 backdrop-blur-md z-10">
                     <h3 className="text-lg font-bold text-text-primary">Interaktiv Tahlil</h3>
                     <p className="text-xs font-medium text-blue-600 uppercase tracking-wide mt-0.5">{statusMessage || "Konsilium jarayoni"}</p>
@@ -209,35 +212,30 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
                             {!fr && error && <ErrorReportPlaceholder message={error} />}
                             {!fr && !error && (isAnalyzing || hasDebate) && (
                                 <div className="space-y-4">
-                                    <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-800/30">
+                                    <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50/70 dark:bg-slate-800/40">
                                         <h4 className="text-sm font-bold text-text-primary mb-2">Jarayon</h4>
                                         <p className="text-xs text-text-secondary">{statusMessage || 'Konsilium jarayoni'}</p>
                                     </div>
                                     {hasDebate && (
-                                        <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-white/50 dark:bg-slate-800/30">
+                                        <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50/70 dark:bg-slate-800/40">
                                             <h4 className="text-sm font-bold text-text-primary mb-2">Dastlabki xulosalar (raundlar bo&apos;yicha)</h4>
-                                            <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
-                                                {(Array.isArray(dh) ? dh.slice(-8) : []).map(msg => (
-                                                    <div key={msg.id} className="text-xs border-l-2 border-slate-300 pl-2 py-0.5">
-                                                        <span className="font-semibold text-slate-600 dark:text-slate-400">
-                                                            {msg.author === 'Orchestrator' || msg.isSystemMessage ? 'Rais' : String(msg.author)}:
-                                                        </span>{' '}
-                                                        <span className="text-text-primary line-clamp-2">{(msg.content || '').trim().slice(0, 120)}{(msg.content && msg.content.length > 120 ? '…' : '')}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                            <p className="text-xs text-text-secondary">
+                                                Har bir raund tugagach yakuniy xulosa shu yerda chiqadi. Konsilium tugagach to&apos;liq hisobot va yuklab olish ko&apos;rinadi.
+                                            </p>
                                         </div>
                                     )}
                                     {livePrognosis && <PrognosisCard prognosis={livePrognosis} />}
-                                    <p className="text-xs text-slate-500 italic">Yakuniy hisobot konsilium tugagach shu yerda chiqadi.</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 italic">Yakuniy hisobot konsilium tugagach shu yerda chiqadi.</p>
                                 </div>
                             )}
                             {record?.id && !isNaN(parseInt(record.id, 10)) && fr && (
                                 <UsefulnessFeedbackCard analysisId={parseInt(record.id, 10)} />
                             )}
-                            <div className="pt-6 mt-6 border-t border-slate-200 dark:border-slate-600">
-                                <DownloadPanel record={record} hasError={!fr && !!error} />
-                            </div>
+                            {showDownloadSection && (
+                                <div className="pt-6 mt-6 border-t border-slate-200 dark:border-slate-600">
+                                    <DownloadPanel record={record} hasError={!fr && !!error} />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

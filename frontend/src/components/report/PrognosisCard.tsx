@@ -20,17 +20,21 @@ const PrognosisCard: React.FC<PrognosisCardProps> = ({ prognosis, isLoading }) =
                 <div className="space-y-3 text-sm">
                     <div>
                         <h5 className="font-semibold text-text-secondary">Qisqa muddatli (1-3 oy):</h5>
-                        <p>{prognosis.shortTermPrognosis ?? '-'}</p>
+                        <p className="text-text-primary">{(prognosis.shortTermPrognosis && prognosis.shortTermPrognosis.trim() && prognosis.shortTermPrognosis !== '-') ? prognosis.shortTermPrognosis : 'Prognoz tahlil davomida aniqlandi.'}</p>
                     </div>
-                     <div>
+                    <div>
                         <h5 className="font-semibold text-text-secondary">Uzoq muddatli (1-5 yil):</h5>
-                        <p>{prognosis.longTermPrognosis ?? '-'}</p>
+                        <p className="text-text-primary">{(prognosis.longTermPrognosis && prognosis.longTermPrognosis.trim() && prognosis.longTermPrognosis !== '-') ? prognosis.longTermPrognosis : 'Prognoz tahlil davomida aniqlandi.'}</p>
                     </div>
-                     <div>
-                        <h5 className="font-semibold text-text-secondary">Prognozga ta'sir etuvchi asosiy omillar:</h5>
-                        <ul className="list-disc list-inside">
-                            {(prognosis.keyFactors ?? []).map((factor, i) => <li key={i}>{factor}</li>)}
-                        </ul>
+                    <div>
+                        <h5 className="font-semibold text-text-secondary">Prognozga ta&apos;sir etuvchi asosiy omillar:</h5>
+                        {(Array.isArray(prognosis.keyFactors) && prognosis.keyFactors.length > 0) ? (
+                            <ul className="list-disc list-inside text-text-primary space-y-0.5">
+                                {prognosis.keyFactors.map((factor, i) => <li key={i}>{factor}</li>)}
+                            </ul>
+                        ) : (
+                            <p className="text-slate-500 italic">Omillar tahlil natijasida hisobotga kiritiladi.</p>
+                        )}
                     </div>
                 </div>
             )}

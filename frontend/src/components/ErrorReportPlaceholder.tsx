@@ -59,7 +59,7 @@ const ErrorReportPlaceholder: React.FC<ErrorReportPlaceholderProps> = ({ message
 
             {/* Dori-darmonlar — placeholder */}
             <Section title="Dori-Darmonlar bo'yicha Tavsiyalar" icon={<PillIcon className="w-6 h-6" />}>
-                <p className="text-slate-500 text-sm italic">Ma'lumot kiritilmagan.</p>
+                <p className="text-slate-500 text-sm italic">Tahlil xato bilan tugadi. To&apos;liq hisobotda tashxis asosida dori tavsiyalari (doza, qanday ichish) kiritiladi. Konsiliumni qayta ishga tushiring yoki PDF/Word orqali ma&apos;lumotni yuklab oling.</p>
             </Section>
 
             {/* Qo'shimcha tekshiruvlar — placeholder */}

@@ -72,11 +72,19 @@ export const generateDocxReport = async (
         children.push(new Paragraph({ text: "" }));
     }
 
+    const reportDate = new Date();
+    const dateStr = reportDate.toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
     children.push(
         new Paragraph({
             text: "KONSILIUM: Yakuniy Klinik Xulosa",
             heading: HeadingLevel.TITLE,
             alignment: AlignmentType.CENTER,
+        }),
+        new Paragraph({
+            children: [new TextRun({ text: "Rasmiy tibbiy maslahat hujjati. Hisobot sanasi: " + dateStr, italics: true, size: 20 })],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 200 },
         }),
         new Paragraph({ text: "\n" }),
 

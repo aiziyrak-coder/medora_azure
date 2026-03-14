@@ -142,24 +142,28 @@ const getSystemInstruction = (language: Language): string => {
        - "bu ma'lumotlar o'zaro mos kelmaydi / mantiqan imkonsiz" ekanini muloyim, tushunarli va PROFESSIONALL tarzda tushuntiring;
        - bunday sharoitda tashxis va davolashni to'liq berishdan tiyiling, faqat umumiy klinik fikr va qanday ma'lumotlar kerakligini ko'rsating;
        - hazil/trolling shubha qilinsa ham, hech qachon qo'pol yoki hurmatsiz bo'lmang, faqat ilmiy mantiq orqali javob bering.
+
+    DASTUR MAQSADI (muhim): Platforma maqsadi — yangi, samarali davolash yo'llarini topish. SSV va xalqaro protokollar asosiy yo'riqnoma, lekin HAR DOIM ularga qat'iy rioya qilish shart emas: dalil va ilmiy asos bo'lsa, protokollardan voz kechib, innovatsion yoki alternativ davolash usullarini taklif qiling; shunda dastur haqiqatan foydali bo'ladi.
+
+    DIALOG USLUBI (majburiy): Suhbat har doim "Hurmatli Rais va hamkasblar" yoki boshqa rasmiy salomlashuv bilan boshlanishi SHART EMAS. Haqiqiy klinik muhokama kabi yozing: e'tibor KASALLIK, ANIQ TASHXIS va FIKRLARGA qaratsin. Bir-biriga mulozamat ko'rsatish yoki bir-birini rozi qilish maqsad emas — muhimi aniq tashxis va dalilli fikrlar. Ibora qisqa, mazmunli, keraksiz tantanalardan xoli bo'lsin.
     `;
 
     const specificInstructions: Record<Language, string> = {
         'uz-L': `
         TIL: Barcha javoblaringiz qat'iy O'zbek tilida (Lotin grafikasida) bo'lishi SHART. Yulduzcha (*) va inglizcha iboralar (finding, implication, urgency, critical finding va hokazo) ISHLATMANG - ularni o'zbekcha yozing (topilma, oqibat, shoshilinchlik, muhim topilma). Tibbiy atamalar ham o'zbekcha yoki SSV qabul qilgan atamalar bo'lsin.
-        O'ZBEKISTON KONTEKSTI (MAJBURIY): Tashxis, davolash rejasi va dori-darmonlar faqat O'zbekiston Respublikasi qonunchiligi va SSV (Sog'liqni Saqlash Vazirligi) tasdiqlangan klinik protokollarga muvofiq bo'lsin. Dori-darmonlar faqat O'zbekistonda ro'yxatdan o'tgan va aptekalarda mavjud savdo nomlari bilan (Nimesil, Sumamed, Augmentin, Metformin, Enalapril, Amlodipin, Omeprazol va hokazo).
+        O'ZBEKISTON KONTEKSTI: SSV klinik protokollari asosiy yo'riqnoma; dastur maqsadi yangi, samarali davolash yo'llarini topish — dalil bo'lsa protokollardan chetga chiqib innovatsion yoki alternativ tavsiyalar bering. Dori-darmonlar O'zbekistonda ro'yxatdan o'tgan va aptekalarda mavjud savdo nomlari bilan (Nimesil, Sumamed, Augmentin, Metformin, Enalapril, Amlodipin, Omeprazol va hokazo); yangi yoki off-label taklif qilsangiz, sababini ko'rsating.
         TERMINOLOGIYA: O'zbek tibbiyot terminologiyasi va SSV qabul qilgan atamalar.
         `,
         'uz-C': `TIL: Barcha javoblaringiz qat'iy O'zbek tilida (Kirill yozuvida) bo'lishi SHART.
-        O'ZBEKISTON KONTEKSTI (MAJBURIY): Tashxis, davolash rejasi va dori-darmonlar faqat O'zbekiston Respublikasi qonunchiligi va SSV tasdiqlangan klinik protokollarga muvofiq bo'lsin. Dori-darmonlar faqat O'zbekistonda ro'yxatdan o'tgan va aptekalarda mavjud savdo nomlari bilan (Nimesil, Sumamed, Augmentin va hokazo).
+        O'ZBEKISTON KONTEKSTI: SSV protokollari asosiy yo'riqnoma; dastur maqsadi yangi davolash yo'llarini topish — dalil bo'lsa protokollardan voz kechib samarali takliflar bering. Dori-darmonlar O'zbekistonda mavjud savdo nomlari bilan (Nimesil, Sumamed, Augmentin va hokazo).
         TERMINOLOGIYA: O'zbek tibbiyot terminologiyasi va SSV qabul qilgan atamalar.`,
         'ru': `YAZYK: Vse vashi otvety DOLZHNY byt strogo na russkom yazyke.
-        KONTEKST UZBEKISTANA (OBYAZATELNO): Diagnoz, plan lecheniya i preparaty - strogo v sootvetstvii s zakonodatelstvom Respubliki Uzbekistan i klinicheskimi protokolami, utverzhdyonnymi Minzdravom (SSV). Prepara ty - tolko zaregistrirovannye v Uzbekistane i dostupnye v aptekah (torgovye nazvaniya: Nimesil, Sumamed, Augmentin, Metformin, Enalapril i t.d.).
+        KONTEKST UZBEKISTANA: Klinicheskie protokoly SSV — osnovnoye rukovodstvo; tsel platformy — nayti novye effektivnyye metody lecheniya. Pri nalichii dokazatelstv dopuskayetsya otkloneniye ot protokolov i innovatsionnyye/alternativnyye rekomendatsii. Preparaty — zaregistrirovannyye v Uzbekistane (Nimesil, Sumamed, Augmentin, Metformin, Enalapril i t.d.).
         TERMINOLOGIYA: Professionalnaya meditsinskaya terminologiya na russkom; pri neobhodimosti - terminy, prinyatye v Uzbekistane.
         `,
         'en': `
         LANGUAGE: All your responses MUST be strictly in English.
-        UZBEKISTAN CONTEXT (MANDATORY): This platform is for use in Uzbekistan. All diagnoses, treatment plans and medications MUST comply with the legislation of the Republic of Uzbekistan and clinical protocols approved by the Ministry of Health (SSV). Recommend only drugs registered and available in Uzbekistan (e.g. Nimesil, Sumamed, Augmentin, Metformin, Enalapril, Amlodipine, Omeprazole).
+        UZBEKISTAN CONTEXT: SSV clinical protocols are the baseline; the platform's goal is to find new, effective treatment approaches. When evidence supports it, you may deviate from protocols and suggest innovative or alternative options. Recommend drugs registered and available in Uzbekistan (e.g. Nimesil, Sumamed, Augmentin, Metformin, Enalapril, Amlodipine, Omeprazole); if suggesting off-protocol or off-label, state the rationale.
         TERMINOLOGY: Professional medical terminology in English; reference ICD-10 where applicable.
         `
     };
@@ -173,8 +177,8 @@ const getSystemInstruction = (language: Language): string => {
     3. Gallyutsinatsiyadan saqlaning: faqat kiritilgan ma'lumot va umumiy tibbiy bilimga tayanib javob bering; taxmin qilmaslik kerak bo'lsa "Qo'shimcha tekshiruv kerak" deb yozing.
     4. Overconfidence dan saqlaning: dalil yetarli bo'lmasa yoki shubha bo'lsa, "Qo'shimcha tekshiruv kerak" yoki "Tasdiqlash uchun laboratoriya/rentgen kerak" deb aniq yozing; taxminiy tashxisni yakuniy deb bermang.
     5. criticalFinding: hayotga xavf yoki shoshilinch davolash kerak bo'lsa, finding, implication va urgency ni aniq to'ldiring.
-    AMALIY YORDAM (majburiy): Javoblaringiz shifokor darhol qo'llashi mumkin bo'lsin. Dori nomi + aniq doza + kuniga necha marta + davomiyligi; davolash rejasi 1-qadam, 2-qadam tarzida; SSV protokol nomi yoki yo'nalishi keltiring; "darhol qilish kerak" va "keyinroq/kuzatuv" ni ajrating. Umumiy so'zlar o'rniga konkret, amaliy tavsiyalar bering.
-    ANIQLIK (majburiy): (1) Faqat kiritilgan ma'lumot va klinik dalillarga asoslangan xulosa chiqaring; ma'lumot yetishmasa "Tasdiqlash uchun ... tekshiruv kerak" deb aniq yozing. (2) Har bir tashxis uchun probability ni dalil kuchiga mos qo'ying; shubha bo'lsa pastroq bering. (3) reasoningChain va justification da "nima uchun shunday" savoliga aniq javob bo'lsin; umumiy iboralardan saqlaning. (4) SSV protokol havolasini aniq keltiring (yo'nalish yoki protokol nomi). (5) Taxminiy tashxisni yakuniy deb yozmang; differensial tashxisda eng ehtimolini birinchi qo'ying va dalil asosini ko'rsating.
+    AMALIY YORDAM (majburiy): Javoblaringiz shifokor darhol qo'llashi mumkin bo'lsin. Dori nomi + aniq doza + kuniga necha marta + davomiyligi; davolash rejasi 1-qadam, 2-qadam tarzida; SSV protokolga havola yoki agar taklif protokoldan farq qilsa — protokoldan voz kechish sababini (dalil asosida) ko'rsating; "darhol qilish kerak" va "keyinroq/kuzatuv" ni ajrating. Umumiy so'zlar o'rniga konkret, amaliy tavsiyalar bering.
+    ANIQLIK (majburiy): (1) Faqat kiritilgan ma'lumot va klinik dalillarga asoslangan xulosa chiqaring; ma'lumot yetishmasa "Tasdiqlash uchun ... tekshiruv kerak" deb aniq yozing. (2) Har bir tashxis uchun probability ni dalil kuchiga mos qo'ying; shubha bo'lsa pastroq bering. (3) reasoningChain va justification da "nima uchun shunday" savoliga aniq javob bo'lsin; umumiy iboralardan saqlaning. (4) SSV protokol havolasi yoki protokoldan chetga chiqish sababi (dalil bilan). (5) Taxminiy tashxisni yakuniy deb yozmang; differensial tashxisda eng ehtimolini birinchi qo'ying va dalil asosini ko'rsating.
     `;
 };
 
@@ -411,7 +415,7 @@ const callGemini = async (
 ): Promise<unknown> => {
     const geminiModel = mapModel(model);
     const wantJson = !!responseSchema;
-    const sys = systemInstruction || "Siz professional tibbiy AI yordamchisiz. O'zbekiston SSV klinik protokollariga muvofiq javob bering.";
+    const sys = systemInstruction || "Siz professional tibbiy AI yordamchisiz. O'zbekiston kontekstida javob bering; protokollar asos, yangi samarali davolash yo'llarini topish maqsadida dalil bo'lsa protokollardan voz kechish mumkin.";
 
     const buildContents = (): string | Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> => {
         if (typeof prompt === 'string') {
@@ -580,8 +584,8 @@ const buildFastDoctorPrompt = (introText: string, data: PatientData) => {
 const getFastDoctorSystemInstruction = (language: Language): string => {
     const til = langMap[language];
     return `Siz shifokor uchun amaliy tibbiy yordamchisiz. Javob: ${til}, FAQAT JSON.
-QOIDALAR: Tashxis nomi aniq; justification 2-3 jumla dalilli (nega shunday tashxis); treatmentPlan 3-5 aniq qadam (1-qadam, 2-qadam); medications: O'zbekistonda mavjud savdo nomi (Nimesil, Sumamed, Metformin, Enalapril va h.k.) + doza + kuniga necha marta + davomiylik; uzbekProtocolMatch: qaysi SSV protokoliga mos (aniq nomi yoki yo'nalishi). criticalFinding faqat shoshilinch bo'lsa. Barcha tavsiyalar shifokor darhol qo'llashi mumkin bo'lsin.
-ANIQLIK: Faqat berilgan ma'lumotga tayaning; probability ni dalil kuchiga mos qo'ying; reasoningChain har qadamda "nima uchun" javob bersin. SSV protokol havolasini aniq yozing.`;
+QOIDALAR: Tashxis nomi aniq; justification 2-3 jumla dalilli; treatmentPlan 3-5 aniq qadam; medications: O'zbekistonda mavjud savdo nomi + doza + davomiylik; uzbekProtocolMatch: SSV protokolga mos yoki protokoldan chetga chiqish sababi (dalil bilan). criticalFinding faqat shoshilinch bo'lsa. Dastur maqsadi yangi samarali davolash topish — dalil bo'lsa protokoldan voz kechish mumkin.
+ANIQLIK: Faqat berilgan ma'lumotga tayaning; probability ni dalil kuchiga mos qo'ying; reasoningChain har qadamda "nima uchun" javob bersin. SSV havola yoki protokoldan chetga chiqish sababini yozing.`;
 };
 
 export const generateFastDoctorConsultation = async (
@@ -1037,7 +1041,22 @@ function normalizePrognosisReport(raw: unknown): PrognosisReport | null {
 const generatePrognosisUpdate = async (debateHistory: ChatMessage[], patientData: PatientData, language: Language): Promise<PrognosisReport | null> => {
     const systemInstr = getSystemInstruction(language);
     const { attachments, ...cleanData } = patientData;
-    const prompt = `Based on patient data and debate history, update prognosis. Consider O'zbekiston SSV klinik protokollari va mahalliy davolash imkoniyatlari. Return JSON with keys: shortTermPrognosis, longTermPrognosis, keyFactors (array of strings), confidenceScore (0-1). Output Language: ${langMap[language]}. Debate: ${JSON.stringify(debateHistory.slice(-5))}. Patient: ${JSON.stringify(cleanData)}.`;
+    const debateSnippet = debateHistory.slice(-8).map(m => `[${m.author === AIModel.SYSTEM ? 'Rais' : m.author}]: ${(m.content || '').trim().slice(0, 200)}`).join('\n');
+    const prompt = `Vazifa: Kasallik prognozi (aniq, batafsil). Bemor va munozara asosida quyidagi JSON ni to'ldiring. Umumiy iboralar yozmang — har bir maydon aniq ma'lumot bilan to'liq bo'lsin.
+
+shortTermPrognosis: Qisqa muddatli prognoz (1–3 oy). 2–4 jumla. Yozing: bemorning kutilayotgan holati, davolash ta'siri, ehtimoliy yaxshilanish yoki asoratlar, qanday kuzatish kerak. Masalan: "Davolashga rioya qilsa 2–3 hafta ichida [simptom] kamayadi; 1 oydan keyin laboratoriya nazorati kerak; asoratlar bo'lsa darhol shifokorga murojaat."
+
+longTermPrognosis: Uzoq muddatli prognoz (1–5 yil). 2–4 jumla. Yozing: uzoq muddatda kutilayotgan natija, surunkali risklar, qaytalash ehtimoli, hayot sifati. Masalan: "Davolash rejasiga rioya etilsa 1–2 yil ichida barqarorlashuv kutiladi; [kasallik] bo'yicha yillik tekshiruv tavsiya etiladi; [risk] ni kamaytirish uchun ..."
+
+keyFactors: Prognozga ta'sir etuvchi asosiy omillar. 4–8 ta aniq band (har biri 1 jumla). Masalan: "Davolash rejasiga rioya qilish darajasi", "Bemor yoshi va yurak/jigar funksiyasi", "Asosiy kasallikning og'irlik darajasi", "Qo'shimcha kasalliklar (diabet, AH va h.k.)", "Iemish va hayot tarzi", "Oila qo'llab-quvvatlashi", "Dori-darmonlarni muntazam qabul qilish". Bemor va munozaraga mos aniq omillarni yozing.
+
+confidenceScore: 0 dan 1 gacha (prognoz ishonchliligi).
+
+TIL: ${langMap[language]}. Javobni FAQAT JSON da bering (shortTermPrognosis, longTermPrognosis, keyFactors, confidenceScore).
+
+Munozara (oxirgi xabarlar): ${debateSnippet}
+
+Bemor: ${JSON.stringify(cleanData)}`;
     const schema = {
         type: 'object',
         properties: {
@@ -1048,7 +1067,7 @@ const generatePrognosisUpdate = async (debateHistory: ChatMessage[], patientData
         }
     };
     try {
-        const raw = await callGemini(prompt, DEPLOY_PRO, schema, false, systemInstr, true, 1024);
+        const raw = await callGemini(prompt, DEPLOY_PRO, schema, false, systemInstr, true, 2048);
         return normalizePrognosisReport(raw);
     } catch (e) {
         return null;
@@ -1098,7 +1117,7 @@ Dastlabki tashxislar: ${diagnoses.map(d => d.name).join(', ') || '-'}.
 QOIDA: Ob'ektiv ko'rik va (agar bor bo'lsa) yuklangan laboratoriya/diagnostika hujjatlari berilgan; shifokordan ularni so'ramang. Barcha ma'lumotlardan to'liq foydalaning va mutaxassislarga aniq yetkazing.`;
 
     // Konsiliumda hech qanday oldindan kiritilgan yozuv yo'q — hammasi AI suhbat va kasallikni o'qib o'zidan yozadi. Hujjatlar bo'lsa Rais ularni ko'radi va tahlil qiladi.
-    const introContentPrompt = `Siz Konsilium Raisi. QOIDA: Konsiliumda hech bir matn oldindan kiritilmaydi — barcha yozuv faqat siz quyidagi bemor va kasallik ma'lumotlarini (va agar ilovada bo'lsa — laboratoriya/diagnostika hujjatlarini) O'QIB, TUSHUNIB, umumlashtirib o'zingiz yozasiz. Tayyor ibora yoki shablon ISHLATMANG. Ob'ektiv ko'rik (vital) va yuklangan hujjatlar allaqachon berilgan — ularni qayta so'ramang. Quyidagi ma'lumotlar (va ilovadagi fayllar) asosida birinchi ochilish so'zini to'liq o'zingiz yozing (3-5 jumla). Agar bemor hujjat yuklagan bo'lsa — ularning asosiy topilmalarini qisqacha aytib, mutaxassislarga ma'lumot bering. Maqsad: eng yaxshi tashxis va davolash, O'zbekiston SSV. Javobni oxirigacha yozing. TIL: ${langMap[language]}.
+    const introContentPrompt = `Siz Konsilium Raisi. QOIDA: Konsiliumda hech bir matn oldindan kiritilmaydi — barcha yozuv faqat siz quyidagi bemor va kasallik ma'lumotlarini (va agar ilovada bo'lsa — laboratoriya/diagnostika hujjatlarini) O'QIB, TUSHUNIB, umumlashtirib o'zingiz yozasiz. Tayyor ibora yoki shablon ISHLATMANG. "Hurmatli hamkasblar" kabi rasmiy ochilish SHART EMAS — to'g'ridan-to'g'ri bemor va kasallik haqida mazmunli ochilish (3-5 jumla). Ob'ektiv ko'rik (vital) va yuklangan hujjatlar allaqachon berilgan — ularni qayta so'ramang. Agar bemor hujjat yuklagan bo'lsa — asosiy topilmalarni qisqacha yetkazing. Maqsad: aniq tashxis va davolash; e'tibor kasallikga. Javobni oxirigacha yozing. TIL: ${langMap[language]}.
 
 ${patientSummaryForRais}`;
     const introMultimodal = attachmentCount > 0 ? buildMultimodalPrompt(introContentPrompt, patientData) : introContentPrompt;
@@ -1112,7 +1131,7 @@ ${patientSummaryForRais}`;
     const DEBATE_ROUNDS = 3;
     let lastLivePrognosis: PrognosisReport | null = null;
     // Birinchi mavzu — bemor, kasallik va (agar bor bo'lsa) hujjatlar asosida; Rais hujjatlarni ko'radi
-    const currentTopicPrompt = `Siz Konsilium raisi. QOIDA: Hech qanday oldindan kiritilgan matn bo'lmasin — faqat quyidagi bemor va kasallik ma'lumotlarini (va ilovadagi laboratoriya/diagnostika hujjatlarini) o'qib, o'zingiz umumlashtirib birinchi mavzuni yozing. Ob'ektiv ko'rik va yuklangan hujjatlar berilgan — shifokordan qayta so'ramang. Mutaxassislarga dastlabki baho va xavf belgilari (har biri o'z sohasida) berishni so'ring; agar hujjatlar bo'lsa, ularning asosiy topilmalarini mutaxassislarga qisqacha yetkazing. Tayyor matn ishlatmang — bitta to'liq paragrafni faqat shu ma'lumotdan kelib chiqib o'zingiz yozing. TIL: ${langMap[language]}.
+    const currentTopicPrompt = `Siz Konsilium raisi. QOIDA: Hech qanday oldindan kiritilgan matn bo'lmasin — faqat quyidagi bemor va kasallik ma'lumotlarini (va ilovadagi hujjatlarini) o'qib, o'zingiz birinchi mavzuni yozing. Rasmiy salomlashuv ("Hurmatli hamkasblar" va h.k.) yozmang — to'g'ridan-to'g'ri mavzu va kasallikga e'tibor. Ob'ektiv ko'rik va yuklangan hujjatlar berilgan — shifokordan qayta so'ramang. Mutaxassislardan dastlabki baho va xavf belgilari so'ring; hujjatlar bo'lsa topilmalarni qisqacha yetkazing. Bitta to'liq paragraf, mazmunli. TIL: ${langMap[language]}.
 
 ${patientSummaryForRais}`;
     const topicMultimodal = attachmentCount > 0 ? buildMultimodalPrompt(currentTopicPrompt, patientData) : currentTopicPrompt;
@@ -1147,7 +1166,7 @@ ${patientSummaryForRais}`;
              debateHistory.push(userMessage);
         } else {
              const raisContent = (currentTopic || '').trim();
-             const fallbackRais = language === 'ru' ? 'Переходим к следующему вопросу. Коллеги, прошу высказаться по текущему состоянию пациента.' : language === 'en' ? 'Moving to the next topic. Colleagues, please share your view on the patient\'s current state.' : 'Keyingi mavzuga o\'tamiz. Hamkasblar, bemor holati bo\'yicha fikringizni bildiring.';
+             const fallbackRais = language === 'ru' ? 'Следующий вопрос: состояние пациента и диагноз. Ваши выводы?' : language === 'en' ? 'Next: patient state and diagnosis. Your view?' : 'Keyingi mavzu: bemor holati va tashxis. Fikrlar?';
              const orchestratorMessage: ChatMessage = { id: `sys-${Date.now()}-${round}`, author: AIModel.SYSTEM, content: raisContent || fallbackRais, isSystemMessage: true };
              onProgress({ type: 'message', message: orchestratorMessage });
              debateHistory.push(orchestratorMessage);
@@ -1180,7 +1199,7 @@ ${patientSummaryForRais}`;
 VITAL KO'RSATKICHLAR (shifokor kiritgan — SO'RAMANG, hisobga oling):
 ${objectiveForSpec || '-'}
 ${labForSpec ? `Laboratoriya ma'lumoti: ${labForSpec}` : ''}${attachmentsNoteForSpec}`;
-            const textPrompt = `Siz - ${specName} (${specTitle}). QOIDA: Konsiliumda hech bir yozuv oldindan kiritilmaydi — hammasi AI o'zi suhbat va kasallikni o'qib, tushunib, umumlashtirib yozadi. Siz ham faqat quyidagi suhbat va bemor ma'lumotlarini (va agar ilovada bo'lsa — hujjatlarni) O'QIB, o'z fikringizni boshidan yozing. Tayyor ibora yoki shablon ISHLATMANG. Ob'ektiv ko'rik va laboratoriya/hujjatlar berilgan — shifokordan so'ramang.
+            const textPrompt = `Siz - ${specName} (${specTitle}). QOIDA: Konsiliumda hech bir yozuv oldindan kiritilmaydi — suhbat va kasallikni o'qib, o'z fikringizni yozasiz. "Hurmatli Rais" yoki boshqa rasmiy salomlashuv YOZMANG — to'g'ridan-to'g'ri tashxis va fikr. Bir-birini rozi qilish yoki mulozamat ko'rsatish maqsad emas; muhimi aniq tashxis va dalilli fikrlar, e'tibor kasallikga. Ob'ektiv ko'rik va laboratoriya/hujjatlar berilgan — shifokordan so'ramang.
 
 --- BEMOR MA'LUMOTLARI (ob'ektiv ko'rik, lab va hujjatlar allaqachon kiritilgan — hisobga oling, qayta so'ramang) ---
 ${bemorSummaryForSpec}
@@ -1193,13 +1212,13 @@ ${fullDebateText}
 Raisning hozirgi mavzusi: "${currentTopic}"
 
 QOIDALAR:
-1. Aloqasi BOR bo'lsa: Boshqa mutaxassislar gaplariga javob (qo'shilish, rad, savol), o'z sohangizdagi aniq taklif. Hammasi faqat yuqoridagi suhbatdan kelib chiqsin.
+1. Aloqasi BOR bo'lsa: Boshqa mutaxassislar gaplariga javob (qo'shilish, rad, savol), o'z sohangizdagi aniq taklif. Hammasi faqat yuqoridagi suhbatdan kelib chiqsin. Rasmiy salomlashuvsiz, mazmunan.
 2. Aloqasi YO'Q bo'lsa: Bitta qisqa jumla o'zingiz yozing, keyin to'xtang.
-3. Shifokordan savol: faqat hayotiy xavf yoki tashxisni aniqlash uchun boshqa iloji bo'lmaganda "FOYDALANUVCHI UCHUN SAVOL: [savol]" yozing; aks holda yozmang — savollarni kam qiling.
+3. Shifokordan savol: faqat hayotiy xavf yoki tashxisni aniqlash uchun boshqa iloji bo'lmaganda "FOYDALANUVCHI UCHUN SAVOL: [savol]" yozing; aks holda yozmang.
 4. Ob'ektiv ko'rik (qon bosimi, puls, harorat, SpO2, nafas) yuqorida berilgan — shifokordan HECH QACHON so'ramang, xulosangizda hisobga oling.
 5. Laboratoriya va diagnostika hujjatlari (agar yuklangan bo'lsa) quyida/ilovada — ularni tahlil qiling, xulosangizda ishlating. Bu ma'lumotlarni shifokordan SO'RAMANG — allaqachon berilgan.
 
-Javob 3-6 jumla, oxirigacha. TIL: ${langMap[language]}.`;
+Javob 3-6 jumla, oxirigacha; keraksiz tantana yo'q. TIL: ${langMap[language]}.`;
 
             
             const specialistMultimodalPrompt = buildMultimodalPrompt(textPrompt, patientData);
@@ -1226,13 +1245,13 @@ Javob 3-6 jumla, oxirigacha. TIL: ${langMap[language]}.`;
         
         if (round < DEBATE_ROUNDS) {
             const debateSummary = debateHistory.slice(-10).map(m => `[${m.author === AIModel.SYSTEM ? 'Rais' : m.author}]: ${(m.content || '').trim().slice(0, 300)}`).join('\n');
-            const summarizationPrompt = `Siz - Konsilium raisi. QOIDA: Hech qanday oldindan kiritilgan matn bo'lmasin — faqat quyidagi suhbatni o'qib, o'zingiz umumlashtirib keyingi xabaringizni yozing. Tayyor ibora ishlatmang. Eslatma: Ob'ektiv ko'rik (vital), laboratoriya va yuklangan hujjatlar allaqachon berilgan — shifokordan ularni qayta so'ramang.
+            const summarizationPrompt = `Siz - Konsilium raisi. QOIDA: Hech qanday oldindan kiritilgan matn bo'lmasin — faqat quyidagi suhbatni o'qib, o'zingiz keyingi mavzuni yozing. "Hurmatli hamkasblar" va boshqa rasmiy salomlashuv YOZMANG; to'g'ridan-to'g'ri mavzu va kasallik/tashxisga e'tibor. Ob'ektiv ko'rik (vital), laboratoriya va yuklangan hujjatlar allaqachon berilgan — shifokordan ularni qayta so'ramang.
 
 --- ${round}-BOSQICH SUHBATI (o'qing, keyin o'zingiz yozing) ---
 ${debateSummary}
 --- TUGADI ---
 
-VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu matnini TO'LIQ yozing — bo'sh qoldirmang. FOYDALANUVCHI UCHUN SAVOLni faqat tashxis yoki shoshilinch qaror uchun mutlaqo zarur bo'lsagina ishlating (juda kam); aksincha doim keyingi mavzuni aniq jumla bilan yozing. Shifokordan savol so'rashni kamaytiring (vital/ob'ektiv ko'rik allaqachon berilgan). Javobni oxirigacha yozing. TIL: ${langMap[language]}.`;
+VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu matnini TO'LIQ yozing — bo'sh qoldirmang. Rasmiy mulozamat yo'q; mazmun — tashxis va kasallik. FOYDALANUVCHI UCHUN SAVOLni faqat tashxis yoki shoshilinch qaror uchun mutlaqo zarur bo'lsagina ishlating (juda kam); aksincha keyingi mavzuni aniq jumla bilan yozing. Javobni oxirigacha yozing. TIL: ${langMap[language]}.`;
             currentTopic = await callGemini(summarizationPrompt, DEPLOY_PRO, undefined, false, systemInstr, true, 3072) as string;
         }
     }
@@ -1276,14 +1295,14 @@ VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu matni
         TIL: Barcha maydonlar faqat o'zbek tilida (Lotin). Inglizcha so'zlar (finding, implication, urgency va h.k.) va yulduzcha (*) ishlatmang.
         LANGUAGE: ${langMap[language]}.
         REQUIREMENTS:
-        1. consensusDiagnosis: har biri uchun reasoningChain, justification, evidenceLevel. uzbekProtocolMatch: qaysi SSV klinik protokoliga mos (masalan: "Arterial gipertenziya / Qandli diabet bo'yicha SSV klinik protokoliga muvofiq") yoki "SSV tasdiqlangan milliy klinik protokollariga muvofiq" deb yozing.
-        2. treatmentPlan: SSV protokollariga muvofiq, batafsil va tartibli; shoshilinch bo'lsa birinchi qadamlar aniq.
-        3. medicationRecommendations: Har bir element uchun MAJBURIY: (a) name — ANIQ SAVDO NOMI (masalan: Nimesil, Sumamed, Metformin, Paratsetamol, Amlodipin, Omeprazol, Enalapril, Augmentin, Ibuprofen). "Dori", "Tabletka" yoki kategoriya yozmang; faqat O'zbekistonda ro'yxatdan o'tgan dori nomi. (b) dosage — aniq doza (masalan "500 mg kuniga 2 marta, 7 kun"). (c) localAvailability — "O'zbekistonda mavjud" yoki muqobil savdo nomlari (masalan "Panadol, Efferalgan"). (d) notes — qisqa yo'riqnoma. Allergiya va dori o'zaro ta'sirini hisobga oling.
+        1. consensusDiagnosis: har biri uchun reasoningChain, justification, evidenceLevel. uzbekProtocolMatch: qaysi SSV protokoliga mos yoki "protokoldan chetga chiqish: [sabab]" (agar yangi/samarali yondashuv taklif qilsangiz).
+        2. treatmentPlan: SSV protokollarini asos qiling; agar yangi yoki protokoldan farq qiluvchi samarali yo'l taklif qilsangiz, qisqacha sababini ko'rsating. Batafsil va tartibli; shoshilinch bo'lsa birinchi qadamlar aniq.
+        3. medicationRecommendations: MAJBURIY — HECH QACHON bo'sh massiv qoldirmang. Tashxis va kasallik asosida o'zingiz (dalillarga tayanib) O'zbekistonda mavjud, bemor uchun eng foydali va kerakli dorilarni tavsiya qiling; ortiqcha dori yozmang — faqat zarur va samarali. Har bir dori uchun: (a) name — ANIQ SAVDO NOMI (Nimesil, Sumamed, Metformin, Paratsetamol, Amlodipin, Omeprazol, Enalapril, Augmentin, Ibuprofen va h.k.). (b) dosage — aniq doza (masalan "500 mg kuniga 2 marta, 7 kun"). (c) notes — HAR BIR DORI UCHUN qo'llanma: qanday ichish (ovqatdan oldin/keyin, suv bilan va h.k.), kuniga necha marta, davomiylik; qisqa yo'riqnoma. (d) localAvailability — "O'zbekistonda mavjud" yoki muqobil savdo nomlari. Allergiya va dori o'zaro ta'sirini hisobga oling. Kamida 1 ta, odatda 2–5 ta zarur dori bo'lsin.
         4. criticalFinding: MAJBURIY. Agar suhbatda yoki bemor ma'lumotlarida hayotga xavf, shoshilinch holat, kritik topilma (masalan anafilaksiya, miokard infarkt, insult, jiddiy qon ketish, septik shok, nafas yetishmovchiligi, xavfli aritmiya va h.k.) tilga olingan yoki ehtimoli bor bo'lsa — to'ldiring: finding (qisqa, aniq), implication (oqibat), urgency ("High" yoki "Medium"). Barchasi o'zbekcha. Yo'q bo'lsa null/bo'sh.
         5. recommendedTests: yetishmayotgan muhim tekshiruvlar (O'zbekiston LITS va standartlariga mos).
-        6. uzbekistanLegislativeNote: "O'zbekiston Respublikasi sog'liqni saqlash qonunchiligi va SSV tasdiqlangan klinik protokollariga muvofiq" yoki tegishli qisqacha eslatma.
+        6. uzbekistanLegislativeNote: "O'zbekiston Respublikasi sog'liqni saqlash qonunchiligi va SSV klinik protokollariga muvofiq" yoki agar takliflar protokoldan chetga chiqsa "Dalil asosida innovatsion/alternativ yondashuv sifatida taklif qilindi" kabi qisqacha eslatma.
         7. rejectedHypotheses: MAJBURIY. Munozarada ko'rib chiqilgan lekin rad etilgan tashxislar (differensial tashxislar). Har biri uchun name (tashxis nomi) va reason (nimaga rad etildi, qisqa sabab). Kamida 1-3 ta yozing agar bahsda boshqa variantlar tilga olingan bo'lsa; agar hech qanday rad etilgan tashxis bo'lmasa, bo'sh massiv [] qaytaring.
-        ANIQLIK: consensusDiagnosis da probability ni dalil kuchiga mos qo'ying; reasoningChain har qadamda "nima uchun" javob bersin (HAR BIR ELEMENT 1-2 JUMLADAN OSHMASIN, qisqa holda yozing - to'liq JSON kesilmasin); uzbekProtocolMatch aniq protokol nomi/yo'nalishi. Taxminiy tashxisni yakuniy deb yozmang.
+        ANIQLIK: consensusDiagnosis da probability ni dalil kuchiga mos qo'ying; reasoningChain har qadamda "nima uchun" javob bersin (HAR BIR ELEMENT 1-2 JUMLADAN OSHMASIN, qisqa holda yozing - to'liq JSON kesilmasin); uzbekProtocolMatch — aniq protokol nomi/yo'nalishi yoki protokoldan chetga chiqish sababi. Taxminiy tashxisni yakuniy deb yozmang.
         KRITIK TOPILMA: Suhbat (debate history) yoki bemor ma'lumotlarida shoshilinch, hayotga xavf, kritik holat tilga olingan bo'lsa — criticalFinding ni albatta to'ldiring (finding, implication, urgency). Bo'sh qoldirmang.
         Debate history: ${JSON.stringify(debateHistory)}
     `;
@@ -1321,7 +1340,7 @@ VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu matni
         const rejectedHypotheses = Array.isArray(rawReport.rejectedHypotheses) && rawReport.rejectedHypotheses.length > 0
             ? rawReport.rejectedHypotheses.map((h: { name?: string; reason?: string }) => ({ name: String(h?.name ?? ''), reason: String(h?.reason ?? '') }))
             : (rawReport.rejectedHypotheses ?? []);
-        const medicationRecommendations = (Array.isArray(rawReport.medicationRecommendations) ? rawReport.medicationRecommendations : []).map((m: { name?: string; dosage?: string; notes?: string; localAvailability?: string; priceEstimate?: string }) => {
+        let medicationRecommendations = (Array.isArray(rawReport.medicationRecommendations) ? rawReport.medicationRecommendations : []).map((m: { name?: string; dosage?: string; notes?: string; localAvailability?: string; priceEstimate?: string }) => {
             const name = String(m?.name ?? '').trim();
             const localAvailability = String(m?.localAvailability ?? '').trim();
             return {
@@ -1332,6 +1351,26 @@ VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu matni
                 priceEstimate: m?.priceEstimate,
             };
         });
+        // Agar dori tavsiyalari bo'sh bo'lsa, tashxis asosida o'zimiz aniqlaymiz (fallback)
+        if (medicationRecommendations.length === 0) {
+            const diagnosisNames = (normalizeConsensusDiagnosis(rawReport.consensusDiagnosis).map(d => d.name).filter(Boolean)).slice(0, 3);
+            if (diagnosisNames.length > 0) {
+                try {
+                    const fallbackMedsPrompt = `Tashxis(lar): ${diagnosisNames.join(', ')}. Ushbu tashxis(lar) uchun O'zbekistonda mavjud, bemor uchun eng kerakli 2–5 ta dori tavsiya qiling. Har biri uchun: name (savdo nomi), dosage (aniq doza), notes (qanday ichish, ovqatdan oldin/keyin, kuniga necha marta — qisqa yo'riqnoma), localAvailability. FAQAT JSON massiv: [{"name":"...","dosage":"...","notes":"...","localAvailability":"..."}]. Ortiqcha dori yozmang. TIL: ${langMap[language]}.`;
+                    const fallbackRaw = await callGemini(fallbackMedsPrompt, DEPLOY_FAST, { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, dosage: { type: 'string' }, notes: { type: 'string' }, localAvailability: { type: 'string' } } } }, false, systemInstr, true, 2048) as unknown;
+                    const fallbackArr = Array.isArray(fallbackRaw) ? fallbackRaw : (fallbackRaw && typeof fallbackRaw === 'object' && Array.isArray((fallbackRaw as Record<string, unknown>).medications) ? (fallbackRaw as Record<string, unknown>).medications : []);
+                    const fallbackMeds = (Array.isArray(fallbackArr) ? fallbackArr : []).map((m: { name?: string; dosage?: string; notes?: string; localAvailability?: string }) => ({
+                        name: String(m?.name ?? '').trim() || 'Dori',
+                        dosage: String(m?.dosage ?? '').trim(),
+                        notes: String(m?.notes ?? ''),
+                        localAvailability: (m?.localAvailability && String(m.localAvailability).trim()) || undefined,
+                    }));
+                    if (fallbackMeds.length > 0) medicationRecommendations = fallbackMeds;
+                } catch {
+                    // ignore fallback failure
+                }
+            }
+        }
         const planItemToStr = (item: unknown): string => {
             if (typeof item === 'string') return item;
             if (item && typeof item === 'object') {
@@ -1501,7 +1540,7 @@ export const continueDebate = async (
     const promptText = `
         User intervention: "${userIntervention}".
         Role: Council Chair.
-        Task: Respond to user and continue debate. Keep in mind SSV clinical protocols and Uzbekistan context.
+        Task: Respond to user and continue debate. Use SSV protocols as baseline; you may suggest evidence-based alternative or innovative options for better outcomes. Uzbekistan context (drugs, standards).
         LANGUAGE: ${langMap[language]}.
         History: ${JSON.stringify(debateHistory)}
     `;
@@ -1526,7 +1565,7 @@ export const runScenarioAnalysis = async (
     const systemInstr = getSystemInstruction(language);
     const promptText = `
         Role: Council Chair.
-        Task: Analyze "What if" scenario: "${scenario}". Follow O'zbekiston SSV klinik protokollari. Recommend only drugs registered and available in Uzbekistan (savdo nomlari: Nimesil, Sumamed, Augmentin, Metformin va hokazo).
+        Task: Analyze "What if" scenario: "${scenario}". Use SSV klinik protokollari as baseline; if scenario justifies, suggest protocol-deviating or innovative options. Recommend drugs registered and available in Uzbekistan (Nimesil, Sumamed, Augmentin, Metformin va hokazo).
         LANGUAGE: ${langMap[language]}.
         Original Debate: ${JSON.stringify(debateHistory)}
     `;
@@ -1774,7 +1813,7 @@ const getDrugToolSystemInstruction = (language: Language): string => {
     const til = langMap[language];
     return `Siz klinik farmakolog va dori-darmonlar bo'yicha AI assistentsiz.
 Javobni faqat ${til} tilida, STRICT JSON formatida yozing. 
-Faqat O'zbekistonda mavjud dori vositalari va SSV klinik protokollariga tayangan holda javob bering.
+O'zbekistonda mavjud dori vositalari va SSV protokollarini asos qiling; dalil bo'lsa alternativ yoki innovatsion yondashuvlarni ham ko'rsating.
 JSON tashqarisida hech qanday matn yozmang.`;
 };
 
