@@ -58,22 +58,23 @@
   50%      { transform: translate(30px, 40px) scale(1.08); }
 }
 
+/* Oq va kulrang animatsion gradient — boshqa ranglar yo'q */
 .app-bg {
   background: linear-gradient(
     135deg,
-    #f0f8ff 0%,
-    #e8f5f2 18%,
-    #eaf2fb 36%,
-    #f0fdf4 54%,
-    #e6f3ff 72%,
-    #f0f8ff 100%
+    #ffffff 0%,
+    #f8f9fa 20%,
+    #f0f1f3 40%,
+    #e9ecef 60%,
+    #f5f5f7 80%,
+    #ffffff 100%
   );
   background-size: 400% 400%;
   animation: bg-shift 20s ease-in-out infinite;
   position: relative;
 }
 
-/* Floating ambient orbs */
+/* Yengil kulrang ambient orblar (animatsiya saqlanadi) */
 .app-bg::before {
   content: '';
   position: fixed;
@@ -82,7 +83,7 @@
   width: 55vw;
   height: 55vw;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(180,230,255,0.22) 0%, rgba(160,220,240,0.08) 50%, transparent 75%);
+  background: radial-gradient(circle, rgba(0,0,0,0.03) 0%, rgba(0,0,0,0.01) 50%, transparent 75%);
   pointer-events: none;
   z-index: 0;
   animation: orb1-move 22s ease-in-out infinite;
@@ -95,7 +96,7 @@
   width: 45vw;
   height: 45vw;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(160,240,200,0.18) 0%, rgba(140,220,200,0.07) 50%, transparent 75%);
+  background: radial-gradient(circle, rgba(0,0,0,0.025) 0%, rgba(0,0,0,0.008) 50%, transparent 75%);
   pointer-events: none;
   z-index: 0;
   animation: orb2-move 26s ease-in-out infinite;
@@ -108,7 +109,7 @@
   width: 35vw;
   height: 35vw;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(200,215,255,0.16) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(0,0,0,0.02) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
   animation: orb3-move 30s ease-in-out infinite;
@@ -257,10 +258,10 @@
   box-shadow: 0 0 24px rgba(0, 210, 255, 0.1), inset 0 0 24px rgba(0, 210, 255, 0.04);
 }
 
-/* Hex grid background pattern */
+/* Hex grid background pattern — kulrang */
 .hex-grid-bg {
   background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V16L28 0l28 16v34L28 66zM28 2L2 17v32l26 15 26-15V17L28 2z' fill='none' stroke='rgba(0,210,255,0.06)' stroke-width='1'/%3E%3C/svg%3E");
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V16L28 0l28 16v34L28 66zM28 2L2 17v32l26 15 26-15V17L28 2z' fill='none' stroke='rgba(0,0,0,0.06)' stroke-width='1'/%3E%3C/svg%3E");
 }
 
 /* =====================================================

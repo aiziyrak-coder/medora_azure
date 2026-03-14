@@ -152,9 +152,9 @@ const Dashboard: React.FC<DashboardProps> = ({
                 >
                     <div className="absolute inset-0 hex-grid-bg" aria-hidden="true" />
                     <div className="absolute top-[-30%] right-[-5%] w-72 h-72 rounded-full pointer-events-none"
-                         style={{ background: 'radial-gradient(circle, rgba(0,210,255,0.14) 0%, transparent 70%)' }} aria-hidden="true" />
+                         style={{ background: 'radial-gradient(circle, rgba(0,0,0,0.04) 0%, transparent 70%)' }} aria-hidden="true" />
                     <div className="absolute bottom-[-25%] left-[8%] w-56 h-56 rounded-full pointer-events-none"
-                         style={{ background: 'radial-gradient(circle, rgba(0,255,135,0.1) 0%, transparent 70%)' }} aria-hidden="true" />
+                         style={{ background: 'radial-gradient(circle, rgba(0,0,0,0.03) 0%, transparent 70%)' }} aria-hidden="true" />
                     <div className="absolute bottom-0 left-0 right-0 h-14" aria-hidden="true">
                         <EcgLine />
                     </div>

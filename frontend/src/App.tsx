@@ -43,7 +43,6 @@ import PlusCircleIcon from './components/icons/PlusCircleIcon';
 import DocumentReportIcon from './components/icons/DocumentReportIcon';
 import LightBulbIcon from './components/icons/LightBulbIcon';
 import CopyrightIcon from './components/icons/CopyrightIcon';
-import HexBackground from './components/HexBackground';
 import MonitorIcon from './components/icons/MonitorIcon'; 
 
 import { AIModel } from './constants/specialists';
@@ -878,10 +877,7 @@ const AppContent: React.FC = () => {
 
     return (
         <div className="flex flex-col h-screen w-full max-w-[100vw] font-sans text-text-primary app-bg relative overflow-hidden">
-            {/* Animatsion ari uyali + elektron fon */}
-            <HexBackground />
-            {/* Third ambient orb */}
-            <div className="app-orb3" aria-hidden="true" />
+            {/* Oq/kulrang animatsion gradient (index.css .app-bg) */}
             {criticalFinding && <CriticalFindingAlert finding={criticalFinding} onClose={() => setCriticalFinding(null)} />}
             {rationaleMessage && <RationaleModal message={rationaleMessage} patientData={patientData!} debateHistory={debateHistory} onClose={() => setRationaleMessage(null)} />}
             {isApiConfigured() && !apiHealthy && !isProcessing && (
