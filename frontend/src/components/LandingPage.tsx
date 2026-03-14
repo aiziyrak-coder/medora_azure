@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import LanguageSwitcher from './LanguageSwitcher';
 import { Language } from '../i18n/LanguageContext';
@@ -67,6 +67,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
     const [showContactModal, setShowContactModal] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(false);
+    const viewportRef = useRef<HTMLDivElement>(null);
 
     const goNext = useCallback(() => {
         if (isTransitioning) return;
@@ -109,8 +110,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
         return () => window.removeEventListener('keydown', handleKey);
     }, [goNext, goPrev, mobileMenuOpen, showContactModal]);
 
+    /** Scroll qilsa ham boshqa slaydga o'tadi: pastga = keyingi, yuqoriga = oldingi */
+    useEffect(() => {
+        const handleWheel = (e: WheelEvent) => {
+            if (mobileMenuOpen || showContactModal) return;
+            e.preventDefault();
+            if (e.deltaY > 0) goNext();
+            else if (e.deltaY < 0) goPrev();
+        };
+        const el = viewportRef.current;
+        if (!el) return;
+        el.addEventListener('wheel', handleWheel, { passive: false });
+        return () => el.removeEventListener('wheel', handleWheel);
+    }, [goNext, goPrev, mobileMenuOpen, showContactModal]);
+
     return (
-        <div className="h-screen max-h-screen w-full max-w-[100vw] bg-slate-950 text-white font-sans overflow-hidden selection:bg-blue-500 selection:text-white flex flex-col landing-viewport">
+        <div ref={viewportRef} className="h-screen max-h-screen w-full max-w-[100vw] bg-slate-950 text-white font-sans overflow-hidden selection:bg-blue-500 selection:text-white flex flex-col landing-viewport">
             {/* --- CONTACT MODAL --- */}
             {showContactModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in-up">
@@ -198,7 +213,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                     style={{ transform: `translateX(-${currentSlide * 100}vw)` }}
                 >
                     {/* SLIDE 0: HERO */}
-                    <section className="landing-slide flex flex-col items-center justify-center relative px-4 sm:px-6 md:px-8 pt-16 pb-24">
+                    <section className={`landing-slide flex flex-col items-center justify-center relative px-4 sm:px-6 md:px-8 pt-16 pb-24 ${currentSlide === 0 ? 'landing-slide-active' : ''}`} data-slide-index={0}>
                         <div className="absolute inset-0 overflow-hidden pointer-events-none">
                             <div className="absolute top-1/4 left-1/4 w-[40vmax] h-[40vmax] rounded-full bg-blue-600/20 blur-[80px] landing-orb" />
                             <div className="absolute bottom-1/4 right-1/4 w-[30vmax] h-[30vmax] rounded-full bg-cyan-500/15 blur-[60px] landing-orb" style={{ animationDelay: '-6s' }} />
@@ -247,7 +262,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                     </section>
 
                     {/* SLIDE 1: FEATURES */}
-                    <section className="landing-slide flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 pt-20 pb-20 overflow-hidden">
+                    <section className={`landing-slide flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 pt-20 pb-20 overflow-hidden ${currentSlide === 1 ? 'landing-slide-active' : ''}`} data-slide-index={1}>
                         <div className="w-full max-w-5xl mx-auto">
                             <p className="text-xs font-bold text-blue-400/90 mb-2 uppercase tracking-wider text-center">{INSTITUTE_NAME_FULL}</p>
                             <h2 className="text-2xl sm:text-4xl font-bold mb-8 text-center">{t('landing_features_title')}</h2>
@@ -261,7 +276,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                                     { icon: <StethoscopeIcon className="w-8 h-8 sm:w-10 sm:h-10 text-orange-400" />, title: t('landing_feature_drug'), bg: 'bg-orange-500/10', border: 'border-orange-500/20' },
                                     { icon: <ChartBarIcon className="w-8 h-8 sm:w-10 sm:h-10 text-cyan-400" />, title: t('landing_feature_risk'), bg: 'bg-cyan-500/10', border: 'border-cyan-500/20' },
                                 ].map((f, i) => (
-                                    <div key={i} className={`p-4 sm:p-5 rounded-2xl bg-slate-800/50 border hover:bg-slate-800/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${f.border}`}>
+                                    <div key={i} className={`landing-feature-card p-4 sm:p-5 rounded-2xl bg-slate-800/50 border hover:bg-slate-800/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${f.border}`} style={{ animationDelay: `${i * 0.08}s` }}>
                                         <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-3 ${f.bg}`}>{f.icon}</div>
                                         <h3 className="text-sm sm:text-base font-bold text-white leading-tight">{f.title}</h3>
                                     </div>
@@ -270,22 +285,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                         </div>
                     </section>
 
-                    {/* SLIDE 2: HOW IT WORKS */}
-                    <section className="landing-slide flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 pt-20 pb-20">
+                    {/* SLIDE 2: HOW IT WORKS — real SVG icons from components */}
+                    <section className={`landing-slide flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 pt-20 pb-20 ${currentSlide === 2 ? 'landing-slide-active' : ''}`} data-slide-index={2}>
                         <div className="w-full max-w-3xl mx-auto text-center">
                             <h2 className="text-2xl sm:text-4xl font-bold mb-4">{t('landing_how_title')} <span className="text-blue-500">{t('landing_how_subtitle')}</span></h2>
-                            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 mt-10">
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-10 mt-10">
                                 {[
-                                    { step: '01', title: t('landing_how_step1'), icon: <DocumentTextIcon className="w-6 h-6 text-white" /> },
-                                    { step: '02', title: t('landing_how_step2'), icon: <BrainCircuitIcon className="w-6 h-6 text-white" /> },
-                                    { step: '03', title: t('landing_how_step3'), icon: <ShieldCheckIcon className="w-6 h-6 text-white" /> },
+                                    { step: '01', title: t('landing_how_step1'), Icon: DocumentTextIcon, bg: 'bg-blue-500/20', border: 'border-blue-400/40', iconColor: 'text-blue-400' },
+                                    { step: '02', title: t('landing_how_step2'), Icon: BrainCircuitIcon, bg: 'bg-cyan-500/20', border: 'border-cyan-400/40', iconColor: 'text-cyan-400' },
+                                    { step: '03', title: t('landing_how_step3'), Icon: ShieldCheckIcon, bg: 'bg-emerald-500/20', border: 'border-emerald-400/40', iconColor: 'text-emerald-400' },
                                 ].map((item, i) => (
-                                    <div key={i} className="flex flex-col items-center gap-3">
-                                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-lg font-bold group-hover:bg-blue-600 transition-colors">
-                                            {item.icon}
+                                    <div key={i} className="landing-step-card flex flex-col items-center gap-3" style={{ animationDelay: `${i * 0.12}s` }}>
+                                        <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl ${item.bg} border ${item.border} flex items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg`}>
+                                            <item.Icon className={`w-8 h-8 sm:w-10 sm:h-10 ${item.iconColor}`} />
                                         </div>
                                         <span className="text-xs font-bold text-slate-500">{item.step}</span>
-                                        <p className="text-sm sm:text-base font-bold text-white max-w-[140px]">{item.title}</p>
+                                        <p className="text-sm sm:text-base font-bold text-white max-w-[160px] leading-snug">{item.title}</p>
                                     </div>
                                 ))}
                             </div>
@@ -296,7 +311,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                     </section>
 
                     {/* SLIDE 3: CTA + FOOTER */}
-                    <section className="landing-slide flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 pt-20 pb-20">
+                    <section className={`landing-slide flex flex-col items-center justify-center px-4 sm:px-6 md:px-8 pt-20 pb-20 ${currentSlide === 3 ? 'landing-slide-active' : ''}`} data-slide-index={3}>
                         <div className="flex-1 flex flex-col items-center justify-center text-center max-w-2xl mx-auto">
                             <p className="text-xs font-bold text-blue-200/90 mb-3 uppercase tracking-wider">{INSTITUTE_NAME_FULL}</p>
                             <h2 className="text-2xl sm:text-4xl md:text-5xl font-black mb-6 tracking-tight">{t('landing_cta_bottom_title')}</h2>
