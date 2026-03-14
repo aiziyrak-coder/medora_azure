@@ -188,17 +188,20 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
                 )}
             </div>
             
-            {/* Right Panel: Final Report - faqat tahlil tugaganda ko'rinadi */}
-            {fr && (
+            {/* Right Panel: Yakuniy xulosa va yuklab olish — tahlil muvaffaqiyatli yoki xato bilan tugasa ham ko'rinadi */}
+            {(fr || (pd && (dh?.length ?? 0) > 0)) && (
                 <div className="xl:col-span-4 glass-panel overflow-hidden flex flex-col h-full">
                     <div className="p-5 border-b border-white/20 bg-white/30 backdrop-blur-md">
                         <h3 className="text-lg font-bold text-text-primary">Yakuniy Xulosa</h3>
+                        {!fr && error && (
+                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">Tahlil xato bilan tugadi. Bemor ma&apos;lumotlari va munozarani yuklab olish mumkin.</p>
+                        )}
                     </div>
                     <div className="p-5 overflow-y-auto flex-grow custom-scrollbar">
                         <div className="space-y-6">
-                            <FinalReportCard report={fr} patientData={pd} onUpdateReport={onUpdateReport} debateHistory={dh} />
-                            <DownloadPanel record={record} />
-                            {record?.id && !isNaN(parseInt(record.id, 10)) && (
+                            {fr && <FinalReportCard report={fr} patientData={pd} onUpdateReport={onUpdateReport} debateHistory={dh} />}
+                            <DownloadPanel record={record} hasError={!fr && !!error} />
+                            {record?.id && !isNaN(parseInt(record.id, 10)) && fr && (
                                 <UsefulnessFeedbackCard analysisId={parseInt(record.id, 10)} />
                             )}
                         </div>

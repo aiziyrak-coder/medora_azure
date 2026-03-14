@@ -348,6 +348,7 @@ export const uzL: TranslationSet = {
   export_download_pdf: 'PDF yuklab olish',
   export_download_word: 'Word yuklab olish',
   export_specialist_conclusion: 'Har bir mutaxassisning yakuniy xulosasi',
+  export_partial_note: 'Tahlil xato bilan tugadi. PDF/Word da bemor ma\'lumotlari va munozara kiritiladi.',
   
   // FAQ (Yordam)
   help_faq_title: 'Tez-tez so\'raladigan savollar',

@@ -342,6 +342,7 @@ export const en = {
   export_download_pdf: 'Download PDF',
   export_download_word: 'Download Word',
   export_specialist_conclusion: 'Each specialist\'s conclusion',
+  export_partial_note: 'Analysis ended with an error. PDF/Word will include patient data and debate only.',
 
   help_faq_title: 'Frequently asked questions',
   help_faq_1_q: 'How can I save the consilium result?',

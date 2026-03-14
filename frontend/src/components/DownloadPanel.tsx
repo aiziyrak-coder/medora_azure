@@ -1,11 +1,23 @@
 import React from 'react';
-import type { AnalysisRecord, ChatMessage } from '../types';
+import type { AnalysisRecord, ChatMessage, FinalReport } from '../types';
 import { generatePdfReport, generateSpecialistConclusionPdf } from '../services/pdfGenerator';
 import { generateDocxReport } from '../services/docxGenerator';
 import DownloadIcon from './icons/DownloadIcon';
 import { AI_SPECIALISTS } from '../constants';
 import { useTranslation, type TranslationKey } from '../hooks/useTranslation';
 import { INSTITUTE_LOGO_SRC, INSTITUTE_NAME_FULL } from '../constants/brand';
+
+/** Minimal report when analysis ended with error — PDF/DOCX still export patient + debate. */
+function getMinimalReportForExport(): FinalReport {
+    return {
+        consensusDiagnosis: [],
+        rejectedHypotheses: [],
+        recommendedTests: [],
+        treatmentPlan: [],
+        medicationRecommendations: [],
+        unexpectedFindings: "Tahlil xato bilan tugadi. Quyida faqat bemor ma'lumotlari va konsilium munozarasi keltirilgan.",
+    };
+}
 
 /** Fetch institute logo as data URL for use in PDF/DOCX */
 async function getInstituteLogoDataUrl(): Promise<string | undefined> {
@@ -26,14 +38,17 @@ async function getInstituteLogoDataUrl(): Promise<string | undefined> {
 
 interface DownloadPanelProps {
     record: Partial<AnalysisRecord>;
+    /** True when analysis ended with error — still allow export of patient + debate. */
+    hasError?: boolean;
 }
 
-const DownloadPanel: React.FC<DownloadPanelProps> = ({ record }) => {
+const DownloadPanel: React.FC<DownloadPanelProps> = ({ record, hasError }) => {
     const { t } = useTranslation();
-    if (!record.finalReport || !record.patientData) {
+    if (!record.patientData) {
         return null;
     }
 
+    const report: FinalReport = record.finalReport ?? getMinimalReportForExport();
     const debateHistory: ChatMessage[] = Array.isArray(record.debateHistory) ? record.debateHistory : [];
     const patientName = `${record.patientData.lastName || ''}_${record.patientData.firstName || ''}`.replace(/\s+/g, '_') || 'Bemor';
 
@@ -47,7 +62,7 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({ record }) => {
 
     const handlePdfDownload = async () => {
         const logoDataUrl = await getInstituteLogoDataUrl();
-        generatePdfReport(record.finalReport!, record.patientData!, debateHistory, getSpecialistName, {
+        generatePdfReport(report, record.patientData!, debateHistory, getSpecialistName, {
             instituteName: INSTITUTE_NAME_FULL,
             instituteLogoDataUrl: logoDataUrl,
         });
@@ -55,7 +70,7 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({ record }) => {
 
     const handleDocxDownload = async () => {
         const logoDataUrl = await getInstituteLogoDataUrl();
-        await generateDocxReport(record.finalReport!, record.patientData!, debateHistory, getSpecialistName, {
+        await generateDocxReport(report, record.patientData!, debateHistory, getSpecialistName, {
             instituteName: INSTITUTE_NAME_FULL,
             instituteLogoDataUrl: logoDataUrl,
         });
@@ -73,6 +88,11 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({ record }) => {
 
     return (
         <div className="space-y-4">
+            {hasError && (
+                <p className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-2">
+                    {t('export_partial_note' as TranslationKey)}
+                </p>
+            )}
             <div className="p-4 bg-slate-100 dark:bg-slate-800/50 rounded-xl border border-border-color">
                 <h4 className="font-bold text-text-primary mb-3">{t('export_report_title' as TranslationKey)}</h4>
                 <div className="flex flex-col sm:flex-row gap-3">
