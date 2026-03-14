@@ -1125,7 +1125,9 @@ ${patientSummaryForRais}`;
              onProgress({ type: 'message', message: userMessage });
              debateHistory.push(userMessage);
         } else {
-             const orchestratorMessage: ChatMessage = { id: `sys-${Date.now()}-${round}`, author: AIModel.SYSTEM, content: currentTopic.trim(), isSystemMessage: true };
+             const raisContent = (currentTopic || '').trim();
+             const fallbackRais = language === 'ru' ? 'Переходим к следующему вопросу. Коллеги, прошу высказаться по текущему состоянию пациента.' : language === 'en' ? 'Moving to the next topic. Colleagues, please share your view on the patient\'s current state.' : 'Keyingi mavzuga o\'tamiz. Hamkasblar, bemor holati bo\'yicha fikringizni bildiring.';
+             const orchestratorMessage: ChatMessage = { id: `sys-${Date.now()}-${round}`, author: AIModel.SYSTEM, content: raisContent || fallbackRais, isSystemMessage: true };
              onProgress({ type: 'message', message: orchestratorMessage });
              debateHistory.push(orchestratorMessage);
         }
@@ -1208,7 +1210,7 @@ Javob 3-6 jumla, oxirigacha. TIL: ${langMap[language]}.`;
 ${debateSummary}
 --- TUGADI ---
 
-VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzuni yo'naltiring. Agar shifokordan aniq ma'lumot kerak bo'lsa: "FOYDALANUVCHI UCHUN SAVOL: [to'liq savol]". Kerak bo'lmasa yozmang. Javobni oxirigacha yozing. TIL: ${langMap[language]}.`;
+VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu yoki savol matnini TO'LIQ yozing — bo'sh qoldirmang. Agar shifokordan aniq ma'lumot kerak bo'lsa: "FOYDALANUVCHI UCHUN SAVOL: [to'liq savol]". Kerak bo'lmasa keyingi mavzuni aniq jumla bilan yozing. Javobni oxirigacha yozing. TIL: ${langMap[language]}.`;
             currentTopic = await callGemini(summarizationPrompt, DEPLOY_PRO, undefined, false, systemInstr, true, 3072) as string;
         }
     }

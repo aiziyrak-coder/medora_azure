@@ -349,6 +349,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                                     </div>
                                 ))}
                             </div>
+                            {/* Infografika: jarayon vaqt va bog'lovchi chiziq */}
+                            <div className="mb-6 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 px-2">
+                                <span className="text-[10px] sm:text-xs text-slate-500 font-medium">01</span>
+                                <div className="flex-1 h-0.5 sm:h-1 min-w-[40px] rounded-full bg-gradient-to-r from-blue-500/60 to-cyan-500/60" />
+                                <span className="text-[10px] text-cyan-400/90">2–5 min</span>
+                                <div className="flex-1 h-0.5 sm:h-1 min-w-[40px] rounded-full bg-gradient-to-r from-cyan-500/60 to-emerald-500/60" />
+                                <span className="text-[10px] sm:text-xs text-slate-500 font-medium">02</span>
+                                <div className="flex-1 h-0.5 sm:h-1 min-w-[40px] rounded-full bg-gradient-to-r from-cyan-500/60 to-emerald-500/60" />
+                                <span className="text-[10px] text-emerald-400/90">5–15 min</span>
+                                <div className="flex-1 h-0.5 sm:h-1 min-w-[40px] rounded-full bg-gradient-to-r from-emerald-500/60 to-emerald-400/40" />
+                                <span className="text-[10px] sm:text-xs text-slate-500 font-medium">03</span>
+                            </div>
                             <p className="text-center text-xs text-slate-500 mb-6 px-2">
                                 {t('landing_how_benefit' as never)}
                             </p>
