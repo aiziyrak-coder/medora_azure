@@ -118,6 +118,9 @@ const AppContent: React.FC = () => {
     const [tvModeDoctorId, setTvModeDoctorId] = useState<string | null>(null);
     const historyFromPopstateRef = useRef(false);
 
+    // i18n — must be before any effect that uses language/t
+    const { t, language, setLanguage } = useTranslation();
+
     // Brauzer orqaga: SPA ichida qolish, platformadan chiqib ketmaslik
     useEffect(() => {
         if (historyFromPopstateRef.current) {
@@ -242,9 +245,6 @@ const AppContent: React.FC = () => {
             setDashboardStats(caseService.getDashboardStats(history));
         });
     }, [currentUser, language]);
-
-    // i18n
-    const { t, language, setLanguage } = useTranslation();
 
     // Core Analysis State
     const [patientData, setPatientData] = useState<PatientData | null>(null);
