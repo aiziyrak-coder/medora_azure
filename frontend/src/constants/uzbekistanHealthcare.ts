@@ -40,7 +40,7 @@ export function getUzbekistanContextForAI(language: 'uz-L' | 'uz-C' | 'ru' | 'en
     language === 'en'
       ? 'UZBEKISTAN HEALTHCARE CONTEXT (mandatory for all recommendations):'
       : language === 'ru'
-        ? 'РљРћРќРўР•РљРЎРў РЈР-Р'Р•РљРРЎРўРђРќРђ (РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ РґР»СЏ РІСЃРµС… СЂРµРєРѕРјРµРЅРґР°С†РёР№):'
+        ? '\u041A\u041E\u041D\u0422\u0415\u041A\u0421\u0422 \u0423\u0437\u0431\u0435\u043A\u0438\u0441\u0442\u0430\u043D\u0430 (\u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u043E \u0434\u043B\u044F \u0432\u0441\u0435\u0445 \u0440\u0435\u043A\u043E\u043C\u0435\u043D\u0434\u0430\u0446\u0438\u0439):'
         : language === 'kaa'
           ? 'Г"ZBEKISTAN SOG\'LIQ KONTEKSTI (barlД±q maslahatlar ushД±n majbГєri):'
           : 'O\'ZBEKISTON SOG\'LIQNI SAQLASH KONTEKSTI (barcha tavsiyalar uchun majburiy):';

@@ -214,7 +214,7 @@ export const ZiyrakInteractive: React.FC<Props> = ({
           <div>
             <p className="font-semibold text-white text-sm">Ziyrak</p>
             <p className={`text-xs ${isListening ? "text-emerald-400" : isThinking ? "text-amber-400" : "text-slate-500"}`}>
-              {isListening ? "рџЋ™ Eshitmoqda" : isThinking ? "рџ'­ O'ylayapti" : "Tayyor"}
+              {isListening ? "Eshitmoqda" : isThinking ? "O'ylayapti" : "Tayyor"}
             </p>
           </div>
         </div>
@@ -225,7 +225,7 @@ export const ZiyrakInteractive: React.FC<Props> = ({
               className={`px-3 py-1 rounded-lg text-xs font-medium ${
                 outputMode === mode ? "bg-sky-600 text-white" : "text-slate-400"
               }`}>
-              {mode === "voice" ? "рџ"Љ Ovozli" : "рџ"ќ Matnli"}
+              {mode === "voice" ? "Ovozli" : "Matnli"}
             </button>
           ))}
         </div>
@@ -262,7 +262,7 @@ export const ZiyrakInteractive: React.FC<Props> = ({
               <p className="text-xs opacity-40 mt-1 text-right">{msg.time}</p>
             </div>
             {msg.role === 'user' && (
-              <span className="w-6 h-6 rounded-full bg-slate-600 flex items-center justify-center text-xs shrink-0 mt-0.5">рџ'Ё-Ќвљ•пёЏ</span>
+              <span className="w-6 h-6 rounded-full bg-slate-600 flex items-center justify-center text-xs shrink-0 mt-0.5"></span>
             )}
           </div>
         ))}
@@ -287,7 +287,7 @@ export const ZiyrakInteractive: React.FC<Props> = ({
                   ? "bg-red-600 text-white animate-pulse"
                   : "bg-sky-600 hover:bg-sky-500 text-white"
               } disabled:opacity-40`}>
-              {isListening ? "рџ"ґ Eshitmoqda..." : "рџЋ™ Savol Berish"}
+              {isListening ? "Eshitmoqda..." : "Savol Berish"}
             </button>
           </div>
           <div className="flex gap-2">
