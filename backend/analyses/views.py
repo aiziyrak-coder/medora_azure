@@ -29,7 +29,7 @@ class AnalysisRecordViewSet(viewsets.ModelViewSet):
         elif self.action in ['update', 'partial_update']:
             return AnalysisRecordUpdateSerializer
         return AnalysisRecordSerializer
-    
+
     def get_queryset(self):
         user = self.request.user
         queryset = AnalysisRecord.objects.select_related('patient', 'created_by', 'patient__created_by')

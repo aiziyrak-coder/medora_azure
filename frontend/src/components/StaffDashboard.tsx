@@ -18,7 +18,7 @@ import QRCode from 'qrcode'; // Import QR library
 import { useTranslation } from '../hooks/useTranslation';
 import LanguageSwitcher from './LanguageSwitcher';
 import { logger } from '../utils/logger';
-import { INSTITUTE_NAME_SHORT } from '../constants/brand';
+import { INSTITUTE_NAME_SHORT, INSTITUTE_LOGO_SRC } from '../constants/brand';
 
 interface StaffDashboardProps {
     user: User;
@@ -260,7 +260,8 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ user, onLogout }) => {
             {/* Header */}
             <div className="p-5 flex justify-between items-center safe-top bg-black/20 backdrop-blur-md">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold">
+                    <img src={INSTITUTE_LOGO_SRC} alt={INSTITUTE_NAME_SHORT} className="w-10 h-10 rounded-full object-contain bg-white/5 flex-shrink-0" />
+                    <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold flex-shrink-0">
                         {user.name.charAt(0)}
                     </div>
                     <div>

@@ -1,4 +1,4 @@
-# Frontend ishlamasa — Node.js o'rnatish
+# Frontend ishlamasa  -  Node.js o'rnatish
 
 Frontend **npm** va **Node.js** talab qiladi. Agar `npm run dev` ishlamasa yoki "npm topilmadi" xabari chiqsa, quyidagilarni bajarishingiz kerak.
 
@@ -10,7 +10,7 @@ Frontend **npm** va **Node.js** talab qiladi. Agar `npm run dev` ishlamasa yoki 
    - **LTS** versiyasini tanlang (masalan, 20.x yoki 22.x).
 
 2. **O'rnatish** paytida quyidagilarni belgilang:
-   - **"Add to PATH"** — belgilangan bo'lsin (Node va npm global PATH ga qo'shiladi).
+   - **"Add to PATH"**  -  belgilangan bo'lsin (Node va npm global PATH ga qo'shiladi).
 
 3. O'rnatish tugagach **kompyuterni qayta ishga tushiring** yoki yangi terminal/PowerShell oching.
 

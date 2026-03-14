@@ -7,7 +7,7 @@ import PlusCircleIcon from './icons/PlusCircleIcon';
 import LightBulbIcon from './icons/LightBulbIcon';
 import UsersIcon from './icons/UsersIcon';
 import { useTranslation } from '../hooks/useTranslation';
-import { INSTITUTE_NAME_FULL, INSTITUTE_NAME_SHORT } from '../constants/brand';
+import { INSTITUTE_NAME_FULL, INSTITUTE_NAME_SHORT, INSTITUTE_LOGO_SRC } from '../constants/brand';
 
 interface UserGuideProps {
     onBack: () => void;
@@ -167,7 +167,7 @@ const UserGuide: React.FC<UserGuideProps> = ({ onBack }) => {
             <div className="border-b border-white/10 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold">M</div>
+                        <img src={INSTITUTE_LOGO_SRC} alt={INSTITUTE_NAME_SHORT} className="w-8 h-8 rounded-lg object-contain bg-white/5" />
                         <span className="font-bold text-lg">{INSTITUTE_NAME_SHORT} Dokumentatsiya</span>
                     </div>
                     <button onClick={onBack} className="flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors">

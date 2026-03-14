@@ -9,8 +9,8 @@ Ushbu qo'llanma **Digital Ocean serverida** dasturni deploy qilish uchun **siz q
 ✅ Kod GitHub'ga push qilingan: https://github.com/aiziyrak-coder/AiDoktorai  
 ✅ Server IP va SSH access mavjud  
 ✅ Domenlar sozlangan:
-   - `AiDoktor.fargana.uz` → Frontend
-   - `AiDoktorapi.fargana.uz` → Backend
+   - `AiDoktor.fargana.uz`  ->  Frontend
+   - `AiDoktorapi.fargana.uz`  ->  Backend
 
 ---
 
@@ -325,8 +325,8 @@ systemctl reload nginx
 Digital Ocean DNS panelida yoki domen provayderingizda:
 
 **A Records:**
-- `AiDoktor.fargana.uz` → Server IP
-- `AiDoktorapi.fargana.uz` → Server IP
+- `AiDoktor.fargana.uz`  ->  Server IP
+- `AiDoktorapi.fargana.uz`  ->  Server IP
 
 ---
 

@@ -273,7 +273,7 @@ class ActiveSession(models.Model):
 
 class QueueItem(models.Model):
     """
-    Shifokor navbati вЂ” barcha qurilmalarda bir xil (telefon/kompyuter sinxron).
+    Shifokor navbati  -  barcha qurilmalarda bir xil (telefon/kompyuter sinxron).
     Registrator yoki shifokor qo'shadi; shifokor ko'radi va boshqaradi.
     """
     STATUS_CHOICES = [

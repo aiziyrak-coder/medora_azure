@@ -20,11 +20,11 @@
 - [ ] Brauzerda: https://AiDoktor.fargana.uz ochilishi, login/register ishlashi
 
 ## Foydalanuvchi tajribasi
-- [x] Brauzer orqaga – SPA ichida qoladi
-- [x] Parol maydoni – ko‘rsatish/yashirish tugmasi
-- [x] Label va ogohlantirish matnlari – kontrast (o‘qilishi oson)
+- [x] Brauzer orqaga  -  SPA ichida qoladi
+- [x] Parol maydoni  -  ko‘rsatish/yashirish tugmasi
+- [x] Label va ogohlantirish matnlari  -  kontrast (o‘qilishi oson)
 - [x] Tailwind: text-primary / text-secondary (ranglar ishlashi)
-- [x] Gemini xato – foydalanuvchiga tushunarli xabar (server yo‘li yashirin)
+- [x] Gemini xato  -  foydalanuvchiga tushunarli xabar (server yo‘li yashirin)
 
 ## Ixtiyoriy (keyingi qadamlar)
 - [ ] Error tracking (masalan Sentry)

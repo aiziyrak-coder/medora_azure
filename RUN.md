@@ -1,4 +1,4 @@
-# AiDoktorAI — Backend 8000, Frontend 3000 da ishga tushirish
+# AiDoktorAI  -  Backend 8000, Frontend 3000 da ishga tushirish
 
 ## Birinchi marta sozlash
 
@@ -32,13 +32,13 @@ cd E:\AiDoktorai
 Backend **8000**, frontend **3000** portda ochiladi (ikkita yangi PowerShell oynasi).
 
 ### Variant 2: Alohida terminalda
-**Terminal 1 – Backend:**
+**Terminal 1  -  Backend:**
 ```powershell
 cd E:\AiDoktorai
 .\run-backend.ps1
 ```
 
-**Terminal 2 – Frontend:**
+**Terminal 2  -  Frontend:**
 ```powershell
 cd E:\AiDoktorai
 .\run-frontend.ps1

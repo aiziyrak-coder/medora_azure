@@ -134,12 +134,12 @@ npm run dev
 ## 3. Integration Test
 
 ### 3.1 Full Flow Test
-1. **Register** → Token oling
-2. **Login** → Token yangilanishi
-3. **Patient yaratish** → Backend'ga saqlanishi
-4. **Analysis yaratish** → Backend'ga saqlanishi
-5. **Report ko'rish** → Backend'dan olinishi
-6. **Logout** → Token tozalanishi
+1. **Register**  ->  Token oling
+2. **Login**  ->  Token yangilanishi
+3. **Patient yaratish**  ->  Backend'ga saqlanishi
+4. **Analysis yaratish**  ->  Backend'ga saqlanishi
+5. **Report ko'rish**  ->  Backend'dan olinishi
+6. **Logout**  ->  Token tozalanishi
 
 ### 3.2 Error Handling Test
 - [ ] Network xatolik (backend o'chirilganda) - fallback ishlaydi

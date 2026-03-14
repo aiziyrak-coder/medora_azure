@@ -25,7 +25,7 @@ nano /var/www/AiDoktorai/.env.production
 
 ---
 
-## 3. Backend (Django) – qayta ishga tushiring
+## 3. Backend (Django)  -  qayta ishga tushiring
 
 ```bash
 cd /var/www/AiDoktorai/backend
@@ -37,7 +37,7 @@ sudo systemctl restart gunicorn
 
 ---
 
-## 4. Frontend – qayta build qiling
+## 4. Frontend  -  qayta build qiling
 
 ```bash
 cd /var/www/AiDoktorai/frontend
@@ -50,10 +50,10 @@ npm run build
 ## 5. Brauzerda tekshirish
 
 - https://AiDoktor.fargana.uz ni yangilang (**Ctrl+Shift+R**).
-- Yangi konsilium boshlang: bemor ma’lumoti → Tahlil boshlash.
+- Yangi konsilium boshlang: bemor ma’lumoti  ->  Tahlil boshlash.
 - Aniqlashtiruvchi savollar kasallik/sholatga mos chiqishi, tavsiya etilgan mutaxassislar va differensial tashxislar haqiqiy (mock emas) bo‘lishi kerak.
 
 ---
 
-**Xulosa:** Git pull → .env da GEMINI_API_KEY tekshirish → backend restart → frontend build. Boshqa hech narsa serverda qilish shart emas.
+**Xulosa:** Git pull  ->  .env da GEMINI_API_KEY tekshirish  ->  backend restart  ->  frontend build. Boshqa hech narsa serverda qilish shart emas.
 -NoNewline

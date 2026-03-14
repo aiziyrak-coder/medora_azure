@@ -1,4 +1,4 @@
-# AiDoktorAI — Real Bozorga Chiqish: Barcha Muammolar va Yechimlar
+# AiDoktorAI  -  Real Bozorga Chiqish: Barcha Muammolar va Yechimlar
 
 Ushbu hujjat **real bozorga chiqishda** duch kelishi mumkin bo'lgan **barcha muammolar, to'siqlar, qiyinchiliklar va xatoliklarni** hal qilish uchun qilingan o'zgarishlar va tavsiyalar.
 
@@ -9,12 +9,12 @@ Ushbu hujjat **real bozorga chiqishda** duch kelishi mumkin bo'lgan **barcha mua
 ### 1.1 ✅ Qilingan o'zgarishlar
 
 #### Rate Limiting
-- **Middleware:** `RateLimitMiddleware` — IP asosida 100 so'rov/minut
+- **Middleware:** `RateLimitMiddleware`  -  IP asosida 100 so'rov/minut
 - **DRF Throttle:** `anon: 100/hour`, `user: 1000/hour`
 - **Cache-based:** Redis yoki local memory cache
 
 #### Security Headers
-- **Middleware:** `SecurityHeadersMiddleware` — barcha response'larga:
+- **Middleware:** `SecurityHeadersMiddleware`  -  barcha response'larga:
   - `X-Content-Type-Options: nosniff`
   - `X-Frame-Options: DENY`
   - `X-XSS-Protection: 1; mode=block`
@@ -26,7 +26,7 @@ Ushbu hujjat **real bozorga chiqishda** duch kelishi mumkin bo'lgan **barcha mua
 - **Filename sanitization:** directory traversal himoyasi
 
 #### Input Validation
-- **Validators:** `accounts/validators.py` — telefon, ism, fayl validatsiyasi
+- **Validators:** `accounts/validators.py`  -  telefon, ism, fayl validatsiyasi
 - **Sanitization:** filename va input sanitization
 
 #### HTTPS va Cookie Security
@@ -55,7 +55,7 @@ Ushbu hujjat **real bozorga chiqishda** duch kelishi mumkin bo'lgan **barcha mua
 - **Composite indexes:** `created_by + created_at`, `patient + created_at`
 
 #### Caching
-- **Redis cache:** `django-redis` — stats, rate limiting, usage counters
+- **Redis cache:** `django-redis`  -  stats, rate limiting, usage counters
 - **Cache timeout:** 5 daqiqa (stats), 60 soniya (rate limit)
 - **Fallback:** Local memory cache (Redis yo'q bo'lsa)
 
@@ -64,7 +64,7 @@ Ushbu hujjat **real bozorga chiqishda** duch kelishi mumkin bo'lgan **barcha mua
 - **PostgreSQL options:** `statement_timeout=30000`
 
 #### Request Logging
-- **Middleware:** `RequestLoggingMiddleware` — 1 soniyadan sekin so'rovlarni log qiladi
+- **Middleware:** `RequestLoggingMiddleware`  -  1 soniyadan sekin so'rovlarni log qiladi
 - **Log files:** `logs/django.log`, `logs/django_errors.log`
 - **Rotation:** 10MB, 5 ta backup
 
@@ -91,7 +91,7 @@ Ushbu hujjat **real bozorga chiqishda** duch kelishi mumkin bo'lgan **barcha mua
 - **GET /health/detailed/:** Database va cache tekshiruvi
 
 #### Error Boundaries (Frontend)
-- **ErrorBoundary component:** React error boundary — xatoliklarni tutadi va foydalanuvchiga ko'rsatadi
+- **ErrorBoundary component:** React error boundary  -  xatoliklarni tutadi va foydalanuvchiga ko'rsatadi
 - **Error tracking:** Production'da Sentry yoki boshqa xizmatga yuborish mumkin
 
 #### API Retry Logic
@@ -148,12 +148,12 @@ Ushbu hujjat **real bozorga chiqishda** duch kelishi mumkin bo'lgan **barcha mua
 
 #### Subscription Management
 - **Trial:** Yangi shifokorlar uchun 7 kunlik trial
-- **Expiry check:** `check_subscription_expiry` command — tugagan obunalarni inactive qiladi
-- **Usage limits:** `max_analyses_per_month` — oylik limit tekshiruvi
+- **Expiry check:** `check_subscription_expiry` command  -  tugagan obunalarni inactive qiladi
+- **Usage limits:** `max_analyses_per_month`  -  oylik limit tekshiruvi
 
 #### Payment Verification
 - **Receipt validation:** Fayl hajmi, turi, format tekshiruvi
-- **Payment record:** `SubscriptionPayment` — barcha to'lovlar yoziladi
+- **Payment record:** `SubscriptionPayment`  -  barcha to'lovlar yoziladi
 - **Admin approval:** Admin panel orqali tasdiqlash
 
 ### 5.2 ⚠️ Qo'shimcha tavsiyalar
@@ -179,7 +179,7 @@ Ushbu hujjat **real bozorga chiqishda** duch kelishi mumkin bo'lgan **barcha mua
 - **Data export:** Foydalanuvchi ma'lumotlarini eksport qilish
 
 #### Medical Data Compliance
-- **Disclaimer:** "Tibbiy maslahat o'rniga bormaydi" — barcha hisobotlarda
+- **Disclaimer:** "Tibbiy maslahat o'rniga bormaydi"  -  barcha hisobotlarda
 - **Audit trail:** Barcha o'zgarishlar log qilinishi
 - **Access control:** Faqat authorized foydalanuvchilar kirishi
 
@@ -211,7 +211,7 @@ Ushbu hujjat **real bozorga chiqishda** duch kelishi mumkin bo'lgan **barcha mua
 ### 8.1 ✅ Qilingan o'zgarishlar
 
 #### Error Handling
-- **ErrorBoundary:** React error boundary — xatoliklarni tutadi
+- **ErrorBoundary:** React error boundary  -  xatoliklarni tutadi
 - **API retry:** Network xatoliklari uchun exponential backoff
 - **Graceful degradation:** API mavjud bo'lmasa local storage'ga fallback
 
@@ -240,13 +240,13 @@ Ushbu hujjat **real bozorga chiqishda** duch kelishi mumkin bo'lgan **barcha mua
 
 ### 9.2 Environment Variables
 - [ ] `DEBUG=False`
-- [ ] `SECRET_KEY` — yangi, kuchli kalit
-- [ ] `ALLOWED_HOSTS` — faqat o'z domeningiz
-- [ ] `CORS_ALLOWED_ORIGINS` — faqat frontend domeni
-- [ ] `DB_*` — PostgreSQL ma'lumotlari
-- [ ] `GEMINI_API_KEY` — API kaliti
+- [ ] `SECRET_KEY`  -  yangi, kuchli kalit
+- [ ] `ALLOWED_HOSTS`  -  faqat o'z domeningiz
+- [ ] `CORS_ALLOWED_ORIGINS`  -  faqat frontend domeni
+- [ ] `DB_*`  -  PostgreSQL ma'lumotlari
+- [ ] `GEMINI_API_KEY`  -  API kaliti
 - [ ] `TELEGRAM_BOT_TOKEN` va `TELEGRAM_PAYMENT_GROUP_ID`
-- [ ] `REDIS_URL` — Redis connection string
+- [ ] `REDIS_URL`  -  Redis connection string
 
 ### 9.3 Database
 - [ ] Migratsiyalar: `python manage.py migrate`
@@ -335,10 +335,10 @@ Ushbu hujjat **real bozorga chiqishda** duch kelishi mumkin bo'lgan **barcha mua
 ## 12. Documentation
 
 ### 12.1 ✅ Mavjud hujjatlar
-- `PRODUCTION_READINESS.md` — Production deploy qo'llanmasi
-- `SUBSCRIPTION_SAAS.md` — Obuna funksiyasi
-- `API_CONNECTION.md` — API ulanish
-- `INTEGRATION.md` — Frontend-backend integratsiya
+- `PRODUCTION_READINESS.md`  -  Production deploy qo'llanmasi
+- `SUBSCRIPTION_SAAS.md`  -  Obuna funksiyasi
+- `API_CONNECTION.md`  -  API ulanish
+- `INTEGRATION.md`  -  Frontend-backend integratsiya
 
 ### 12.2 ⚠️ Qo'shish kerak
 - **API Documentation:** Swagger/OpenAPI allaqachon mavjud (`/swagger/`)
@@ -364,5 +364,5 @@ Ushbu hujjat **real bozorga chiqishda** duch kelishi mumkin bo'lgan **barcha mua
 - ⚠️ Payment gateway integratsiyasi (ixtiyoriy)
 - ⚠️ Email/SMS notifications (ixtiyoriy)
 
-Dastur **real bozorga chiqishga tayyor** — asosiy xavfsizlik, performance va error handling barcha qilingan!
+Dastur **real bozorga chiqishga tayyor**  -  asosiy xavfsizlik, performance va error handling barcha qilingan!
 -NoNewline

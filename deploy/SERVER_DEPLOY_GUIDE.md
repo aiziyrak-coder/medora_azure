@@ -80,7 +80,7 @@ ALLOWED_HOSTS=localhost,127.0.0.1,AiDoktorapi.fargana.uz,AiDoktor.fargana.uz,AiD
 CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://AiDoktor.fargana.uz,https://AiDoktorapi.fargana.uz
 ```
 
-Saqlash: `Ctrl+O` → `Enter` → `Ctrl+X`
+Saqlash: `Ctrl+O`  ->  `Enter`  ->  `Ctrl+X`
 
 #### 3. Virtual Environment Faollashtirish
 ```bash
@@ -338,7 +338,7 @@ Har bir deploy dan keyin tekshiring:
 - [ ] Migrations bajarildi
 - [ ] Gunicorn restart edildi
 - [ ] Nginx reload qilindi
-- [ ] Health check: `http://127.0.0.1:8001/health/` → HTTP 200
+- [ ] Health check: `http://127.0.0.1:8001/health/`  ->  HTTP 200
 - [ ] HTTPS orqali test: `https://AiDoktorapi.fargana.uz/`
 - [ ] Admin panel: `https://AiDoktorapi.fargana.uz/admin/`
 - [ ] Frontend ulandi: `https://AiDoktor.fargana.uz/`

@@ -147,7 +147,7 @@ export const generatePdfReport = (
     doc.setFont(PDF_FONT, 'normal');
     doc.setFontSize(10);
     doc.setTextColor(80, 80, 80);
-    doc.text("Tibbiy maslahat hujjati — doktor tavsiyasi sifatida. Faqat ma'lumot uchun.", margin, y);
+    doc.text("Tibbiy maslahat hujjati - doktor tavsiyasi sifatida. Faqat ma'lumot uchun.", margin, y);
     y += LINE_HEIGHT + 6;
 
     addSectionTitle("Bemor Ma'lumotlari");
@@ -177,7 +177,7 @@ export const generatePdfReport = (
 
     addSectionTitle("Eng Ehtimolli Tashxis(lar)");
     normalizeConsensusDiagnosis(report.consensusDiagnosis).forEach(diag => {
-        const pct = Number.isFinite(diag.probability) ? `${diag.probability}%` : '—';
+        const pct = Number.isFinite(diag.probability) ? `${diag.probability}%` : '-';
         addKeyValue("Tashxis", `${diag.name} (${pct})`);
         addKeyValue("Dalillilik Darajasi", diag.evidenceLevel || "N/A");
         addKeyValue("Asoslash", diag.justification);
@@ -228,7 +228,7 @@ export const generatePdfReport = (
         if (typeof t === 'string') return t;
         if (t && typeof t === 'object') {
             const o = t as Record<string, unknown>;
-            return [o.testName ?? o.name ?? o.test, o.reason, o.urgency].filter(Boolean).map(String).join(' — ') || JSON.stringify(t);
+            return [o.testName ?? o.name ?? o.test, o.reason, o.urgency].filter(Boolean).map(String).join(' - ') || JSON.stringify(t);
         }
         return String(t ?? '');
     };
@@ -392,7 +392,7 @@ export const generateSpecialistConclusionPdf = (
     doc.setFontSize(11);
     doc.setFont(PDF_FONT, 'normal');
     doc.setTextColor(40, 40, 40);
-    const textToSplit = content || '—';
+    const textToSplit = content || '-';
     const splitText = doc.splitTextToSize(textToSplit, pageWidth - margin * 2);
     splitText.forEach((line: string) => {
         if (y > pageHeight - margin - FOOTER_RESERVE) {
@@ -405,7 +405,7 @@ export const generateSpecialistConclusionPdf = (
 
     doc.setFontSize(9);
     doc.setTextColor(90, 90, 90);
-    doc.text("Tibbiy maslahat hujjati — faqat ma'lumot uchun. Professional tibbiy maslahat o'rnini bosa olmaydi.", margin, pageHeight - 14);
+    doc.text("Tibbiy maslahat hujjati - faqat ma'lumot uchun. Professional tibbiy maslahat o'rnini bosa olmaydi.", margin, pageHeight - 14);
 
     const name = (fileName || specialistDisplayName).replace(/\s+/g, '_').replace(/[^\w\-_.]/g, '');
     doc.save(`${name}_xulosa.pdf`);

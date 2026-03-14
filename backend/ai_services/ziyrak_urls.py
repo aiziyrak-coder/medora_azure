@@ -1,4 +1,4 @@
-"""Farg'ona JSTI Ziyrak URL patterns вЂ” /api/ziyrak/*"""
+"""Farg'ona JSTI Ziyrak URL patterns  -  /api/ziyrak/*"""
 from django.urls import path
 from .ziyrak_views import (
     session_create, session_end, session_info,

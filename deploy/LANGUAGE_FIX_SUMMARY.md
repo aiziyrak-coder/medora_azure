@@ -117,10 +117,10 @@ All user-facing text is now translated:
 ## 🧪 Testing
 
 ### Test Scenarios
-1. **Switch to Russian** → All text displays in Russian ✅
-2. **Switch to Uzbek Cyrillic** → All text displays in Uzbek Cyrillic ✅
-3. **AI Errors** → Proper translations shown ✅
-4. **Validation Errors** → Localized messages ✅
+1. **Switch to Russian**  ->  All text displays in Russian ✅
+2. **Switch to Uzbek Cyrillic**  ->  All text displays in Uzbek Cyrillic ✅
+3. **AI Errors**  ->  Proper translations shown ✅
+4. **Validation Errors**  ->  Localized messages ✅
 
 ### Verified Endpoints
 - `/api/ai/clarifying-questions/` - Error messages translated ✅

@@ -139,7 +139,7 @@ All scripts are located in `deploy/` directory:
 - ✅ Robust JSON parsing with multiple fallback strategies
 - ✅ Comprehensive logging for production debugging
 - ✅ Type-safe error handling
-- ✅ Clean separation of concerns (service → UI translation)
+- ✅ Clean separation of concerns (service  ->  UI translation)
 
 ---
 

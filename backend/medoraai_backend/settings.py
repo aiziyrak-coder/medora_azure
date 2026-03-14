@@ -29,7 +29,7 @@ if not DEBUG and SECRET_KEY == _default_secret:
         'Generate one with: python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"'
     )
 
-# ALLOWED_HOSTS: serverni .env/systemd override qilishini bekor qilish вЂ” faqat *
+# ALLOWED_HOSTS: serverni .env/systemd override qilishini bekor qilish  -  faqat *
 ALLOWED_HOSTS = ['*', 'medora.cdcgroup.uz', 'medoraapi.cdcgroup.uz', 'localhost', '127.0.0.1']
 
 # Application definition
@@ -361,7 +361,7 @@ else:
         }
     }
 
-# Logging Configuration вЂ” file handlers only if logs dir exists and is writable (avoid startup crash)
+# Logging Configuration  -  file handlers only if logs dir exists and is writable (avoid startup crash)
 _LOGS_DIR = BASE_DIR / 'logs'
 def _logs_writable():
     try:

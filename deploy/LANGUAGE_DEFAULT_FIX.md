@@ -85,12 +85,12 @@ const setLanguage = (newLanguage: Language) => {
 ## 🎯 How It Works
 
 ### First-Time Users (After Update)
-1. User visits site → Checks localStorage → No preference found
+1. User visits site  ->  Checks localStorage  ->  No preference found
 2. System defaults to **Uzbek Latin (uz-L)**
 3. User sees all text in Uzbek ✅
 
 ### Previous Russian Users (Migration)
-1. User visits site → Checks localStorage → Finds `'ru'`
+1. User visits site  ->  Checks localStorage  ->  Finds `'ru'`
 2. **Migration triggers**: Clears Russian setting
 3. Returns **Uzbek Latin (uz-L)** as default
 4. User sees all text in Uzbek ✅
@@ -179,9 +179,9 @@ User Visits Site
     ↓
 Check localStorage['preferred_language']
     ↓
-Is it 'ru'? → YES → Remove it → Return 'uz-L'
+Is it 'ru'?  ->  YES  ->  Remove it  ->  Return 'uz-L'
     ↓ NO
-Is it valid? → YES → Return saved value
+Is it valid?  ->  YES  ->  Return saved value
     ↓ NO
 Return 'uz-L' (default)
 ```

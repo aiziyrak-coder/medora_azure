@@ -3,21 +3,21 @@ Farg'ona JSTI Jarvis API Views
 ========================
 Endpoint'lar:
 
-  POST /api/ZIYRAK/session/create/       в†’ Yangi sessiya ochish
-  POST /api/ZIYRAK/session/<id>/end/     в†’ Sessiyani yopish
-  GET  /api/ZIYRAK/session/<id>/info/    в†’ Sessiya ma'lumoti
+  POST /api/ZIYRAK/session/create/        ->  Yangi sessiya ochish
+  POST /api/ZIYRAK/session/<id>/end/      ->  Sessiyani yopish
+  GET  /api/ZIYRAK/session/<id>/info/     ->  Sessiya ma'lumoti
 
-  POST /api/ZIYRAK/speech/token/         в†’ Azure Speech SDK tokeni
-  POST /api/ZIYRAK/speech/stt/           в†’ Audio в†’ matn (batch)
-  POST /api/ZIYRAK/speech/tts/           в†’ Matn в†’ MP3 audio (base64)
+  POST /api/ZIYRAK/speech/token/          ->  Azure Speech SDK tokeni
+  POST /api/ZIYRAK/speech/stt/            ->  Audio  ->  matn (batch)
+  POST /api/ZIYRAK/speech/tts/            ->  Matn  ->  MP3 audio (base64)
 
-  POST /api/ZIYRAK/transcript/add/       в†’ Transkript bo'lagini saqlash
-  GET  /api/ZIYRAK/transcript/<id>/      в†’ To'liq transkriptni olish
+  POST /api/ZIYRAK/transcript/add/        ->  Transkript bo'lagini saqlash
+  GET  /api/ZIYRAK/transcript/<id>/       ->  To'liq transkriptni olish
 
-  POST /api/ZIYRAK/chat/                 в†’ Interaktiv chat (sync)
-  POST /api/ZIYRAK/chat/stream/          в†’ Interaktiv chat (SSE stream)
+  POST /api/ZIYRAK/chat/                  ->  Interaktiv chat (sync)
+  POST /api/ZIYRAK/chat/stream/           ->  Interaktiv chat (SSE stream)
 
-  POST /api/ZIYRAK/diagnosis/            в†’ Konsultatsiya tashxisi (yakunida)
+  POST /api/ZIYRAK/diagnosis/             ->  Konsultatsiya tashxisi (yakunida)
 """
 
 import json

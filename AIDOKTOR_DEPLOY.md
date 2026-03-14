@@ -8,7 +8,7 @@
 - **Commit:** abcfb1c
 - **Branch:** main
 - **Files Changed:** 351 files
-- **Rebrand:** MEDORA AI → AiDoktor
+- **Rebrand:** MEDORA AI  ->  AiDoktor
 
 ---
 
@@ -50,7 +50,7 @@ Javob:
 ### **Backend:**
 - ✅ settings.py: ALLOWED_HOSTS yangilandi
 - ✅ .env: GEMINI_API_KEY va boshqa sozlamalar
-- ✅ Barcha Python fayllarida "MEDORA" → "AiDoktor"
+- ✅ Barcha Python fayllarida "MEDORA"  ->  "AiDoktor"
 - ✅ Middleware va URL konfiguratsiyalari
 
 ### **Frontend:**
@@ -70,10 +70,10 @@ Javob:
 
 ## 🎨 Brending Qaerda Yangilandi:
 
-1. **Loyiha nomi:** MEDORA AI → **AiDoktor**
-2. **Tashkilot:** CDC Group → **Farg'ona Jamoat Salomatligi Tibbiyot Instituti**
-3. **Domenlar:** cdcgroup.uz → **fargana.uz**
-4. **API:** medoraapi → **api**
+1. **Loyiha nomi:** MEDORA AI  ->  **AiDoktor**
+2. **Tashkilot:** CDC Group  ->  **Farg'ona Jamoat Salomatligi Tibbiyot Instituti**
+3. **Domenlar:** cdcgroup.uz  ->  **fargana.uz**
+4. **API:** medoraapi  ->  **api**
 5. **Logotiplar:**Barcha iconlarda AiDoktor stili
 6. **Hujjatlar:**Barcha README va qo'llanmalar
 

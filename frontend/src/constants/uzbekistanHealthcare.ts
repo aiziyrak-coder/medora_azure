@@ -6,13 +6,13 @@
 /** SSV va qonunchilik haqida qisqacha */
 export const UZBEKISTAN_HEALTHCARE_CONTEXT = {
   legislation: [
-    "O'zbekiston Respublikasining В«Sog'liqni saqlash to'g'risidaВ» Qonuni  -  barcha tibbiy faoliyat ushbu qonun asosida amalga oshiriladi.",
+    "O'zbekiston Respublikasining \"Sog'liqni saqlash to'g'risida\" Qonuni  -  barcha tibbiy faoliyat ushbu qonun asosida amalga oshiriladi.",
     "SSV (Sog'liqni Saqlash Vazirligi) buyruqlari va qarorlari  -  davolash yordami standartlari va klinik protokollar SSV tomonidan tasdiqlanadi.",
     "Tibbiy xizmatlar ko'rsatilishi, retsept yozish, davolash rejalari SSV tasdiqlangan klinik protokollarga muvofiq bo'lishi shart.",
   ],
   clinicalProtocols: [
     "SSV 2024 yil tasdiqlangan milliy klinik protokollar (110+ nozologiya): arterial gipertenziya, surunkali yurak ishemik kasalligi, bronxial astma, O'OBB, qandli diabet 1 va 2-tur, virusli gepatit B va C, jigar sirrozi, antenatal parvarish va boshqalar.",
-    "Tashxis va davolash rejasi SSV klinik protokoliga mos kelishi kerak; protokol raqami yoki yo'nalishi (masalan: В«Arterial gipertenziya bo'yicha SSV klinik protokoliga muvofiqВ») keltirilishi ma'qul.",
+    "Tashxis va davolash rejasi SSV klinik protokoliga mos kelishi kerak; protokol raqami yoki yo'nalishi (masalan: \"Arterial gipertenziya bo'yicha SSV klinik protokoliga muvofiq\") keltirilishi ma'qul.",
     "ICD-10 O'zbekistonda qo'llaniladi  -  tashxislar xalqaro ICD-10 kodlari bilan ifodalanishi mumkin.",
   ],
   drugsAndPharmacy: [
@@ -29,8 +29,8 @@ export const UZBEKISTAN_HEALTHCARE_CONTEXT = {
 } as const;
 
 /** AI uchun bitta matnli kontekst (promptga qo'shish uchun) */
-export function getUzbekistanContextForAI(language: 'uz-L' | 'uz-C' | 'ru' | 'en' | 'kaa'): string {
-  const sep = '\n· ';
+export function getUzbekistanContextForAI(language: 'uz-L' | 'uz-C' | 'ru' | 'en'): string {
+  const sep = '\n- ';
   const legislation = UZBEKISTAN_HEALTHCARE_CONTEXT.legislation.join(sep);
   const protocols = UZBEKISTAN_HEALTHCARE_CONTEXT.clinicalProtocols.join(sep);
   const drugs = UZBEKISTAN_HEALTHCARE_CONTEXT.drugsAndPharmacy.join(sep);
@@ -41,9 +41,7 @@ export function getUzbekistanContextForAI(language: 'uz-L' | 'uz-C' | 'ru' | 'en
       ? 'UZBEKISTAN HEALTHCARE CONTEXT (mandatory for all recommendations):'
       : language === 'ru'
         ? '\u041A\u041E\u041D\u0422\u0415\u041A\u0421\u0422 \u0423\u0437\u0431\u0435\u043A\u0438\u0441\u0442\u0430\u043D\u0430 (\u043E\u0431\u044F\u0437\u0430\u0442\u0435\u043B\u044C\u043D\u043E \u0434\u043B\u044F \u0432\u0441\u0435\u0445 \u0440\u0435\u043A\u043E\u043C\u0435\u043D\u0434\u0430\u0446\u0438\u0439):'
-        : language === 'kaa'
-          ? 'Г"ZBEKISTAN SOG\'LIQ KONTEKSTI (barlД±q maslahatlar ushД±n majbГєri):'
-          : 'O\'ZBEKISTON SOG\'LIQNI SAQLASH KONTEKSTI (barcha tavsiyalar uchun majburiy):';
+        : 'O\'ZBEKISTON SOG\'LIQNI SAQLASH KONTEKSTI (barcha tavsiyalar uchun majburiy):';
 
   return `${intro}
 1) Qonunchilik:${sep}${legislation}

@@ -32,7 +32,6 @@ interface AnalysisViewProps {
     onInjectHypothesis: (hypothesis: Diagnosis) => void;
     onUserIntervention: (intervention: string) => void;
     onExplainRationale: (message: ChatMessageProps) => void;
-    onGoToEducation: () => void;
     onRunScenario: (scenario: string) => Promise<FinalReport | null>;
     onUpdateReport: (updatedReport: Partial<FinalReport>) => void;
 }
@@ -42,7 +41,7 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
     const { 
         record, isLive, statusMessage, isAnalyzing, differentialDiagnoses, error, 
         diagnosisFeedback, onDiagnosisFeedback, onStartDebate, onInjectHypothesis, 
-        onUserIntervention, onExplainRationale, onGoToEducation, socraticQuestion,
+        onUserIntervention, onExplainRationale, socraticQuestion,
         livePrognosis, onRunScenario, onUpdateReport
     } = props;
     
@@ -189,9 +188,6 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
                         <div className="space-y-6">
                             <FinalReportCard report={fr} patientData={pd} onUpdateReport={onUpdateReport} debateHistory={dh} />
                             <DownloadPanel record={record} />
-                            <button onClick={onGoToEducation} className="w-full py-4 rounded-[1.25rem] font-bold text-blue-600 bg-white border border-blue-100 hover:bg-blue-50 transition-colors shadow-sm">
-                                Bemor uchun Ma'lumot Portalini Ochish
-                            </button>
                         </div>
                     </div>
                 </div>

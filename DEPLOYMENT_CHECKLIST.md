@@ -1,4 +1,4 @@
-# AiDoktorAI — Real Bozorga Chiqish Checklist
+# AiDoktorAI  -  Real Bozorga Chiqish Checklist
 
 ## ✅ Barcha Muammolar Hal Qilindi
 
@@ -74,11 +74,11 @@ npm run build
 
 ### 2.3 Bank Account Details
 `frontend/src/components/SubscriptionPage.tsx` ichida `BANK_ACCOUNT` konstantasini yangilang:
-- `bankName` — haqiqiy bank nomi
-- `accountNumber` — haqiqiy hisob raqam
-- `mfo` — MFO kodi
-- `inn` — INN
-- `receiver` — Qabul qiluvchi nomi
+- `bankName`  -  haqiqiy bank nomi
+- `accountNumber`  -  haqiqiy hisob raqam
+- `mfo`  -  MFO kodi
+- `inn`  -  INN
+- `receiver`  -  Qabul qiluvchi nomi
 
 ---
 
@@ -262,7 +262,7 @@ tail -f /path/to/backend/logs/django_errors.log
 Barcha asosiy muammolar hal qilindi va dastur **real bozorga chiqishga tayyor**!
 
 Batafsil ma'lumot:
-- `PRODUCTION_HARDENING.md` — Barcha muammolar va yechimlar
-- `CRITICAL_ISSUES_FIXED.md` — Hal qilingan muammolar ro'yxati
-- `PRODUCTION_READINESS.md` — Production deploy qo'llanmasi
+- `PRODUCTION_HARDENING.md`  -  Barcha muammolar va yechimlar
+- `CRITICAL_ISSUES_FIXED.md`  -  Hal qilingan muammolar ro'yxati
+- `PRODUCTION_READINESS.md`  -  Production deploy qo'llanmasi
 -NoNewline

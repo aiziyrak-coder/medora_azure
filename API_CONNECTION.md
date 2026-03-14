@@ -53,30 +53,30 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 ## 🔄 API Integration Features
 
 ### ✅ Authentication Flow
-- **Register**: Frontend → Backend API → JWT tokens
-- **Login**: Frontend → Backend API → JWT tokens
+- **Register**: Frontend  ->  Backend API  ->  JWT tokens
+- **Login**: Frontend  ->  Backend API  ->  JWT tokens
 - **Auto token refresh**: Token muddati tugasa avtomatik yangilanadi
 - **Fallback**: API mavjud bo'lmasa, localStorage ishlatiladi
 
 ### ✅ Patient Management
-- **Create**: Frontend → `POST /api/patients/` → Backend
-- **List**: Frontend → `GET /api/patients/` → Backend
-- **Update**: Frontend → `PATCH /api/patients/{id}/` → Backend
-- **Delete**: Frontend → `DELETE /api/patients/{id}/` → Backend
-- **File Upload**: Frontend → `POST /api/patients/{id}/upload-attachment/` → Backend
+- **Create**: Frontend  ->  `POST /api/patients/`  ->  Backend
+- **List**: Frontend  ->  `GET /api/patients/`  ->  Backend
+- **Update**: Frontend  ->  `PATCH /api/patients/{id}/`  ->  Backend
+- **Delete**: Frontend  ->  `DELETE /api/patients/{id}/`  ->  Backend
+- **File Upload**: Frontend  ->  `POST /api/patients/{id}/upload-attachment/`  ->  Backend
 
 ### ✅ Analysis Management
-- **Create**: Frontend → `POST /api/analyses/` → Backend
-- **List**: Frontend → `GET /api/analyses/` → Backend
-- **Update**: Frontend → `PATCH /api/analyses/{id}/` → Backend
-- **Stats**: Frontend → `GET /api/analyses/stats/` → Backend
-- **Feedback**: Frontend → `POST /api/analyses/{id}/add-feedback/` → Backend
+- **Create**: Frontend  ->  `POST /api/analyses/`  ->  Backend
+- **List**: Frontend  ->  `GET /api/analyses/`  ->  Backend
+- **Update**: Frontend  ->  `PATCH /api/analyses/{id}/`  ->  Backend
+- **Stats**: Frontend  ->  `GET /api/analyses/stats/`  ->  Backend
+- **Feedback**: Frontend  ->  `POST /api/analyses/{id}/add-feedback/`  ->  Backend
 
 ### ✅ AI Services
-- **Clarifying Questions**: Frontend → `POST /api/ai/clarifying-questions/` → Backend → Gemini AI
-- **Recommend Specialists**: Frontend → `POST /api/ai/recommend-specialists/` → Backend → Gemini AI
-- **Generate Diagnoses**: Frontend → `POST /api/ai/generate-diagnoses/` → Backend → Gemini AI
-- **Council Debate**: Frontend → `POST /api/ai/council-debate/` → Backend → Gemini AI
+- **Clarifying Questions**: Frontend  ->  `POST /api/ai/clarifying-questions/`  ->  Backend  ->  Gemini AI
+- **Recommend Specialists**: Frontend  ->  `POST /api/ai/recommend-specialists/`  ->  Backend  ->  Gemini AI
+- **Generate Diagnoses**: Frontend  ->  `POST /api/ai/generate-diagnoses/`  ->  Backend  ->  Gemini AI
+- **Council Debate**: Frontend  ->  `POST /api/ai/council-debate/`  ->  Backend  ->  Gemini AI
 
 ## 🛡️ Error Handling
 
@@ -104,7 +104,7 @@ Backend API (Django REST)
     ↓
 Database (SQLite/PostgreSQL)
     ↓
-Response → Frontend
+Response  ->  Frontend
 ```
 
 ## 🧪 Testing

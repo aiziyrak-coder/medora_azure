@@ -37,7 +37,7 @@ SECRET_KEY=your-very-long-random-secret-key-change-this
 DEBUG=False
 ALLOWED_HOSTS=AiDoktorapi.fargana.uz,127.0.0.1,localhost
 
-# CORS – frontend manzili
+# CORS  -  frontend manzili
 CORS_ALLOWED_ORIGINS=https://AiDoktor.fargana.uz,http://localhost:3000
 
 # Ma'lumotlar bazasi (SQLite ishlatilsa)
@@ -48,7 +48,7 @@ DB_NAME=db.sqlite3
 GEMINI_API_KEY=your-gemini-api-key-here
 AI_MODEL_DEFAULT=gemini-1.5-pro
 
-# Telegram (to‘lov xabarnomalari – ixtiyoriy)
+# Telegram (to‘lov xabarnomalari  -  ixtiyoriy)
 TELEGRAM_BOT_TOKEN=your-telegram-bot-token
 TELEGRAM_PAYMENT_GROUP_ID=-1001234567890
 
@@ -71,7 +71,7 @@ sudo systemctl restart AiDoktorai-backend
 
 ---
 
-## 2. Frontend build uchun (Vite – build paytida)
+## 2. Frontend build uchun (Vite  -  build paytida)
 
 **Joyi:** `/var/www/AiDoktorai/.env.production`
 
@@ -84,7 +84,7 @@ sudo nano /var/www/AiDoktorai/.env.production
 **Fayl ichiga:**
 
 ```env
-# Gemini – frontend build paytida bundle’ga yoziladi (AI brauzerda ishlashi uchun)
+# Gemini  -  frontend build paytida bundle’ga yoziladi (AI brauzerda ishlashi uchun)
 GEMINI_API_KEY=your-gemini-api-key-here
 
 # Yoki: VITE_GEMINI_API_KEY=your-gemini-api-key-here

@@ -8,7 +8,7 @@ import CheckCircleIcon from './icons/CheckCircleIcon';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
 import XIcon from './icons/XIcon';
 import { AIModel } from '../constants/specialists';
-import { INSTITUTE_NAME_SHORT } from '../constants/brand';
+import { INSTITUTE_NAME_SHORT, INSTITUTE_LOGO_SRC } from '../constants/brand';
 import { AI_SPECIALISTS } from '../constants';
 import LanguageSwitcher from './LanguageSwitcher';
 import { Language } from '../i18n/LanguageContext';
@@ -326,13 +326,18 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
                 {/* LEFT SIDE: Information */}
                 <div className="hidden lg:flex w-1/2 flex-col justify-between p-8 xl:p-12 h-full">
                     <div className="animate-fade-in-up">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 backdrop-blur-md mb-4">
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shadow-[0_0_8px_#60a5fa]"></span>
-                            <span className="text-[10px] font-bold text-blue-100 tracking-wide uppercase">{INSTITUTE_NAME_SHORT} Tizimi v1.0</span>
+                        <div className="flex items-center gap-3 mb-4">
+                            <img src={INSTITUTE_LOGO_SRC} alt="" className="w-14 h-14 rounded-full object-contain ring-2 ring-white/20" />
+                            <div>
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 backdrop-blur-md mb-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shadow-[0_0_8px_#60a5fa]"></span>
+                                    <span className="text-[10px] font-bold text-blue-100 tracking-wide uppercase">{INSTITUTE_NAME_SHORT} Tizimi v1.0</span>
+                                </div>
+                                <h1 className="text-4xl xl:text-6xl font-black text-white tracking-tighter drop-shadow-xl uppercase">
+                                    {INSTITUTE_NAME_SHORT}
+                                </h1>
+                            </div>
                         </div>
-                        <h1 className="text-4xl xl:text-6xl font-black text-white tracking-tighter mb-3 drop-shadow-xl uppercase">
-                            {INSTITUTE_NAME_SHORT}
-                        </h1>
                         <p className="text-xl text-blue-100 font-light border-l-4 border-blue-500 pl-4">
                             {t('auth_marketing_title')}
                         </p>

@@ -50,7 +50,7 @@ const EMERGENCY_TYPES = [
   { key: "anesteziya_muammosi",  label: "Anesteziya Asorat",    color: "border-orange-600 text-orange-300" },
   { key: "yurak_toxtatish",      label: "Yurak To'xtashi",      color: "border-red-700 text-red-200" },
   { key: "nafas_etishmovchiligi",label: "Nafas Etishmovchiligi",color: "border-amber-600 text-amber-300" },
-  { key: "septik_shok",          label: "рџ¦  Septik Shok",          color: "border-violet-600 text-violet-300" },
+  { key: "septik_shok",          label: "Septik Shok",          color: "border-violet-600 text-violet-300" },
 ];
 
 export const ZiyrakSurgery: React.FC<Props> = ({ language, onError, onStateChange }) => {
@@ -360,7 +360,7 @@ export const ZiyrakSurgery: React.FC<Props> = ({ language, onError, onStateChang
                 Fon eshitmoqda
               </span>
             )}
-            <button onClick={stopAudio} className="text-xs text-slate-500 hover:text-white">вЏ№</button>
+            <button onClick={stopAudio} className="text-xs text-slate-500 hover:text-white font-bold" aria-label="To'xtatish">x</button>
           </div>
         </div>
       </div>
@@ -375,7 +375,7 @@ export const ZiyrakSurgery: React.FC<Props> = ({ language, onError, onStateChang
       {/* Last response */}
       {lastResponse && (
         <div className="rounded-xl bg-slate-800/60 border border-slate-700/30 p-3">
-          <p className="text-xs text-slate-500 mb-1">рџ¤- Ziyrak:</p>
+          <p className="text-xs text-slate-500 mb-1">Ziyrak:</p>
           <p className="text-slate-200 text-sm">{lastResponse}</p>
         </div>
       )}
@@ -425,7 +425,7 @@ export const ZiyrakSurgery: React.FC<Props> = ({ language, onError, onStateChang
         <div className="rounded-2xl bg-red-950/50 border-2 border-red-500 p-4 space-y-2">
           <div className="flex items-center justify-between">
             <h4 className="font-bold text-red-200 text-sm">{emergency.protocol_name}</h4>
-            <button onClick={() => setEmergency(null)} className="text-slate-500 text-lg">{'\u2716'}</button>
+            <button onClick={() => setEmergency(null)} className="text-slate-500 text-lg font-bold" aria-label="Yopish">x</button>
           </div>
           <div className="space-y-1">
             {emergency.steps.slice(0,5).map((step, i) => (

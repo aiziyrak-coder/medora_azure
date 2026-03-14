@@ -32,7 +32,6 @@ import LiveConsultationView from './components/LiveConsultationView';
 import AnalysisView from './components/AnalysisView';
 import TeamRecommendationView from './components/TeamRecommendationView';
 import CaseLibraryView from './components/CaseLibraryView';
-import PatientEducationPortal from './components/education/PatientEducationPortal';
 import CriticalFindingAlert from './components/modals/CriticalFindingAlert';
 import RationaleModal from './components/modals/RationaleModal';
 import LanguageSwitcher from './components/LanguageSwitcher';
@@ -46,7 +45,7 @@ import CopyrightIcon from './components/icons/CopyrightIcon';
 import MonitorIcon from './components/icons/MonitorIcon'; 
 
 import { AIModel } from './constants/specialists';
-import { INSTITUTE_NAME_FULL, INSTITUTE_NAME_SHORT, PLATFORM_NAME } from './constants/brand';
+import { INSTITUTE_NAME_FULL, INSTITUTE_NAME_SHORT, PLATFORM_NAME, INSTITUTE_LOGO_SRC } from './constants/brand';
 
 const ScrollWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <div className="h-full overflow-y-auto overflow-x-hidden page-px py-6 custom-scrollbar min-w-0">
@@ -291,7 +290,15 @@ const AppContent: React.FC = () => {
             case 'user_question': setSocraticQuestion(update.question); break;
             case 'prognosis_update': setLivePrognosis(update.data); break;
             case 'report': {
-                setFinalReport(update.data);
+                const reportData = update.data;
+                const mergedReport: FinalReport = {
+                    ...reportData,
+                    prognosisReport: livePrognosis ?? reportData.prognosisReport,
+                    rejectedHypotheses: Array.isArray(reportData.rejectedHypotheses) && reportData.rejectedHypotheses.length > 0
+                        ? reportData.rejectedHypotheses.map((h: { name?: string; reason?: string }) => ({ name: String(h?.name ?? ''), reason: String(h?.reason ?? '') }))
+                        : (reportData.rejectedHypotheses ?? []),
+                };
+                setFinalReport(mergedReport);
                 setIsProcessing(false);
                 setSocraticQuestion(null);
                 setStatusMessage(t('analysis_complete_status'));
@@ -303,7 +310,7 @@ const AppContent: React.FC = () => {
                         date: new Date().toISOString(),
                         patientData,
                         debateHistory,
-                        finalReport: update.data,
+                        finalReport: mergedReport,
                         followUpHistory: [],
                         selectedSpecialists: selectedSpecialistsConfig.map(s => s.role),
                         detectedMedications: Array.isArray(detectedMeds) ? detectedMeds : [],
@@ -348,6 +355,7 @@ const AppContent: React.FC = () => {
                                     authServiceLocal.saveAnalysis(currentUser.phone, newRecord);
                                     caseService.addCaseToLibrary(newRecord);
                                     applyHistoryAndRecord(authServiceLocal.getAnalyses(currentUser.phone), newRecord);
+                                    setError(patientResponse.error?.message || "Bemor serverga saqlanmadi. Tahlil faqat ushbu qurilmada saqlandi.");
                                     return;
                                 }
                                 const patientId = patientResponse.data.id;
@@ -360,31 +368,37 @@ const AppContent: React.FC = () => {
                                         };
                                         authServiceLocal.saveAnalysis(currentUser.phone, fromApi);
                                         caseService.addCaseToLibrary(fromApi);
+                                        setError(null);
+                                    } else {
+                                        authServiceLocal.saveAnalysis(currentUser.phone, newRecord);
+                                        caseService.addCaseToLibrary(newRecord);
+                                        setError(createRes.error?.message || "Tahlil serverga saqlanmadi. Faqat ushbu qurilmada saqlandi.");
                                     }
                                     return getAnalyses();
                                 }).then((response) => {
-                                    if (response.success && response.data) {
-                                        const latest = response.data[0];
-                                        const savedRecord = latest
-                                            ? { ...newRecord, id: latest.id, patientId: latest.patientId }
+                                    if (response.success && Array.isArray(response.data)) {
+                                        const list = response.data;
+                                        const savedRecord = createRes?.success && createRes?.data
+                                            ? { ...newRecord, id: String(createRes.data.id), patientId: String(createRes.data.patientId ?? patientId) }
                                             : newRecord;
-                                        applyHistoryAndRecord(response.data, savedRecord);
+                                        applyHistoryAndRecord(list, list[0] ?? savedRecord);
                                     } else {
-                                        const history = authServiceLocal.getAnalyses(currentUser.phone);
-                                        applyHistoryAndRecord(history, newRecord);
+                                        applyHistoryAndRecord(authServiceLocal.getAnalyses(currentUser.phone), newRecord);
                                     }
                                 }).catch(() => {
                                     authServiceLocal.saveAnalysis(currentUser.phone, newRecord);
                                     caseService.addCaseToLibrary(newRecord);
                                     applyHistoryAndRecord(authServiceLocal.getAnalyses(currentUser.phone), newRecord);
+                                    setError("Serverga ulanishda xatolik. Tahlil faqat ushbu qurilmada saqlandi.");
                                 });
                             }).catch(() => {
                                 authServiceLocal.saveAnalysis(currentUser.phone, newRecord);
                                 caseService.addCaseToLibrary(newRecord);
                                 applyHistoryAndRecord(authServiceLocal.getAnalyses(currentUser.phone), newRecord);
+                                setError("Bemor yoki tahlil serverga saqlanmadi. Faqat ushbu qurilmada saqlandi.");
                             });
                         });
-                    }).catch(() => {
+                    }).catch((err) => {
                         if (currentAnalysisRecord?.id) {
                             authServiceLocal.updateAnalysis(currentUser.phone, newRecord);
                         } else {
@@ -392,6 +406,7 @@ const AppContent: React.FC = () => {
                             caseService.addCaseToLibrary(newRecord);
                         }
                         applyHistoryAndRecord(authServiceLocal.getAnalyses(currentUser.phone), newRecord);
+                        setError(err?.message || "Serverga saqlashda xatolik. Tahlil ushbu qurilmada saqlandi.");
                     });
                 }
                 break;
@@ -479,21 +494,24 @@ const AppContent: React.FC = () => {
         else setAppView(view);
     };
 
-    /** Savollar FAQAT AI orqali bemorning kiritgan ma'lumotlaridan generatsiya qilinadi.
-     *  AI savol yarata olmasa → aniqlashtiruv bosqichini o'tkazib yuborib, jamoa tavsiyasiga o'tamiz. */
+    /** Savollar avval API, keyin Gemini orqali; ikkalasi bo'sh bo'lsa ham fallback savollar bilan aniqlashtiruv ko'rsatiladi. */
+    const CLARIFY_TIMEOUT_MS = 12000;
     const handleGenerateClarificationQuestions = async (data: PatientData) => {
         setError(null);
         setIsProcessing(true);
         setStatusMessage(t('clarification_generating_questions'));
         let questions: string[] = [];
         try {
-            // Backend orqali
             const { generateClarifyingQuestions } = await import('./services/apiAiService');
-            const response = await generateClarifyingQuestions(data);
-            if (response.success && Array.isArray(response.data) && response.data.length > 0) {
+            const response = await Promise.race([
+                generateClarifyingQuestions(data),
+                new Promise<never>((_, reject) =>
+                    setTimeout(() => reject(new Error('timeout')), CLARIFY_TIMEOUT_MS)),
+            ]);
+            if (response?.success && Array.isArray(response.data) && response.data.length > 0) {
                 questions = response.data;
             }
-        } catch { /* ignore, try Gemini directly */ }
+        } catch { /* timeout yoki xato → Gemini fallback */ }
 
         if (questions.length === 0) {
             try {
@@ -502,11 +520,8 @@ const AppContent: React.FC = () => {
         }
 
         if (questions.length === 0) {
-            // AI savol yarata olmadi → aniqlashtiruv o'tkazib yuboriladi
-            setIsProcessing(false);
-            setAppView('team_recommendation');
-            await handleRecommendTeamFromData(data);
-            return;
+            const { CLARIFY_FALLBACK } = await import('./services/aiCouncilService');
+            questions = CLARIFY_FALLBACK[language];
         }
 
         setClarificationQuestions(questions);
@@ -789,7 +804,7 @@ const AppContent: React.FC = () => {
                             backLabel={isArchive ? 'Arxiv' : 'Asosiy sahifa'}
                         />
                         <div className="flex-1 page-px py-3 overflow-hidden">
-                            <AnalysisView record={record} isLive={true} statusMessage={statusMessage} isAnalyzing={isProcessing} differentialDiagnoses={differentialDiagnoses} error={error} onDiagnosisFeedback={handleDiagnosisFeedback} diagnosisFeedback={diagnosisFeedback} onStartDebate={handleStartDebate} onInjectHypothesis={handleInjectHypothesis} onUserIntervention={handleUserIntervention} userIntervention={userIntervention} onExplainRationale={handleExplainRationale} onGoToEducation={() => setAppView('patient_education')} socraticQuestion={socraticQuestion} livePrognosis={livePrognosis} onRunScenario={handleRunScenario} onUpdateReport={handleUpdateReport} />
+                            <AnalysisView record={record} isLive={true} statusMessage={statusMessage} isAnalyzing={isProcessing} differentialDiagnoses={differentialDiagnoses} error={error} onDiagnosisFeedback={handleDiagnosisFeedback} diagnosisFeedback={diagnosisFeedback} onStartDebate={handleStartDebate} onInjectHypothesis={handleInjectHypothesis} onUserIntervention={handleUserIntervention} userIntervention={userIntervention} onExplainRationale={handleExplainRationale} socraticQuestion={socraticQuestion} livePrognosis={livePrognosis} onRunScenario={handleRunScenario} onUpdateReport={handleUpdateReport} />
                         </div>
                     </div>
                 );
@@ -811,16 +826,6 @@ const AppContent: React.FC = () => {
                         <BackBar title="Holatlar Kutubxonasi" onBack={() => setAppView('history')} backLabel="Arxiv" />
                         <ScrollWrapper>
                             <CaseLibraryView onBack={() => setAppView('history')} />
-                        </ScrollWrapper>
-                    </div>
-                );
-
-            case 'patient_education':
-                return (
-                    <div className="h-full flex flex-col overflow-hidden min-w-0">
-                        <BackBar title="Bemor uchun Ma'lumot" onBack={() => setAppView('view_history_item')} backLabel="Tahlilga" />
-                        <ScrollWrapper>
-                            {currentAnalysisRecord && <PatientEducationPortal record={currentAnalysisRecord} onBack={() => setAppView('view_history_item')} />}
                         </ScrollWrapper>
                     </div>
                 );
@@ -886,7 +891,7 @@ const AppContent: React.FC = () => {
             {isApiConfigured() && !apiHealthy && !isProcessing && (
                 <div className="flex-none flex items-center justify-center gap-2 sm:gap-3 py-2 page-px bg-amber-500/90 text-white text-xs sm:text-sm font-medium z-40 flex-wrap">
                     {healthStatus === 400 ? (
-                        <span className="break-words">Domen boshqa serverga yo&apos;naltirilgan. DNS tekshiring: <code className="bg-black/20 px-1 rounded">nslookup medora.cdcgroup.uz</code> в†' <code className="bg-black/20 px-1 rounded">167.71.53.238</code> bo&apos;lishi kerak.</span>
+                        <span className="break-words">Domen boshqa serverga yo&apos;naltirilgan. DNS tekshiring: <code className="bg-black/20 px-1 rounded">nslookup medora.cdcgroup.uz</code>  ->  <code className="bg-black/20 px-1 rounded">167.71.53.238</code> bo&apos;lishi kerak.</span>
                     ) : (
                         <span>Server bilan bog&apos;lanish yo&apos;q. Ma&apos;lumotlar mahalliy saqlanadi.</span>
                     )}
@@ -900,9 +905,7 @@ const AppContent: React.FC = () => {
                         onClick={() => handleNavigation('dashboard')}
                         className="flex items-center gap-2 sm:gap-3 min-w-0 hover:opacity-80 transition-opacity"
                     >
-                        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0">
-                            <span className="text-white font-black text-base sm:text-lg">M</span>
-                        </div>
+                        <img src={INSTITUTE_LOGO_SRC} alt={INSTITUTE_NAME_SHORT} className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-contain shrink-0 bg-slate-100" />
                         <div className="min-w-0 hidden sm:block">
                             <h1 className="text-base font-black tracking-tight text-slate-800 leading-none">{t('appName')}</h1>
                             <p className="text-[9px] text-slate-400 font-medium tracking-wide leading-none mt-0.5">{PLATFORM_NAME} - AI Konsilium</p>
@@ -946,12 +949,7 @@ const AppContent: React.FC = () => {
 
                         {/* Institute branding */}
                         <div className="flex items-center gap-3 min-w-0">
-                            <div
-                                className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md"
-                                style={{ background: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 50%, #10b981 100%)' }}
-                            >
-                                <span className="text-white font-black text-sm">F</span>
-                            </div>
+                            <img src={INSTITUTE_LOGO_SRC} alt={INSTITUTE_NAME_SHORT} className="w-8 h-8 rounded-xl object-contain flex-shrink-0 shadow-md" />
                             <div className="min-w-0">
                                 <p
                                     className="font-black text-sm tracking-tight"

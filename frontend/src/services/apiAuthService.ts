@@ -137,8 +137,16 @@ export const register = async (data: RegisterData): Promise<{ success: boolean; 
  * Login user
  */
 export const login = async (credentials: LoginCredentials): Promise<{ success: boolean; message: string }> => {
+  const phone = credentials.phone != null ? String(credentials.phone).trim() : '';
+  const password = credentials.password != null ? String(credentials.password) : '';
+  if (!phone) {
+    return { success: false, message: "Telefon raqami kiritilishi shart." };
+  }
+  if (!password) {
+    return { success: false, message: "Parol kiritilishi shart." };
+  }
   try {
-    const response = await apiPost<AuthResponse>('/auth/login/', credentials);
+    const response = await apiPost<AuthResponse>('/auth/login/', { phone, password });
     
     if (response.success && response.data) {
       saveTokens(response.data.tokens.access, response.data.tokens.refresh);

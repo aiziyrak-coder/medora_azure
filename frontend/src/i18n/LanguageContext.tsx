@@ -1,7 +1,7 @@
 
 import React, { createContext, useState, ReactNode } from 'react';
 
-export type Language = 'uz-L' | 'uz-C' | 'kaa' | 'ru' | 'en';
+export type Language = 'uz-L' | 'uz-C' | 'ru' | 'en';
 
 interface LanguageContextType {
     language: Language;
@@ -19,13 +19,16 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
             const saved = localStorage.getItem('preferred_language') as Language | null;
             
             // Migration: If Russian is saved, clear it and default to Uzbek (new default)
-            // This ensures all users see Uzbek by default after this update
             if (saved === 'ru') {
                 localStorage.removeItem('preferred_language');
                 return 'uz-L';
             }
-            
-            if (saved && ['uz-L', 'uz-C', 'kaa', 'ru', 'en'].includes(saved)) {
+            // Migration: Karakalpak (kaa) was removed; fall back to Uzbek Latin
+            if (saved === 'kaa') {
+                localStorage.removeItem('preferred_language');
+                return 'uz-L';
+            }
+            if (saved && ['uz-L', 'uz-C', 'ru', 'en'].includes(saved)) {
                 return saved;
             }
         }

@@ -34,7 +34,7 @@ const CACHE_NAME = 'konsilium-cache-v8';
 
 ### How It Works:
 
-1. **Cache Version Increment**: v7 → v8
+1. **Cache Version Increment**: v7  ->  v8
 2. **Automatic Cleanup**: Old cache (v7) automatically deleted on activation
 3. **Fresh Content**: All users forced to download latest HTML, CSS, JS
 4. **No Manual Action Needed**: Happens automatically on next page load
@@ -135,7 +135,7 @@ User Visits Site
     ↓
 Service Worker Checks Version
     ↓
-Is v8 > v7? → YES
+Is v8 > v7?  ->  YES
     ↓
 Delete Old Cache (v7)
     ↓

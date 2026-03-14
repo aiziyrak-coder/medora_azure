@@ -7,6 +7,7 @@ import {
     INSTITUTE_NAME_FULL,
     INSTITUTE_NAME_SHORT,
     INSTITUTE_LOGO_TEXT,
+    INSTITUTE_LOGO_SRC,
     INSTITUTE_PHONE_1,
     INSTITUTE_PHONE_2,
     INSTITUTE_EMAIL_1,
@@ -185,9 +186,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
             {/* --- FIXED NAV --- */}
             <nav className="flex-none fixed top-0 left-0 right-0 z-50 py-3 md:py-4 px-4 md:px-6 bg-slate-950/80 backdrop-blur-xl border-b border-white/5">
                 <div className="flex justify-between items-center gap-2">
-                    <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className="text-xs sm:text-sm font-black tracking-tight text-white truncate uppercase">{INSTITUTE_LOGO_TEXT}</span>
-                        <span className="text-[10px] font-medium text-slate-500 hidden sm:block truncate">{INSTITUTE_NAME_FULL}</span>
+                    <div className="flex items-center gap-3 min-w-0">
+                        <img src={INSTITUTE_LOGO_SRC} alt={INSTITUTE_LOGO_TEXT} className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-contain flex-shrink-0 bg-white/5" />
+                        <div className="flex flex-col gap-0.5 min-w-0">
+                            <span className="text-xs sm:text-sm font-black tracking-tight text-white truncate uppercase">{INSTITUTE_LOGO_TEXT}</span>
+                            <span className="text-[10px] font-medium text-slate-500 hidden sm:block truncate">{INSTITUTE_NAME_FULL}</span>
+                        </div>
                     </div>
                     <div className="hidden lg:flex items-center">
                         {onOpenAbout && (
@@ -232,6 +236,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                                 <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
                                 {t('landing_hero_badge')}
                             </div>
+                            <img src={INSTITUTE_LOGO_SRC} alt="" className="landing-content-in landing-content-in-delay-0 w-20 h-20 sm:w-24 sm:h-24 rounded-full object-contain mx-auto mb-3 ring-2 ring-white/10" />
                             <p className="landing-content-in landing-content-in-delay-1 text-sm text-slate-400 font-semibold mb-2">{INSTITUTE_NAME_FULL}</p>
                             <div className="landing-content-in landing-content-in-delay-2 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-400/20 mb-6">
                                 <span className="text-sm font-black uppercase" style={{ background: 'linear-gradient(90deg,#38bdf8,#34d399)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
@@ -328,6 +333,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenA
                                 {t('landing_cta_bottom_btn')}
                             </button>
                             <div className="mt-12 pt-8 border-t border-white/10 w-full">
+                                <img src={INSTITUTE_LOGO_SRC} alt="" className="w-14 h-14 rounded-full object-contain mx-auto mb-2 opacity-90" />
                                 <p className="text-white font-black text-sm uppercase mb-1">{INSTITUTE_LOGO_TEXT}</p>
                                 <p className="text-slate-500 text-xs mb-3">{FOOTER_COPYRIGHT}</p>
                                 <p className="text-slate-600 text-xs mb-4">{PLATFORM_NAME}</p>

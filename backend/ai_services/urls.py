@@ -1,5 +1,5 @@
 """
-AI Services URLs вЂ” Azure AI Foundry
+AI Services URLs  -  Azure AI Foundry
 """
 from django.urls import path
 from .views import (

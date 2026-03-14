@@ -1,4 +1,4 @@
-# AiDoktor вЂ” To'liq HTTPS sozlash
+# AiDoktor  -  To'liq HTTPS sozlash
 
 Ikkala domen **https** orqali ishlashi uchun quyidagi qadamlarni serverda bajarish.
 
@@ -12,7 +12,7 @@ sudo certbot certonly --nginx -d AiDoktorapi.ziyrak.org
 # sudo certbot certonly --nginx -d AiDoktor.ziyrak.org -d AiDoktorapi.ziyrak.org
 ```
 
-## 2. Nginx вЂ” HTTPS konfig
+## 2. Nginx  -  HTTPS konfig
 
 ```bash
 # Loyihadagi HTTPS konfigni nusxalash
@@ -44,7 +44,7 @@ SECURE_SSL_REDIRECT=True
 sudo systemctl restart AiDoktor
 ```
 
-## 4. Frontend вЂ” API https, qayta build
+## 4. Frontend  -  API https, qayta build
 
 ```bash
 cd ~/AiDoktor_platform/app/frontend

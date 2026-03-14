@@ -269,12 +269,17 @@ const handleResponse = async <T>(response: Response): Promise<ApiResponse<T>> =>
   }
 
   if (!response.ok) {
-    const errObj = data?.error as { message?: string; details?: unknown } | undefined;
-    const drfErrors = data && typeof data === 'object' && !data?.error && !data?.message && !data?.detail
+    const errObj = data?.error as { message?: string; details?: unknown } | Record<string, unknown> | undefined;
+    const errMessage = errObj && typeof errObj === 'object' && !Array.isArray(errObj) && 'message' in errObj
+      ? (errObj as { message?: string }).message
+      : typeof data?.error === 'string'
+        ? (data.error as string)
+        : undefined;
+    const drfErrors = data && typeof data === 'object' && !errMessage && !data?.message && !data?.detail
       ? formatDrfErrors(data as Record<string, string[]>)
       : null;
     const message =
-      errObj?.message ||
+      errMessage ||
       (data?.message as string | undefined) ||
       drfErrors ||
       (typeof data?.detail === 'string' ? data.detail : null) ||
@@ -282,15 +287,16 @@ const handleResponse = async <T>(response: Response): Promise<ApiResponse<T>> =>
       (response.status === 400
         ? "Ma'lumotlar noto'g'ri. Maydonlarni tekshiring."
         : "Xatolik yuz berdi. Iltimos, keyinroq urinib ko'ring.");
-    if (response.status === 400 && !errObj?.message && Object.keys(data).length === 0 && typeof console !== 'undefined' && console.warn) {
+    if (response.status === 400 && !errMessage && Object.keys(data).length === 0 && typeof console !== 'undefined' && console.warn) {
       console.warn("[Farg'ona JSTI] 400 javob (server tanasi bo'sh):", response.url);
     }
+    const details = errObj && typeof errObj === 'object' && 'details' in errObj ? (errObj as { details?: unknown }).details : undefined;
     return {
       success: false,
       error: {
         code: response.status,
         message,
-        details: errObj?.details ?? data?.errors ?? data,
+        details: details ?? (data && typeof data === 'object' ? (data.errors ?? data) : undefined),
       },
     };
   }

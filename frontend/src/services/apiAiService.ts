@@ -2,14 +2,14 @@
  * AI Services API - Azure AI Foundry
  *
  * Ikki asosiy rejim:
- *   1. Consilium Mode  в†' /api/ai/consilium/     (5 professor, 3 faza)
- *   2. Doctor Support  в†' /api/ai/doctor-support/ (GPT-4o, tezkor)
- *   3. Doctor Stream   в†' /api/ai/doctor-stream/  (SSE)
+ *   1. Consilium Mode   ->  /api/ai/consilium/     (5 professor, 3 faza)
+ *   2. Doctor Support   ->  /api/ai/doctor-support/ (GPT-4o, tezkor)
+ *   3. Doctor Stream    ->  /api/ai/doctor-stream/  (SSE)
  */
 import { apiPost, API_BASE_URL, type ApiResponse } from './api';
 import type { PatientData, Diagnosis, AIModel } from '../types';
 
-// в"Ђв"Ђв"Ђ Task type constants в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+// ---
 export const TASK_QUICK_CONSULT  = 'quick_consult';
 export const TASK_DIAGNOSIS      = 'diagnosis';
 export const TASK_TREATMENT      = 'treatment_plan';
@@ -25,7 +25,7 @@ export type DoctorTaskType =
   | typeof TASK_LAB_INTERPRET
   | typeof TASK_FOLLOW_UP;
 
-// в"Ђв"Ђв"Ђ Consilium types в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+// ---
 export interface DebateMessage {
   id:          string;
   author:      string;
@@ -73,7 +73,7 @@ export interface ConsiliumResult {
   completed_at: string;
 }
 
-// в"Ђв"Ђв"Ђ Doctor Support types в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+// ---
 export interface DoctorSupportResult {
   _task_type:   string;
   _language:    string;
@@ -109,16 +109,16 @@ export interface DoctorSupportResult {
   error?:                string;
 }
 
-// в"Ђв"Ђв"Ђ Filter error type в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+// ---
 export interface FilteredError {
   filtered:      boolean;
   filter_level:  string;
   message:       string;
 }
 
-// в"Ђв"Ђв"Ђ API calls в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+// ---
 
-/** Multi-Agent Medical Consilium (3 faza: Independent в†' Debate в†' Consensus) */
+/** Multi-Agent Medical Consilium (3 faza: Independent  ->  Debate  ->  Consensus) */
 export const runConsilium = async (
   patientData: PatientData,
   language: string = 'uz-L',
@@ -220,7 +220,7 @@ export const runDoctorSupportStream = (
   return () => { aborted = true; };
 };
 
-// в"Ђв"Ђв"Ђ Legacy endpoints (backwards-compat) в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+// ---
 
 export const generateClarifyingQuestions = async (
   patientData: PatientData,

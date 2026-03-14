@@ -45,7 +45,7 @@ TELEGRAM_BOT_TOKEN=8345119740:AAETf0ZTo8zh2A3S5TKIkm7nWQnhO74yBAo
 TELEGRAM_PAYMENT_GROUP_ID=-5041567370
 ```
 
-**Saqlash:** `Ctrl+O` → `Enter` → `Ctrl+X`
+**Saqlash:** `Ctrl+O`  ->  `Enter`  ->  `Ctrl+X`
 
 ---
 

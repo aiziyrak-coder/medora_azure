@@ -14,9 +14,9 @@ import { ZiyrakSurgery }      from './ZiyrakSurgery';
 import { apiPost, API_BASE_URL } from '../../services/api';
 import { INSTITUTE_NAME_SHORT } from '../../constants/brand';
 
-// в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+// ---
 // Types
-// в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+// ---
 
 export type ZiyrakMode = 'consultation' | 'interactive' | 'surgery';
 export type ZiyrakState = 'sleeping' | 'listening' | 'active' | 'speaking';
@@ -28,9 +28,9 @@ interface Props {
   className?:     string;
 }
 
-// в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+// ---
 // Wake Word Pulse indicator
-// в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+// ---
 
 function WakeIndicator({ state }: { state: ZiyrakState }) {
   const config: Record<ZiyrakState, { color: string; label: string; pulse: boolean }> = {
@@ -57,9 +57,9 @@ function WakeIndicator({ state }: { state: ZiyrakState }) {
   );
 }
 
-// в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+// ---
 // Wake Word Banner
-// в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+// ---
 
 function WakeBanner({ onDismiss }: { onDismiss: () => void }) {
   useEffect(() => {
@@ -71,7 +71,7 @@ function WakeBanner({ onDismiss }: { onDismiss: () => void }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
       <div className="bg-sky-900/90 border-2 border-sky-400 rounded-3xl px-8 py-6 text-center
                       shadow-2xl shadow-sky-500/30 animate-[fadeInScale_0.4s_ease-out]">
-        <div className="text-4xl mb-3">рџ¤-</div>
+        <div className="text-4xl mb-3 font-bold text-sky-300">Ziyrak</div>
         <p className="text-sky-300 font-bold text-xl">Ziyrak Faollashdi!</p>
         <p className="text-sky-400/80 text-sm mt-1">
           Men {INSTITUTE_NAME_SHORT} platformasining raqamli yordamchisi  -  Ziyrakman.
@@ -81,9 +81,7 @@ function WakeBanner({ onDismiss }: { onDismiss: () => void }) {
           <div className="relative w-16 h-16">
             <div className="absolute inset-0 rounded-full bg-sky-500/30 animate-ping" />
             <div className="absolute inset-2 rounded-full bg-sky-500/50 animate-ping animation-delay-150" />
-            <div className="w-16 h-16 rounded-full bg-sky-600 flex items-center justify-center">
-              <span className="text-2xl">рџ"Љ</span>
-            </div>
+            <div className="w-16 h-16 rounded-full bg-sky-600 flex items-center justify-center text-white text-2xl font-bold">Z</div>
           </div>
         </div>
       </div>
@@ -91,9 +89,9 @@ function WakeBanner({ onDismiss }: { onDismiss: () => void }) {
   );
 }
 
-// в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+// ---
 // Main Dashboard
-// в"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђв"Ђ
+// ---
 
 export const ZiyrakDashboard: React.FC<Props> = ({
   patientData,
@@ -182,10 +180,10 @@ export const ZiyrakDashboard: React.FC<Props> = ({
     setTimeout(() => setError(""), 8000);
   }, []);
 
-  const TABS: Array<{ id: ZiyrakMode; label: string; desc: string; icon: string }> = [
-    { id: "consultation", icon: "рџЋ™",  label: "Konsultatsiya",     desc: "Passiv tinglash" },
-    { id: "interactive",  icon: "рџ'¬",  label: "Ziyrak Chat",        desc: "Interaktiv" },
-    { id: "surgery",      icon: "рџ©є",  label: "Operatsiya Xonasi",  desc: "Hands-free" },
+  const TABS: Array<{ id: ZiyrakMode; label: string; desc: string }> = [
+    { id: "consultation", label: "Konsultatsiya",     desc: "Passiv tinglash" },
+    { id: "interactive",  label: "Ziyrak Chat",        desc: "Interaktiv" },
+    { id: "surgery",      label: "Operatsiya Xonasi",  desc: "Hands-free" },
   ];
 
   return (
@@ -205,7 +203,7 @@ export const ZiyrakDashboard: React.FC<Props> = ({
               ziyrakState === "listening" ? "bg-sky-700" :
               ziyrakState === "active" ? "bg-emerald-700" : "bg-violet-700"
             }`}>
-            рџ¤-
+            <span className="text-lg font-bold text-white">Z</span>
           </div>
           {ziyrakState !== "sleeping" && (
             <div className={`absolute inset-0 rounded-full animate-ping opacity-40 ${
@@ -222,7 +220,7 @@ export const ZiyrakDashboard: React.FC<Props> = ({
           <WakeIndicator state={ziyrakState} />
         </div>
 
-        {/* Wake word toggle */}
+        {/* Wake word toggle - faqat matn, emoji/unicode yo'q (mojibake oldini olish) */}
         <button
           onClick={wakeDetecting ? stopWakeDetection : startWakeDetection}
           className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
@@ -232,16 +230,16 @@ export const ZiyrakDashboard: React.FC<Props> = ({
           }`}
           title={wakeDetecting ? "'Salom Ziyrak' tinglayapti" : "'Salom Ziyrak' tinglashni boshlash"}
         >
-          {wakeDetecting ? "рџЋ™ Tinglayapti" : "рџЋ™ Wake Word"}
+          {wakeDetecting ? "Tinglayapti" : "Wake Word"}
         </button>
       </div>
 
       {/* Wake word hint */}
       {wakeDetecting && (
         <div className="rounded-xl bg-sky-950/40 border border-sky-700/40 px-3 py-2 flex items-center gap-2">
-          <span className="text-sky-400 text-lg animate-pulse">рџ'‚</span>
+          <span className="text-sky-400 text-sm font-bold animate-pulse" aria-hidden="true">&gt;</span>
           <p className="text-sky-300/80 text-xs">
-            "<strong className="text-sky-200">Salom Ziyrak</strong>" deb ayting  -  tizim faollashadi
+            &quot;<strong className="text-sky-200">Salom Ziyrak</strong>&quot; deb ayting  -  tizim faollashadi
           </p>
         </div>
       )}
@@ -249,7 +247,7 @@ export const ZiyrakDashboard: React.FC<Props> = ({
       {/* Error */}
       {error && (
         <div className="rounded-xl bg-red-950/40 border border-red-500/40 p-3 text-red-300 text-sm">
-          вљ  {error}
+          !  {error}
         </div>
       )}
 
@@ -265,7 +263,7 @@ export const ZiyrakDashboard: React.FC<Props> = ({
           >
             <p className={`text-xs font-medium leading-none ${
               activeMode === tab.id ? "text-white" : "text-slate-400"
-            }`}>{tab.icon} {tab.label}</p>
+            }`}>{tab.label}</p>
             <p className="text-xs text-slate-500 hidden sm:block mt-0.5">{tab.desc}</p>
           </button>
         ))}
@@ -304,7 +302,7 @@ export const ZiyrakDashboard: React.FC<Props> = ({
       {/* Consilium sync */}
       {consiliumReport && (
         <div className="rounded-xl bg-violet-950/30 border border-violet-600/30 p-3 text-xs text-violet-300">
-          рџ"- Konsilium xulosasi Ziyrak kontekstiga yuklandi
+          Konsilium xulosasi Ziyrak kontekstiga yuklandi
         </div>
       )}
     </div>

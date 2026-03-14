@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import type { PatientQueueItem } from '../types';
-import { INSTITUTE_NAME_SHORT } from '../constants/brand';
+import { INSTITUTE_NAME_SHORT, INSTITUTE_LOGO_SRC } from '../constants/brand';
 import * as queueService from '../services/queueService';
 import * as settingsService from '../services/settingsService';
 
@@ -90,7 +90,7 @@ const TvDisplay: React.FC<{ doctorId: string }> = ({ doctorId }) => {
                 {/* Header Overlay */}
                 <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-20">
                     <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center font-black text-2xl shadow-lg shadow-blue-600/50">M</div>
+                        <img src={INSTITUTE_LOGO_SRC} alt="" className="w-12 h-12 rounded-xl object-contain shadow-lg bg-slate-800/50" />
                         <div>
                             <h1 className="text-2xl font-black tracking-tighter leading-none">{INSTITUTE_NAME_SHORT}</h1>
                             <p className="text-xs text-blue-400 font-bold uppercase tracking-widest mt-1">Elektron Navbat</p>

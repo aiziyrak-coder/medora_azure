@@ -210,7 +210,7 @@ const PlanTab: React.FC<{ report: FinalReport }> = ({ report }) => {
                 {(report.recommendedTests ?? []).map((testItem, i) => {
                     const display = typeof testItem === 'string' ? testItem : (testItem && typeof testItem === 'object'
                         ? [((testItem as Record<string, unknown>).testName ?? (testItem as Record<string, unknown>).name), (testItem as Record<string, unknown>).reason, (testItem as Record<string, unknown>).urgency]
-                            .filter(Boolean).map(String).join(' — ') || JSON.stringify(testItem)
+                            .filter(Boolean).map(String).join(' - ') || JSON.stringify(testItem)
                         : String(testItem ?? ''));
                     return (
                     <li key={i} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5">
@@ -272,7 +272,7 @@ const PrescriptionTab: React.FC<{ report: FinalReport }> = ({ report }) => {
                     
                     {med.instructions && (
                         <p className="text-xs text-slate-300 bg-black/30 p-3 rounded-lg border border-white/5">
-                            рџ"‹ <span className="font-semibold">{t('report_instructions')}</span> {med.instructions}
+                            <span className="font-semibold">{t('report_instructions')}</span> {med.instructions}
                         </p>
                     )}
                 </div>
@@ -280,7 +280,7 @@ const PrescriptionTab: React.FC<{ report: FinalReport }> = ({ report }) => {
         ))}
         
         <div className="mt-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-start gap-3 backdrop-blur-md">
-            <span className="text-xl">вљ пёЏ</span>
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-amber-500/30 text-amber-300 text-xs font-bold" aria-hidden="true">!</span>
             <p className="text-xs text-amber-200 leading-relaxed font-medium">
                 {t('report_disclaimer')}
                 {report.uzbekistanLegislativeNote && ` ${report.uzbekistanLegislativeNote}`}
@@ -470,7 +470,7 @@ const ProfileView: React.FC<{ user: User, onLogout: () => void }> = ({ user, onL
                 </div>
             </GlassCard>
 
-            {/* в•ђв•ђв•ђв•ђв•ђв•ђв•ђ OBUNA BO'LIMI в•ђв•ђв•ђв•ђв•ђв•ђв•ђ */}
+            {/* OBUNA BO'LIMI */}
             <div className="mb-5">
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">
                     Obuna holati
@@ -577,7 +577,7 @@ const ProfileView: React.FC<{ user: User, onLogout: () => void }> = ({ user, onL
                     </button>
                 )}
 
-                {/* в•ђв•ђв•ђ OBUNA REJALARI + TO'LOV в•ђв•ђв•ђ */}
+                {/* OBUNA REJALARI + TO'LOV */}
                 {showPayment && (
                     <div className="mt-4 space-y-4 animate-fade-in-up">
                         {/* Rejalar */}
@@ -998,7 +998,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                 ${t('vitals_title')}:
                 ${t('vitals_bp')}: ${vitals.bpSys || '-'}/${vitals.bpDia || '-'} mm.Hg
                 ${t('vitals_pulse')}: ${vitals.heartRate || '-'} bpm
-                ${t('vitals_temp')}: ${vitals.temp || '-'} В°C
+                ${t('vitals_temp')}: ${vitals.temp || '-'} °C
                 ${t('vitals_spo2')}: ${vitals.spO2 || '-'} %
                 ${t('vitals_respiration')}: ${vitals.respiration || '-'} /min
                 
@@ -1625,7 +1625,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                                                         patient.status === 'in-progress' ? 'bg-blue-400 animate-pulse' : 'bg-slate-500'
                                                     }`} />
                                                     <p className="text-[10px] sm:text-xs text-slate-300 font-medium uppercase tracking-wider">
-                                                        {patient.age} yosh{typeof patient.arrivalTime === 'string' ? ` В· ${patient.arrivalTime}` : ''}
+                                                        {patient.age} yosh{typeof patient.arrivalTime === 'string' ? ` - ${patient.arrivalTime}` : ''}
                                                     </p>
                                                 </div>
                                             </div>
@@ -1697,7 +1697,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                                 onClick={() => setShowAIAssistant(v => !v)}
                                 className={`flex items-center gap-2 px-3 py-2 rounded-xl font-semibold text-sm transition-all ${showAIAssistant ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/30' : 'bg-white/10 hover:bg-white/20 text-white'}`}
                             >
-                                <span className="text-base">🧠</span>
+                                <span className="text-xs font-black bg-white/20 rounded px-1.5 py-0.5">AI</span>
                                 <span>AI Yordamchi</span>
                             </button>
                         </div>
@@ -1754,9 +1754,9 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                                             <VitalInputCompact label={t('vitals_label_sys')} unit="mm" value={vitals.bpSys} onChange={val => handleVitalChange('bpSys', val)} icon={<span className="text-[10px] font-black">BP</span>} color="red" error={vitalErrors.bpSys} />
                                             <VitalInputCompact label={t('vitals_label_dia')} unit="mm" value={vitals.bpDia} onChange={val => handleVitalChange('bpDia', val)} icon={<span className="text-[10px] font-black">BP</span>} color="red" error={vitalErrors.bpDia} />
                                             <VitalInputCompact label={t('vitals_label_puls')} unit="bpm" value={vitals.heartRate} onChange={val => handleVitalChange('heartRate', val)} icon={<HeartRateIcon className="w-3 h-3"/>} color="pink" error={vitalErrors.heartRate} />
-                                            <VitalInputCompact label={t('vitals_label_temp')} unit="В°C" value={vitals.temp} onChange={val => handleVitalChange('temp', val)} icon={<span className="text-xs">рџЊЎ</span>} color="orange" error={vitalErrors.temp} />
+                                            <VitalInputCompact label={t('vitals_label_temp')} unit="°C" value={vitals.temp} onChange={val => handleVitalChange('temp', val)} icon={<span className="text-[10px] font-black">T</span>} color="orange" error={vitalErrors.temp} />
                                             <VitalInputCompact label={t('vitals_label_spo2')} unit="%" value={vitals.spO2} onChange={val => handleVitalChange('spO2', val)} icon={<OxygenIcon className="w-3 h-3"/>} color="cyan" error={vitalErrors.spO2} />
-                                            <VitalInputCompact label={t('vitals_label_resp')} unit="/min" value={vitals.respiration} onChange={val => handleVitalChange('respiration', val)} icon={<span className="text-xs">рџ«Ѓ</span>} color="blue" error={vitalErrors.respiration} />
+                                            <VitalInputCompact label={t('vitals_label_resp')} unit="/min" value={vitals.respiration} onChange={val => handleVitalChange('respiration', val)} icon={<span className="text-[10px] font-black">R</span>} color="blue" error={vitalErrors.respiration} />
                                         </div>
                                     </div>
 
@@ -1927,7 +1927,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                                         disabled={isAnalyzing}
                                         className="w-full bg-white/15 hover:bg-white/25 text-white font-bold py-3 rounded-2xl border border-white/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                                     >
-                                        <span>🔄</span>
+                                        <span className="text-sm font-bold">Qayta</span>
                                         <span>Qayta tahlil</span>
                                     </button>
                                     <button 
@@ -1968,7 +1968,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                             {view !== 'ziyrak' && (
                                 <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
                             )}
-                            <span className={`text-base sm:text-lg flex-shrink-0 ${view === 'ziyrak' ? 'drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]' : ''}`}>рџ¤-</span>
+                            <span className={`text-base sm:text-lg flex-shrink-0 ${view === 'ziyrak' ? 'drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]' : ''}`}>Z</span>
                             <span className="text-[8px] sm:text-[9px] font-bold mt-0.5 sm:mt-1 tracking-wider truncate w-full text-center">Ziyrak</span>
                         </button>
                         <button type="button" onClick={() => setView('profile')} className={`flex flex-col items-center justify-center p-1 sm:p-2 transition-colors min-w-0 flex-1 ${view === 'profile' ? 'text-white' : 'text-white/50 hover:text-white'}`}>

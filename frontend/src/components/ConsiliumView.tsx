@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ConsiliumView - Multi-Agent Medical Consilium
  * Vizual ko'rsatish: 3 faza progress + professorlar bahsi + yakuniy xulosa
  */
@@ -49,9 +49,9 @@ const PHASE_LABELS: Record<string, Record<string, string>> = {
     consensus:   '3-Faza: Konsensus Xulosasi',
   },
   ru: {
-    independent: 'Р¤Р°Р·Р° 1: РќРµР·Р°РІРёСЃРёРјС‹Р№ Р°РЅР°Р»РёР·',
-    debate:      'Р¤Р°Р·Р° 2: Р"РµР±Р°С‚С‹',
-    consensus:   'Р¤Р°Р·Р° 3: РљРѕРЅСЃРµРЅСЃСѓСЃ',
+    independent: 'Фаза 1: Независимый анализ',
+    debate:      'Фаза 2: Дебаты',
+    consensus:   'Фаза 3: Консенсус',
   },
   en: {
     independent: 'Phase 1: Independent Analysis',
@@ -65,19 +65,19 @@ function getPhaseLabels(lang: string) {
 }
 
 const PROFESSOR_COLORS: Record<string, string> = {
-  deepseek: 'bg-violet-600',
-  llama:    'bg-emerald-600',
+  deepseek: 'D',
+  llama: 'L',
   mistral:  'bg-amber-600',
-  mini:     'bg-rose-600',
-  gpt4o:    'bg-sky-600',
+  mini: 'Mi',
+  gpt4o: 'G',
 };
 
 const PROFESSOR_ICONS: Record<string, string> = {
-  deepseek: 'рџ§ ',
-  llama:    'рџ"љ',
+  deepseek: 'D',
+  llama:    'L',
   mistral:  'M',
-  mini:     'рџ'Љ',
-  gpt4o:    'рџЋ"',
+  mini:     'Mi',
+  gpt4o:    'G',
 };
 
 function PhaseIndicator({
@@ -90,10 +90,10 @@ function PhaseIndicator({
     error:   'bg-red-600 text-white',
   };
   const icons: Record<PhaseStatus, string> = {
-    waiting: '…',
-    running: '⟳',
-    done:    '✓',
-    error:   '×',
+    waiting: '...',
+    running: 'O',
+    done:    '+',
+    error:   'x',
   };
   return (
     <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${colors[status]}`}>
@@ -106,7 +106,7 @@ function PhaseIndicator({
 function DebateCard({ msg, onDownload }: { msg: DebateMessage; onDownload?: (msg: DebateMessage) => void }) {
   const agentId = msg.id.split('-')[0];
   const colorClass = PROFESSOR_COLORS[agentId] || 'bg-slate-600';
-  const icon       = PROFESSOR_ICONS[agentId]  || 'рџ©є';
+  const icon       = PROFESSOR_ICONS[agentId]  || 'K';
   const isDebate   = msg.phase === 'debate';
 
   return (
@@ -218,7 +218,7 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white">рџЏ› Tibbiy Konsilium</h2>
+          <h2 className="text-xl font-bold text-white">Tibbiy Konsilium</h2>
           <p className="text-sm text-slate-400 mt-0.5">
             5 ta mustaqil AI professor - Bahslar - Konsensus
           </p>
@@ -242,14 +242,14 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
           className="w-full py-3 rounded-2xl bg-gradient-to-r from-sky-600 to-violet-600
                      text-white font-semibold text-base hover:opacity-90 active:scale-95 transition-all"
         >
-          рџљЂ Konsiliumni Boshlash
+          Konsiliumni Boshlash
         </button>
       )}
 
       {/* Loading skeleton */}
       {loading && (
         <div className="rounded-2xl border border-slate-600/40 bg-slate-800/40 p-6 text-center">
-          <div className="animate-spin text-4xl mb-3">вџі</div>
+          <div className="animate-spin w-10 h-10 border-2 border-sky-500 border-t-transparent rounded-full mx-auto mb-3" aria-hidden="true" />
           <p className="text-slate-300">Professorlar mustaqil tahlil qilmoqda...</p>
           <p className="text-slate-500 text-sm mt-1">Bu jarayon 30-90 soniya davom etishi mumkin</p>
         </div>
@@ -384,7 +384,7 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
               {/* Follow-up */}
               {result.final_report.followUpPlan && (
                 <div className="rounded-2xl bg-slate-800/60 border border-slate-600/30 p-4">
-                  <h3 className="font-bold text-white mb-1">рџ"… Kuzatuv Rejasi</h3>
+                  <h3 className="font-bold text-white mb-1">Kuzatuv Rejasi</h3>
                   <p className="text-slate-300 text-sm">{result.final_report.followUpPlan}</p>
                 </div>
               )}
@@ -449,7 +449,7 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
             className="w-full py-2 rounded-xl border border-slate-600 text-slate-400 text-sm
                        hover:border-sky-500 hover:text-sky-400 transition-colors"
           >
-            рџ"„ Qayta O'tkazish
+            Qayta O'tkazish
           </button>
         </>
       )}

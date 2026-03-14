@@ -1,19 +1,19 @@
 """
-Azure Speech Services вЂ” STT & TTS  (Production-Ready)
+Azure Speech Services  -  STT & TTS  (Production-Ready)
 =======================================================
 Region  : swedencentral
 Endpoint: https://swedencentral.api.cognitive.microsoft.com/
 
 REST API asosida (SDK o'rnatishsiz):
-  вЂў STT  вЂ“ audio в†’ matn  (batch)
-  вЂў TTS  вЂ“ matn в†’ MP3 audio (O'zbek + Rus + English neural voices)
-  вЂў Token вЂ“ Frontend Azure Speech SDK uchun vaqtinchalik auth token
+  - STT   -  audio  ->  matn  (batch)
+  - TTS   -  matn  ->  MP3 audio (O'zbek + Rus + English neural voices)
+  - Token  -  Frontend Azure Speech SDK uchun vaqtinchalik auth token
 
 Ovoz profillari (Azure Neural TTS):
-  uz-UZ  в†’ uz-UZ-MadinaNeural     (ayol, O'zbek)
-  ru-RU  в†’ ru-RU-SvetlanaNeural   (ayol, Rus)
-  en-US  в†’ en-US-JennyNeural      (ayol, English)
-  kk-KZ  в†’ kk-KZ-AigulNeural     (Qoraqolpoq вЂ” Azure qo'llasa, aks holda Rus)
+  uz-UZ   ->  uz-UZ-MadinaNeural     (ayol, O'zbek)
+  ru-RU   ->  ru-RU-SvetlanaNeural   (ayol, Rus)
+  en-US   ->  en-US-JennyNeural      (ayol, English)
+  kk-KZ   ->  kk-KZ-AigulNeural     (Qoraqolpoq  -  Azure qo'llasa, aks holda Rus)
 """
 
 from __future__ import annotations
@@ -160,7 +160,7 @@ def get_speech_token() -> dict:
 
 
 # в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-# STT вЂ” Batch  (audio bytes в†’ matn)
+# STT  -  Batch  (audio bytes  ->  matn)
 # в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 def transcribe_audio(
@@ -169,7 +169,7 @@ def transcribe_audio(
     audio_format: str = "wav",
 ) -> dict:
     """
-    Azure Speech STT: audio bytes в†’ matn.
+    Azure Speech STT: audio bytes  ->  matn.
 
     Args:
         audio_data:   WAV / OGG / WebM audio bytes.
@@ -258,7 +258,7 @@ def transcribe_audio(
 
 
 # в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-# TTS вЂ” Matn в†’ Audio bytes (MP3)
+# TTS  -  Matn  ->  Audio bytes (MP3)
 # в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 def synthesize_speech(
@@ -270,14 +270,14 @@ def synthesize_speech(
     fmt:      str = "audio-24khz-48kbitrate-mono-mp3",
 ) -> bytes:
     """
-    Azure Neural TTS: matn в†’ MP3 audio bytes.
+    Azure Neural TTS: matn  ->  MP3 audio bytes.
 
     Args:
         text:     O'qiladigan matn (max 3000 belgi).
         language: Til kodi (uz-L, ru, en, kaa).
-        rate:     Nutq tezligi: "-20%" вЂ“ "+20%" yoki "slow"/"fast".
-        pitch:    Ovoz toni: "-10Hz" вЂ“ "+10Hz".
-        volume:   Ovoz balandligi: "0" вЂ“ "100%".
+        rate:     Nutq tezligi: "-20%"  -  "+20%" yoki "slow"/"fast".
+        pitch:    Ovoz toni: "-10Hz"  -  "+10Hz".
+        volume:   Ovoz balandligi: "0"  -  "100%".
         fmt:      Azure audio output format.
 
     Returns:
@@ -331,7 +331,7 @@ def synthesize_speech(
 
 
 def synthesize_speech_b64(text: str, language: str = "uz-L") -> str:
-    """TTS в†’ base64 encoded MP3 string (JSON API uchun)."""
+    """TTS  ->  base64 encoded MP3 string (JSON API uchun)."""
     audio = synthesize_speech(text, language)
     return base64.b64encode(audio).decode("utf-8")
 
@@ -425,7 +425,7 @@ def delete_transcript(session_id: str) -> bool:
 def test_connection() -> dict:
     """
     Azure Speech ulanishini tekshirish.
-    Management API ga ping вЂ” kalit to'g'riligini tasdiqlaydi.
+    Management API ga ping  -  kalit to'g'riligini tasdiqlaydi.
     """
     _check_config()
     try:

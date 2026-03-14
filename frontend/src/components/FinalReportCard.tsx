@@ -129,7 +129,7 @@ const recommendedTestToDisplay = (item: unknown): string => {
         const reason = o.reason ?? o.reasoning;
         const urgency = o.urgency;
         const parts = [testName, reason, urgency].filter(v => v != null && String(v).trim());
-        return parts.map(String).join(' — ') || JSON.stringify(item);
+        return parts.map(String).join(' - ') || JSON.stringify(item);
     }
     return String(item ?? '');
 };
@@ -174,7 +174,7 @@ const FinalReportCard: React.FC<{
     };
 
     const handleCancelEditPlan = () => {
-        setEditedPlan(report.treatmentPlan);
+        setEditedPlan((Array.isArray(report.treatmentPlan) ? report.treatmentPlan : []).map(planItemToString));
         setIsEditingPlan(false);
     };
 
@@ -185,7 +185,7 @@ const FinalReportCard: React.FC<{
                 <h1 className={`text-2xl font-bold tracking-tight ${isScenario ? 'text-purple-700' : 'text-slate-800'}`}>
                     {isScenario ? "Alternativ Senariy Natijasi" : "YAKUNIY KLINIK XULOSA"}
                 </h1>
-                <p className="text-sm text-slate-500 mt-1">Konsilium konsensusi asosida — tibbiy hujjat</p>
+                <p className="text-sm text-slate-500 mt-1">Konsilium konsensusi asosida - tibbiy hujjat</p>
             </div>
 
             {/* ASOSIY XULOSA — bitta aniq blok, boshqa matn bilan aralashmasin */}
@@ -214,7 +214,7 @@ const FinalReportCard: React.FC<{
                                 <div className="flex justify-between items-start gap-2">
                                     <span className="text-base font-bold text-slate-900">{diag.name}</span>
                                     <span className="px-2.5 py-0.5 bg-blue-100 text-blue-800 rounded text-sm font-semibold shrink-0">
-                                        {Number.isFinite(diag.probability) ? `${diag.probability}%` : '—'}
+                                        {Number.isFinite(diag.probability) ? `${diag.probability}%` : '-'}
                                     </span>
                                 </div>
                                 {diag.uzbekProtocolMatch && (
@@ -252,6 +252,12 @@ const FinalReportCard: React.FC<{
                             <p><span className='font-semibold'>Topilmalar:</span> {report.imageAnalysis.findings}</p>
                             <p className="mt-2"><span className='font-semibold'>Klinik bog'liqlik:</span> {report.imageAnalysis.correlation}</p>
                         </div>
+                    </Section>
+                )}
+
+                {report.unexpectedFindings && String(report.unexpectedFindings).trim() && (
+                    <Section title="Kutilmagan topilmalar va gipotezalar" icon={<LightBulbIcon className="w-6 h-6 text-amber-500"/>}>
+                        <p className="text-text-primary whitespace-pre-wrap">{report.unexpectedFindings}</p>
                     </Section>
                 )}
 
@@ -305,13 +311,19 @@ const FinalReportCard: React.FC<{
                 
                 <Section title="Dori-Darmonlar bo'yicha Tavsiyalar (O'zbekiston)" icon={<PillIcon className="w-6 h-6"/>}>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     {(Array.isArray(report.medicationRecommendations) && report.medicationRecommendations.length > 0) ? report.medicationRecommendations.map((med, index) => (
+                     {(Array.isArray(report.medicationRecommendations) && report.medicationRecommendations.length > 0) ? report.medicationRecommendations.map((med, index) => {
+                        const drugName = (med.name && String(med.name).trim()) || (med.localAvailability && String(med.localAvailability).trim()) || 'Dori';
+                        const hasRealName = med.name && String(med.name).trim() && !/^(doza|dori|tabletka|tavsiya)$/i.test(String(med.name).trim());
+                        const showLocalAvailability = med.localAvailability && (hasRealName || !drugName.includes(med.localAvailability));
+                        return (
                         <div key={index} className="p-4 bg-slate-50 rounded-xl border border-border-color shadow-sm relative overflow-hidden">
                            <div className="absolute top-0 right-0 bg-blue-500 w-16 h-16 rounded-bl-full -mr-8 -mt-8 opacity-10"></div>
-                           <p className="font-bold text-lg text-text-primary">{med.name}</p>
-                           <p className="text-sm text-text-secondary mt-1"><span className="font-semibold">Doza:</span> {med.dosage}</p>
+                           <p className="font-bold text-lg text-text-primary">{drugName}</p>
+                           {(med.dosage && String(med.dosage).trim()) ? (
+                               <p className="text-sm text-text-secondary mt-1"><span className="font-semibold">Doza:</span> {med.dosage}</p>
+                           ) : null}
                            
-                           {med.localAvailability && (
+                           {showLocalAvailability && (
                                <div className="mt-2 p-2 bg-green-50 border border-green-100 rounded text-xs text-green-800">
                                    <span className="font-bold">Mahalliy savdo nomlari:</span> {med.localAvailability}
                                </div>
@@ -321,9 +333,9 @@ const FinalReportCard: React.FC<{
                                <p className="text-xs text-slate-500 mt-1 italic">Taxminiy narxi: {med.priceEstimate}</p>
                            )}
                            
-                           <p className="text-xs text-text-secondary mt-2 border-t pt-2">{med.notes}</p>
+                           {med.notes && <p className="text-xs text-text-secondary mt-2 border-t pt-2">{med.notes}</p>}
                         </div>
-                    )) : (
+                    ); }) : (
                         <p className="text-slate-500 text-sm italic">Ma'lumot kiritilmagan.</p>
                     )}
                     </div>

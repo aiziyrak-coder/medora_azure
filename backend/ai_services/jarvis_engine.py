@@ -2,15 +2,15 @@
 Farg'ona JSTI Jarvis AI Engine
 ========================
 Ikki rejim:
-  1. ConsultationMonitor  вЂ” passiv tinglash, auto-diagnosis
-  2. ZIYRAKChat           вЂ” interaktiv suhbat, kontekst xotirasi
+  1. ConsultationMonitor   -  passiv tinglash, auto-diagnosis
+  2. ZIYRAKChat            -  interaktiv suhbat, kontekst xotirasi
 
 Context management:
-  вЂў Har bir sessiya uchun suhbat tarixi (rolling window: 20 xabar)
-  вЂў Bemor ma'lumotlari, transkript, doktor so'rovlari вЂ” birgalikda kontekst
-  вЂў PhysiologyFilter + AnatomyGuard вЂ” har bir ovozli so'rovda ham ishlaydi
+  - Har bir sessiya uchun suhbat tarixi (rolling window: 20 xabar)
+  - Bemor ma'lumotlari, transkript, doktor so'rovlari  -  birgalikda kontekst
+  - PhysiologyFilter + AnatomyGuard  -  har bir ovozli so'rovda ham ishlaydi
 
-GPT-4o (FJSTI-gpt4o) вЂ” barcha ZIYRAK so'rovlari uchun
+GPT-4o (FJSTI-gpt4o)  -  barcha ZIYRAK so'rovlari uchun
 """
 
 from __future__ import annotations
@@ -37,21 +37,21 @@ logger = logging.getLogger(__name__)
 # в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 _ZIYRAK_SYSTEM = """\
-Siz "Farg'ona JSTI Jarvis" вЂ” tibbiy yordamchi AI siz.
+Siz "Farg'ona JSTI Jarvis"  -  tibbiy yordamchi AI siz.
 Siz shifokorning ishonchli yordamchisi siz, bemor emas, SHIFOKORGA yordam berasiz.
 
 VAZIFALARINGIZ:
-1. Shifokor savol bersa вЂ” aniq, qisqa, klinik jihatdan to'g'ri javob bering.
+1. Shifokor savol bersa  -  aniq, qisqa, klinik jihatdan to'g'ri javob bering.
 2. Suhbatni kuzatib boring va yangi klinik belgilar chiqqanda shifokorni ogohlantirib turing.
 3. O'zbekiston SSV protokollariga mos tavsiya bering.
 4. Faqat O'zbekistonda ro'yxatdan o'tgan dori-darmonlar tavsiya qiling.
-5. Shoshilinch belgi aniqlansa вЂ” DARHOL shifokorni ogohlantirib, 103 ga murojaat tavsiya qiling.
+5. Shoshilinch belgi aniqlansa  -  DARHOL shifokorni ogohlantirib, 103 ga murojaat tavsiya qiling.
 
 OVOZLI MULOQOT QOIDALARI:
-вЂў Javoblar QISQA va ANIQ bo'lsin (max 2-3 gap).
-вЂў Matnli rejim uchun biroz batafsil bo'lishi mumkin.
-вЂў Suhbat kontekstini doim eslab qoling.
-вЂў Bemor nomini tilga olmang вЂ” maxfiylik.
+- Javoblar QISQA va ANIQ bo'lsin (max 2-3 gap).
+- Matnli rejim uchun biroz batafsil bo'lishi mumkin.
+- Suhbat kontekstini doim eslab qoling.
+- Bemor nomini tilga olmang  -  maxfiylik.
 
 TIL: {language_hint}
 """
@@ -224,12 +224,12 @@ def ZIYRAK_chat(
     voice_mode:  bool = True,
 ) -> dict:
     """
-    Shifokor в†’ ZIYRAK so'rov.
+    Shifokor  ->  ZIYRAK so'rov.
 
     Args:
         session_id:   ZIYRAK sessiya ID.
         user_message: Shifokorning savoli (matn yoki STT orqali kelgan).
-        voice_mode:   True в†’ qisqa javob (ovoz uchun), False в†’ batafsil.
+        voice_mode:   True  ->  qisqa javob (ovoz uchun), False  ->  batafsil.
 
     Returns:
         {
@@ -255,9 +255,9 @@ def ZIYRAK_chat(
             "filter_level":    guard.level,
         }
 
-    # System prompt вЂ” voice mode uchun qisqa javob yo'riqnomasi
+    # System prompt  -  voice mode uchun qisqa javob yo'riqnomasi
     if voice_mode:
-        user_message = user_message + "\n\n[REJIM: Ovozli вЂ” QISQA va aniq javob bering, max 2-3 gap]"
+        user_message = user_message + "\n\n[REJIM: Ovozli  -  QISQA va aniq javob bering, max 2-3 gap]"
 
     messages = _build_gpt_messages(session, user_message)
 
@@ -300,7 +300,7 @@ def ZIYRAK_chat_stream(
     user_message: str,
     voice_mode:   bool = True,
 ) -> Iterator[str]:
-    """Streaming version of ZIYRAK_chat вЂ” yields text chunks."""
+    """Streaming version of ZIYRAK_chat  -  yields text chunks."""
     session = get_session(session_id)
     if not session:
         yield '[{"error": "Sessiya topilmadi"}]'
@@ -312,7 +312,7 @@ def ZIYRAK_chat_stream(
         return
 
     if voice_mode:
-        user_message_prompt = user_message + "\n\n[REJIM: Ovozli вЂ” QISQA javob, max 2-3 gap]"
+        user_message_prompt = user_message + "\n\n[REJIM: Ovozli  -  QISQA javob, max 2-3 gap]"
     else:
         user_message_prompt = user_message
 
@@ -356,7 +356,7 @@ def add_transcript_to_session(
 ) -> dict:
     """
     Real-time transkript bo'lagini sessiyaga qo'shish.
-    Kritik belgilar aniqlansa вЂ” ogohlantirish qaytaradi.
+    Kritik belgilar aniqlansa  -  ogohlantirish qaytaradi.
     """
     session = get_session(session_id)
     if not session:

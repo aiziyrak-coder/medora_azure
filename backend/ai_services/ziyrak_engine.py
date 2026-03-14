@@ -45,23 +45,23 @@ _ZIYRAK_INTRO = (
 )
 
 _ZIYRAK_SYSTEM = """\
-Siz "Farg'ona JSTI Ziyrak" вЂ” Farg'ona JSTI platformasining raqamli tibbiy yordamchisi siz.
+Siz "Farg'ona JSTI Ziyrak"  -  Farg'ona JSTI platformasining raqamli tibbiy yordamchisi siz.
 O'zingizni shu tarzda tanishtirasiz: "Men Farg'ona JSTI platformasining raqamli yordamchisi - Ziyrakman."
 
 Siz shifokorning ishonchli yordamchisi siz, SHIFOKORGA yordam berasiz.
 
 VAZIFALARINGIZ:
-1. Shifokor savol bersa вЂ” aniq, qisqa, klinik jihatdan to'g'ri javob bering.
+1. Shifokor savol bersa  -  aniq, qisqa, klinik jihatdan to'g'ri javob bering.
 2. Suhbatni kuzatib boring va yangi klinik belgilar chiqqanda shifokorni ogohlantirib turing.
 3. O'zbekiston SSV protokollariga mos tavsiya bering.
 4. Faqat O'zbekistonda ro'yxatdan o'tgan dori-darmonlar tavsiya qiling.
-5. Shoshilinch belgi aniqlansa вЂ” DARHOL shifokorni ogohlantirib, 103 ga murojaat tavsiya qiling.
+5. Shoshilinch belgi aniqlansa  -  DARHOL shifokorni ogohlantirib, 103 ga murojaat tavsiya qiling.
 
 OVOZLI MULOQOT QOIDALARI:
 - Javoblar QISQA va ANIQ bo'lsin (max 2-3 gap).
 - Matnli rejim uchun biroz batafsil bo'lishi mumkin.
 - Suhbat kontekstini doim eslab qoling.
-- Bemor nomini tilga olmang вЂ” maxfiylik.
+- Bemor nomini tilga olmang  -  maxfiylik.
 
 TIL: {language_hint}
 """
@@ -229,7 +229,7 @@ def ziyrak_chat(
     voice_mode:   bool = True,
 ) -> dict:
     """
-    Shifokor в†’ Ziyrak so'rov.
+    Shifokor  ->  Ziyrak so'rov.
 
     Returns:
         {
@@ -256,7 +256,7 @@ def ziyrak_chat(
 
     prompt = user_message
     if voice_mode:
-        prompt += "\n\n[REJIM: Ovozli вЂ” QISQA va aniq javob, max 2-3 gap]"
+        prompt += "\n\n[REJIM: Ovozli  -  QISQA va aniq javob, max 2-3 gap]"
 
     messages = _build_messages(session, prompt)
 
@@ -299,7 +299,7 @@ def ziyrak_chat_stream(
     user_message: str,
     voice_mode:   bool = True,
 ) -> Iterator[str]:
-    """Streaming version вЂ” yields text chunks."""
+    """Streaming version  -  yields text chunks."""
     session = get_session(session_id)
     if not session:
         yield '[{"error": "Sessiya topilmadi"}]'
@@ -310,7 +310,7 @@ def ziyrak_chat_stream(
         yield guard.message
         return
 
-    prompt = user_message + ("\n\n[REJIM: Ovozli вЂ” QISQA javob, max 2-3 gap]" if voice_mode else "")
+    prompt = user_message + ("\n\n[REJIM: Ovozli  -  QISQA javob, max 2-3 gap]" if voice_mode else "")
     messages = _build_messages(session, prompt)
 
     full_text = ""
@@ -373,7 +373,7 @@ def add_transcript_to_session(
 # в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 _DIAGNOSIS_SYSTEM = """\
-Siz Ziyrak вЂ” tibbiy tahlil AI. Quyidagi shifokor-bemor suhbati asosida:
+Siz Ziyrak  -  tibbiy tahlil AI. Quyidagi shifokor-bemor suhbati asosida:
 1. Bemor shikoyatlarini QISQACHA jamla.
 2. Eng ehtimoliy taxminiy tashxis (ICD-10 bilan).
 3. O'zbekiston SSV protokoliga mos davolash rejasi.

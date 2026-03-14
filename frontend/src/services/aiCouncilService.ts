@@ -62,9 +62,16 @@ function mapModel(modelLabel: string): string {
 const langMap: Record<Language, string> = {
     'uz-L': 'Uzbek (Latin script)',
     'uz-C': 'Uzbek (Cyrillic script)',
-    'kaa': 'Karakalpak (Latin script)',
     'ru': 'Russian',
     'en': 'English'
+};
+
+/** Fallback savollar — AI muvaffaqiyatsiz bo'lsa ham aniqlashtiruv sahifasi ko'rsatiladi */
+export const CLARIFY_FALLBACK: Record<Language, string[]> = {
+    'uz-L': ['Shikoyat qachondan boshlangan?', 'Qanday davolashlar qo\'llanildi?', 'Boshqa surunkali kasalliklar bormi?'],
+    'uz-C': ['Шикоят қачондан бошланган?', 'Қандай даволашлар қўлланилди?', 'Бошқа сурункали касалликлар борми?'],
+    'ru': ['Когда начались жалобы?', 'Какое лечение применялось?', 'Есть ли другие хронические заболевания?'],
+    'en': ['When did the complaints start?', 'What treatment has been used?', 'Any other chronic conditions?'],
 };
 
 // --- DYNAMIC SYSTEM INSTRUCTIONS (Kuchli va Aqlli) ---
@@ -74,7 +81,7 @@ const getSystemInstruction = (language: Language): string => {
     Vazifangiz: shifokorga ENG ANIQ, DALILLI va XAVFSIZ yechim taqdim etish.
     
     AQLIYAT QOIDALARI:
-    1. Har bir xulosa uchun QADAMMA-QADAM MANTIQIY ZANJIR (chain-of-thought) yozing: "Sabab A в†' natija B в†' shuning uchun C."
+    1. Har bir xulosa uchun QADAMMA-QADAM MANTIQIY ZANJIR (chain-of-thought) yozing: "Sabab A  ->  natija B  ->  shuning uchun C."
     2. Differensial tashxisda har bir variant uchun "Nega bu ehtimol?" va "Nega boshqasi kamroq?" javob bering.
     3. Ishonch darajasini aniq bering (yuqori/o'rta/past) va qaysi ma'lumot yetishmasligi aniqlikni kamaytirishini ayting.
     4. XAVFSIZLIK: Bemor allergiyasi, joriy dori-darmonlar va buyrak/jigar funksiyasi bo'yicha har doim o'ylab bering; xavfli aralashuvlarni darhol bildiring.
@@ -100,20 +107,12 @@ const getSystemInstruction = (language: Language): string => {
         O'ZBEKISTON KONTEKSTI (MAJBURIY): Tashxis, davolash rejasi va dori-darmonlar faqat O'zbekiston Respublikasi qonunchiligi va SSV (Sog'liqni Saqlash Vazirligi) tasdiqlangan klinik protokollarga muvofiq bo'lsin. Dori-darmonlar faqat O'zbekistonda ro'yxatdan o'tgan va aptekalarda mavjud savdo nomlari bilan (Nimesil, Sumamed, Augmentin, Metformin, Enalapril, Amlodipin, Omeprazol va hokazo).
         TERMINOLOGIYA: O'zbek tibbiyot terminologiyasi va SSV qabul qilgan atamalar.
         `,
-        'uz-C': `
-        РўРР›: Р'Р°СЂС‡Р° Р¶Р°РІРѕР±Р»Р°СЂРёРЅРіРёР· Т›Р°С‚СЉРёР№ РЋР·Р±РµРє С‚РёР»РёРґР° (РљРёСЂРёР»Р» РіСЂР°С„РёРєР°СЃРёРґР°) Р±СћР»РёС€Рё РЁРђР Рў.
-        РЋР-Р'Р•РљРРЎРўРћРќ РљРћРќРўР•РљРЎРўР (РњРђР-Р'РЈР РР™): РўР°С€С…РёСЃ, РґР°РІРѕР»Р°С€ СЂРµР¶Р°СЃРё РІР° РґРѕСЂРё-РґР°СЂРјРѕРЅР»Р°СЂ С„Р°Т›Р°С‚ РЋР·Р±РµРєРёСЃС‚РѕРЅ Р РµСЃРїСѓР±Р»РёРєР°СЃРё Т›РѕРЅСѓРЅС‡РёР»РёРіРё РІР° РЎРЎР' С‚Р°СЃРґРёТ›Р»Р°РіР°РЅ РєР»РёРЅРёРє РїСЂРѕС‚РѕРєРѕР»Р»Р°СЂРіР° РјСѓРІРѕС„РёТ› Р±СћР»СЃРёРЅ. Р"РѕСЂРё-РґР°СЂРјРѕРЅР»Р°СЂ С„Р°Т›Р°С‚ РЋР·Р±РµРєРёСЃС‚РѕРЅРґР° СЂСћР№С…Р°С‚РґР°РЅ СћС‚РіР°РЅ РІР° Р°РїС‚РµРєР°Р»Р°СЂРґР° РјР°РІР¶СѓРґ СЃР°РІРґРѕ РЅРѕРјР»Р°СЂРё Р±РёР»Р°РЅ.
-        РўР•Р РњРРќРћР›РћР"РРЇ: РЋР·Р±РµРє С‚РёР±Р±РёС'С‚ С‚РµСЂРјРёРЅРѕР»РѕРіРёСЏСЃРё РІР° РЎРЎР' Т›Р°Р±СѓР» Т›РёР»РіР°РЅ Р°С‚Р°РјР°Р»Р°СЂ.
-        `,
-        'kaa': `
-        TIL: BarlД±q juwaplarД±Е„Д±z qataЕ„ Qaraqalpaq tilinde (Lotin grafikasД±nda) bolД±wД± SHГЃRT.
-        Г"ZBEKISTAN KONTEKSTI (MAJBГљRI): Tashxis, emlew rejasi hГЎm dГЎri-darmonlar tek Г"zbekistan RespublikasД± qonunshД±lД±ЗµД± hГЎm SSV tasdД±qlagan klinikalД±q protokollarga sГЎykes bolsД±n. DГЎri-darmonlar tek Г"zbekistonda dizimnen Гіtken hГЎm aptekalarda bar savdo atlarД± menen.
-        TERMINOLOGIYA: Qaraqalpaq/O'zbek medicinalД±q terminologiyasД±.
-        `,
-        'ru': `
-        РЇР-Р«Рљ: Р'СЃРµ РІР°С€Рё РѕС‚РІРµС‚С‹ Р"РћР›Р-РќР« Р±С‹С‚СЊ СЃС‚СЂРѕРіРѕ РЅР° Р СѓСЃСЃРєРѕРј СЏР·С‹РєРµ.
-        РљРћРќРўР•РљРЎРў РЈР-Р'Р•РљРРЎРўРђРќРђ (РћР'РЇР-РђРўР•Р›Р¬РќРћ): Р"РёР°РіРЅРѕР·, РїР»Р°РЅ Р»РµС‡РµРЅРёСЏ Рё РїСЂРµРїР°СЂР°С‚С‹ - СЃС‚СЂРѕРіРѕ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ Р·Р°РєРѕРЅРѕРґР°С‚РµР»СЊСЃС‚РІРѕРј Р РµСЃРїСѓР±Р»РёРєРё РЈР·Р±РµРєРёСЃС‚Р°РЅ Рё РєР»РёРЅРёС‡РµСЃРєРёРјРё РїСЂРѕС‚РѕРєРѕР»Р°РјРё, СѓС‚РІРµСЂР¶РґС'РЅРЅС‹РјРё РњРёРЅР·РґСЂР°РІРѕРј (РЎРЎР'). РџСЂРµРїР°СЂР°С‚С‹ - С‚РѕР»СЊРєРѕ Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅРЅС‹Рµ РІ РЈР·Р±РµРєРёСЃС‚Р°РЅРµ Рё РґРѕСЃС‚СѓРїРЅС‹Рµ РІ Р°РїС‚РµРєР°С… (С‚РѕСЂРіРѕРІС‹Рµ РЅР°Р·РІР°РЅРёСЏ: РќРёРјРёСЃРёР», РЎСѓРјР°РјРµРґ, РђСѓРіРјРµРЅС‚РёРЅ, РњРµС‚С„РѕСЂРјРёРЅ, Р­РЅР°Р»Р°РїСЂРёР» Рё С‚.Рґ.).
-        РўР•Р РњРРќРћР›РћР"РРЇ: РџСЂРѕС„РµСЃСЃРёРѕРЅР°Р»СЊРЅР°СЏ РјРµРґРёС†РёРЅСЃРєР°СЏ С‚РµСЂРјРёРЅРѕР»РѕРіРёСЏ РЅР° СЂСѓСЃСЃРєРѕРј; РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё - С‚РµСЂРјРёРЅС‹, РїСЂРёРЅСЏС‚С‹Рµ РІ РЈР·Р±РµРєРёСЃС‚Р°РЅРµ.
+        'uz-C': `TIL: Barcha javoblaringiz qat'iy O'zbek tilida (Kirill yozuvida) bo'lishi SHART.
+        O'ZBEKISTON KONTEKSTI (MAJBURIY): Tashxis, davolash rejasi va dori-darmonlar faqat O'zbekiston Respublikasi qonunchiligi va SSV tasdiqlangan klinik protokollarga muvofiq bo'lsin. Dori-darmonlar faqat O'zbekistonda ro'yxatdan o'tgan va aptekalarda mavjud savdo nomlari bilan (Nimesil, Sumamed, Augmentin va hokazo).
+        TERMINOLOGIYA: O'zbek tibbiyot terminologiyasi va SSV qabul qilgan atamalar.``,
+        'ru': `YAZYK: Vse vashi otvety DOLZHNY byt strogo na russkom yazyke.
+        KONTEKST UZBEKISTANA (OBYAZATELNO): Diagnoz, plan lecheniya i preparaty - strogo v sootvetstvii s zakonodatelstvom Respubliki Uzbekistan i klinicheskimi protokolami, utverzhdyonnymi Minzdravom (SSV). Prepara ty - tolko zaregistrirovannye v Uzbekistane i dostupnye v aptekah (torgovye nazvaniya: Nimesil, Sumamed, Augmentin, Metformin, Enalapril i t.d.).
+        TERMINOLOGIYA: Professionalnaya meditsinskaya terminologiya na russkom; pri neobhodimosti - terminy, prinyatye v Uzbekistane.
         `,
         'en': `
         LANGUAGE: All your responses MUST be strictly in English.
@@ -869,7 +868,7 @@ ${patientSummary}`;
     try {
         const ai = getGemini();
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000);
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
         const response = await ai.models.generateContent({
             model: DEPLOY_FAST,
             contents: plainPrompt,
@@ -884,7 +883,7 @@ ${patientSummary}`;
         return questions.length >= 2 ? questions.slice(0, 4) : CLARIFY_FALLBACK[language];
     } catch (e) {
         logger.warning('generateClarifyingQuestions error', e);
-        return [];
+        return CLARIFY_FALLBACK[language];
     }
 };
 
@@ -1026,7 +1025,6 @@ export const runCouncilDebate = async (
     const introMessages: Record<Language, string> = {
         'uz-L': 'O\'zbekiston yetakchi tibbiyot mutaxassislari yig\'ilmoqda...',
         'uz-C': 'Ўзбекистон етакчи тиббиёт мутахассислари йиғилмоқда...',
-        'kaa': 'Qaraqalpaqstan jetekshi medicina qaniygelari jıynalmaqta...',
         'ru': 'Ведующие медицинские специалисты собираются...',
         'en': 'Leading medical specialists are gathering...'
     };
@@ -1054,7 +1052,6 @@ export const runCouncilDebate = async (
         const roundMessages: Record<Language, string> = {
             'uz-L': `${round}-bosqich munozarasi boshlanmoqda...`,
             'uz-C': `${round}-боскич мунозараси бошланмоқда...`,
-            'kaa': `${round}-basqısh munozarası baslanbaqta...`,
             'ru': `Начинается ${round}-й раунд обсуждения...`,
             'en': `Round ${round} of debate starting...`
         };
@@ -1152,7 +1149,6 @@ Tarixi: ${JSON.stringify(debateHistory.slice(-8))}`;
     const finalizingMessages: Record<Language, string> = {
         'uz-L': 'Yakuniy hisobot tayyorlanmoqda...',
         'uz-C': 'Якуний ҳисобот тайёрланмоқда...',
-        'kaa': 'Juwmaqlawşı esabat tayarlanbaqta...',
         'ru': 'Подготовка итогового отчёта...',
         'en': 'Preparing final report...'
     };
@@ -1191,10 +1187,11 @@ Tarixi: ${JSON.stringify(debateHistory.slice(-8))}`;
         REQUIREMENTS:
         1. consensusDiagnosis: har biri uchun reasoningChain, justification, evidenceLevel. uzbekProtocolMatch: qaysi SSV klinik protokoliga mos (masalan: "Arterial gipertenziya / Qandli diabet bo'yicha SSV klinik protokoliga muvofiq") yoki "SSV tasdiqlangan milliy klinik protokollariga muvofiq" deb yozing.
         2. treatmentPlan: SSV protokollariga muvofiq, batafsil va tartibli; shoshilinch bo'lsa birinchi qadamlar aniq.
-        3. medicationRecommendations: FAQAT O'zbekiston Respublikasida ro'yxatdan o'tgan va aptekalarda mavjud savdo nomlari (Nimesil, Sumamed, Augmentin, Metformin, Enalapril, Amlodipin, Omeprazol, Paratsetamol, Ibuprofen va hokazo). Allergiya va dori aralashuvini hisobga oling. localAvailability: "O'zbekistonda mavjud" yoki qisqacha izoh.
+        3. medicationRecommendations: Har bir element uchun MAJBURIY: (a) name — ANIQ SAVDO NOMI (masalan: Nimesil, Sumamed, Metformin, Paratsetamol, Amlodipin, Omeprazol, Enalapril, Augmentin, Ibuprofen). "Dori", "Tabletka" yoki kategoriya yozmang; faqat O'zbekistonda ro'yxatdan o'tgan dori nomi. (b) dosage — aniq doza (masalan "500 mg kuniga 2 marta, 7 kun"). (c) localAvailability — "O'zbekistonda mavjud" yoki muqobil savdo nomlari (masalan "Panadol, Efferalgan"). (d) notes — qisqa yo'riqnoma. Allergiya va dori o'zaro ta'sirini hisobga oling.
         4. criticalFinding: hayotga xavf yoki shoshilinch davolash kerak bo'lsa to'ldiring (finding, implication, urgency - barchasi o'zbekcha); yo'q bo'lsa bo'sh qoldiring.
         5. recommendedTests: yetishmayotgan muhim tekshiruvlar (O'zbekiston LITS va standartlariga mos).
         6. uzbekistanLegislativeNote: "O'zbekiston Respublikasi sog'liqni saqlash qonunchiligi va SSV tasdiqlangan klinik protokollariga muvofiq" yoki tegishli qisqacha eslatma.
+        7. rejectedHypotheses: MAJBURIY. Munozarada ko'rib chiqilgan lekin rad etilgan tashxislar (differensial tashxislar). Har biri uchun name (tashxis nomi) va reason (nimaga rad etildi, qisqa sabab). Kamida 1-3 ta yozing agar bahsda boshqa variantlar tilga olingan bo'lsa; agar hech qanday rad etilgan tashxis bo'lmasa, bo'sh massiv [] qaytaring.
         ANIQLIK: consensusDiagnosis da probability ni dalil kuchiga mos qo'ying; reasoningChain har qadamda "nima uchun" javob bersin (HAR BIR ELEMENT 1-2 JUMLADAN OSHMASIN, qisqa holda yozing - to'liq JSON kesilmasin); uzbekProtocolMatch aniq protokol nomi/yo'nalishi. Taxminiy tashxisni yakuniy deb yozmang.
         Debate history: ${JSON.stringify(debateHistory)}
     `;
@@ -1229,7 +1226,40 @@ Tarixi: ${JSON.stringify(debateHistory.slice(-8))}`;
             onProgress({ type: 'critical_finding', data: rawReport.criticalFinding });
         }
 
-        onProgress({ type: 'report', data: rawReport, detectedMedications: [] });
+        const rejectedHypotheses = Array.isArray(rawReport.rejectedHypotheses) && rawReport.rejectedHypotheses.length > 0
+            ? rawReport.rejectedHypotheses.map((h: { name?: string; reason?: string }) => ({ name: String(h?.name ?? ''), reason: String(h?.reason ?? '') }))
+            : (rawReport.rejectedHypotheses ?? []);
+        const medicationRecommendations = (Array.isArray(rawReport.medicationRecommendations) ? rawReport.medicationRecommendations : []).map((m: { name?: string; dosage?: string; notes?: string; localAvailability?: string; priceEstimate?: string }) => {
+            const name = String(m?.name ?? '').trim();
+            const localAvailability = String(m?.localAvailability ?? '').trim();
+            return {
+                name: name || localAvailability || 'Dori',
+                dosage: String(m?.dosage ?? '').trim(),
+                notes: String(m?.notes ?? ''),
+                localAvailability: localAvailability || undefined,
+                priceEstimate: m?.priceEstimate,
+            };
+        });
+        const planItemToStr = (item: unknown): string => {
+            if (typeof item === 'string') return item;
+            if (item && typeof item === 'object') {
+                const o = item as Record<string, unknown>;
+                return [o.step, o.details, o.urgency, o.action, o.description, o.text]
+                    .filter(v => v != null && String(v).trim()).map(String).join(' - ') || JSON.stringify(item);
+            }
+            return String(item ?? '');
+        };
+        const rawPlan = Array.isArray(rawReport.treatmentPlan) ? rawReport.treatmentPlan : [];
+        const treatmentPlan = rawPlan.map(planItemToStr).filter(s => s.trim());
+        const reportWithPrognosis: FinalReport = {
+            ...rawReport,
+            prognosisReport: livePrognosis ?? rawReport.prognosisReport,
+            rejectedHypotheses,
+            medicationRecommendations,
+            treatmentPlan: treatmentPlan.length > 0 ? treatmentPlan : rawPlan.map((x: unknown) => (typeof x === 'string' ? x : JSON.stringify(x))).filter(Boolean),
+            unexpectedFindings: typeof rawReport.unexpectedFindings === 'string' ? rawReport.unexpectedFindings : String(rawReport.unexpectedFindings ?? ''),
+        };
+        onProgress({ type: 'report', data: reportWithPrognosis, detectedMedications: [] });
     } catch (e) {
         onProgress({ type: 'error', message: "Report generation error: " + (e instanceof Error ? e.message : String(e)) });
     }

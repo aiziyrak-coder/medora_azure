@@ -32,10 +32,30 @@ export interface AnalysisListParams {
 /**
  * Convert API AnalysisRecord to frontend AnalysisRecord
  */
+const planItemToStr = (item: unknown): string => {
+  if (typeof item === 'string') return item;
+  if (item && typeof item === 'object') {
+    const o = item as Record<string, unknown>;
+    return [o.step, o.details, o.urgency, o.action, o.description, o.text]
+      .filter(v => v != null && String(v).trim()).map(String).join(' - ') || JSON.stringify(item);
+  }
+  return String(item ?? '');
+};
+
 const apiToAnalysisRecord = (api: ApiAnalysisRecord): AnalysisRecord => {
-  const fr = api.final_report || {};
+  const fr = (api.final_report || {}) as Record<string, unknown>;
   const a = api as ApiAnalysisRecord & { patient_id?: string; patient?: number | { id?: number } };
   const patientId = a.patient_id ?? (typeof a.patient === 'object' && a.patient?.id != null ? String(a.patient.id) : String(a.patient ?? ''));
+  const rawTreatmentPlan = Array.isArray(fr.treatmentPlan) ? fr.treatmentPlan : Array.isArray(fr.treatment_plan) ? fr.treatment_plan : [];
+  const treatmentPlan = rawTreatmentPlan.map(planItemToStr).filter(s => s.trim());
+  const rawMeds = Array.isArray(fr.medicationRecommendations) ? fr.medicationRecommendations : Array.isArray(fr.medication_recommendations) ? fr.medication_recommendations : [];
+  const medicationRecommendations = rawMeds.map((m: Record<string, unknown>) => ({
+    name: String(m?.name ?? m?.drug ?? ''),
+    dosage: String(m?.dosage ?? ''),
+    notes: String(m?.notes ?? ''),
+    localAvailability: m?.localAvailability ?? m?.local_availability != null ? String(m.local_availability) : undefined,
+    priceEstimate: m?.priceEstimate ?? m?.price_estimate != null ? String(m.price_estimate) : undefined,
+  }));
   return {
     id: api.id.toString(),
     patientId,
@@ -44,15 +64,19 @@ const apiToAnalysisRecord = (api: ApiAnalysisRecord): AnalysisRecord => {
     debateHistory: api.debate_history || [],
     finalReport: {
       ...fr,
-      consensusDiagnosis: normalizeConsensusDiagnosis(fr.consensusDiagnosis),
-      rejectedHypotheses: Array.isArray(fr.rejectedHypotheses) ? fr.rejectedHypotheses : [],
-      treatmentPlan: Array.isArray(fr.treatmentPlan) ? fr.treatmentPlan : [],
-      medicationRecommendations: Array.isArray(fr.medicationRecommendations) ? fr.medicationRecommendations : [],
-      recommendedTests: (Array.isArray(fr.recommendedTests) ? fr.recommendedTests : []).map((t: unknown) => {
+      consensusDiagnosis: normalizeConsensusDiagnosis(fr.consensusDiagnosis ?? fr.consensus_diagnosis),
+      rejectedHypotheses: Array.isArray(fr.rejectedHypotheses) ? fr.rejectedHypotheses.map((h: { name?: unknown; reason?: unknown }) => ({ name: String(h?.name ?? ''), reason: String(h?.reason ?? '') }))
+        : (Array.isArray(fr.rejected_hypotheses) ? fr.rejected_hypotheses : []).map((h: { name?: unknown; reason?: unknown }) => ({ name: String(h?.name ?? ''), reason: String(h?.reason ?? '') })),
+      prognosisReport: fr.prognosisReport ?? fr.prognosis_report ?? undefined,
+      treatmentPlan,
+      medicationRecommendations,
+      unexpectedFindings: String(fr.unexpectedFindings ?? fr.unexpected_findings ?? ''),
+      criticalFinding: (fr.criticalFinding ?? fr.critical_finding) as FinalReport['criticalFinding'],
+      recommendedTests: (Array.isArray(fr.recommendedTests) ? fr.recommendedTests : Array.isArray(fr.recommended_tests) ? fr.recommended_tests : []).map((t: unknown) => {
         if (typeof t === 'string') return t;
         if (t && typeof t === 'object') {
           const o = t as Record<string, unknown>;
-          return [o.testName ?? o.name ?? o.test, o.reason, o.urgency].filter(Boolean).map(String).join(' — ') || JSON.stringify(t);
+          return [o.testName ?? o.name ?? o.test, o.reason, o.urgency].filter(Boolean).map(String).join(' - ') || JSON.stringify(t);
         }
         return String(t ?? '');
       }),
@@ -131,7 +155,7 @@ const analysisRecordToApi = (record: Partial<AnalysisRecord>): Partial<ApiAnalys
       if (typeof t === 'string') return t.slice(0, 500);
       if (t && typeof t === 'object') {
         const o = t as Record<string, unknown>;
-        const part = [o.testName ?? o.name ?? o.test, o.reason ?? o.reasoning, o.urgency].filter(Boolean).map(String).join(' — ');
+        const part = [o.testName ?? o.name ?? o.test, o.reason ?? o.reasoning, o.urgency].filter(Boolean).map(String).join(' - ');
         return part.slice(0, 500) || JSON.stringify(t).slice(0, 500);
       }
       return String(t ?? '').slice(0, 500);
@@ -232,8 +256,15 @@ export const createAnalysis = async (
   record: Partial<AnalysisRecord>
 ): Promise<ApiResponse<AnalysisRecord>> => {
   const base = analysisRecordToApi(record);
+  const patientIdNum = Number.isFinite(Number(patientId)) ? Number(patientId) : 0;
+  if (patientIdNum <= 0) {
+    return {
+      success: false,
+      error: { code: 400, message: "Bemor ID noto'g'ri. Avval bemor yaratilishi kerak." },
+    };
+  }
   const apiData: Record<string, unknown> = {
-    patient: Number(patientId),
+    patient: patientIdNum,
     external_patient_id: base.external_patient_id ?? '',
     patient_data: base.patient_data ?? {},
     debate_history: base.debate_history ?? [],
@@ -242,7 +273,8 @@ export const createAnalysis = async (
     selected_specialists: base.selected_specialists ?? [],
     detected_medications: base.detected_medications ?? [],
   };
-  const response = await apiPost<ApiAnalysisRecord>('/analyses/', apiData);
+  const sanitized = sanitizeForJson(apiData) as Record<string, unknown>;
+  const response = await apiPost<ApiAnalysisRecord>('/analyses/', sanitized);
   
   if (response.success && response.data) {
     return {

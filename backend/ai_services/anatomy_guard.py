@@ -1,24 +1,24 @@
 """
-Anatomy Guard вЂ” Production-Ready Middleware & Decorator
+Anatomy Guard  -  Production-Ready Middleware & Decorator
 ========================================================
 
 Har bir AI so'rovini ikki darajada tekshiradi:
 
-  Level 1 вЂ“ FAST RULE-BASED CHECK  (regex, <1ms, AI chaqirmasdan)
-    вЂў Anatomik imkonsiz joylashishlar  (tizzadagi oshqozon, ko'zdagi yurak ...)
-    вЂў Aldamchi / sinov so'rovlar       (men mushukman, zaharni qancha berish ...)
-    вЂў Fiziologik ziddiyatlar           (5 yoshda, 30 yillik kasallik ...)
-    вЂў Prompt injection                 (ignore previous, jailbreak ...)
+  Level 1  -  FAST RULE-BASED CHECK  (regex, <1ms, AI chaqirmasdan)
+    - Anatomik imkonsiz joylashishlar  (tizzadagi oshqozon, ko'zdagi yurak ...)
+    - Aldamchi / sinov so'rovlar       (men mushukman, zaharni qancha berish ...)
+    - Fiziologik ziddiyatlar           (5 yoshda, 30 yillik kasallik ...)
+    - Prompt injection                 (ignore previous, jailbreak ...)
 
-  Level 2 вЂ“ SEMANTIC AI CHECK  (FJSTI-mini, ~500ms, faqat shubhada)
-    вЂў Chuqur semantik tahlil
-    вЂў Kontekstga bog'liq anatomik xatolar
-    вЂў Murakkab mantiqiy ziddiyatlar
+  Level 2  -  SEMANTIC AI CHECK  (FJSTI-mini, ~500ms, faqat shubhada)
+    - Chuqur semantik tahlil
+    - Kontekstga bog'liq anatomik xatolar
+    - Murakkab mantiqiy ziddiyatlar
 
 Ishlatish usullari:
-  1. Django Middleware  в†’  settings.py MIDDLEWARE ga qo'shiladi
-  2. View Decorator     в†’  @anatomy_guard() dekorator sifatida
-  3. Direct call        в†’  AnatomyGuard.check(patient_data)
+  1. Django Middleware   ->   settings.py MIDDLEWARE ga qo'shiladi
+  2. View Decorator      ->   @anatomy_guard() dekorator sifatida
+  3. Direct call         ->   AnatomyGuard.check(patient_data)
 
 Natija: GuardResult(passed, level, message, details)
 """
@@ -53,10 +53,10 @@ PASS_RESULT = GuardResult(passed=True, level="ok", message="", details="")
 
 
 # в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-# Level 1 вЂ“ Rule-based checks
+# Level 1  -  Rule-based checks
 # в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
-# Anatomik jihatdan imkonsiz organвЂ“joy juftliklari (O'zbek + Rus + English)
+# Anatomik jihatdan imkonsiz organ - joy juftliklari (O'zbek + Rus + English)
 _ANATOMIC_RULES: list[tuple[str, str]] = [
     # (organ) + (noto'g'ri joy)
     (
@@ -177,7 +177,7 @@ def _level1_check(text: str) -> GuardResult | None:
 
 
 # в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-# Level 2 вЂ“ Semantic AI check (mini model)
+# Level 2  -  Semantic AI check (mini model)
 # в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 
 _L2_SYSTEM = """\
@@ -238,7 +238,7 @@ class AnatomyGuard:
             use_ai:        Enable Level-2 AI check.
 
         Returns:
-            GuardResult вЂ“ .passed=True means safe to proceed.
+            GuardResult  -  .passed=True means safe to proceed.
         """
         if isinstance(patient_data, dict):
             text = " ".join([

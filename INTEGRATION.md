@@ -40,8 +40,8 @@ Frontend `http://localhost:3000` da ishga tushadi.
 
 ### Authentication Flow
 
-1. **Register** → `POST /api/auth/register/`
-2. **Login** → `POST /api/auth/login/` → JWT tokens olinadi
+1. **Register**  ->  `POST /api/auth/register/`
+2. **Login**  ->  `POST /api/auth/login/`  ->  JWT tokens olinadi
 3. Tokens localStorage'ga saqlanadi
 4. Har bir API so'rovida `Authorization: Bearer <token>` header qo'shiladi
 5. Token muddati tugasa, avtomatik yangilanadi
@@ -49,22 +49,22 @@ Frontend `http://localhost:3000` da ishga tushadi.
 ### Data Flow
 
 #### Patients
-- **Create**: Frontend → `POST /api/patients/` → Backend saves → Returns patient
-- **List**: Frontend → `GET /api/patients/` → Backend returns list
-- **Update**: Frontend → `PATCH /api/patients/{id}/` → Backend updates
-- **Delete**: Frontend → `DELETE /api/patients/{id}/` → Backend deletes
+- **Create**: Frontend  ->  `POST /api/patients/`  ->  Backend saves  ->  Returns patient
+- **List**: Frontend  ->  `GET /api/patients/`  ->  Backend returns list
+- **Update**: Frontend  ->  `PATCH /api/patients/{id}/`  ->  Backend updates
+- **Delete**: Frontend  ->  `DELETE /api/patients/{id}/`  ->  Backend deletes
 
 #### Analyses
-- **Create**: Frontend → `POST /api/analyses/` → Backend saves → Returns analysis
-- **List**: Frontend → `GET /api/analyses/` → Backend returns list
-- **Update**: Frontend → `PATCH /api/analyses/{id}/` → Backend updates
-- **Stats**: Frontend → `GET /api/analyses/stats/` → Backend returns statistics
+- **Create**: Frontend  ->  `POST /api/analyses/`  ->  Backend saves  ->  Returns analysis
+- **List**: Frontend  ->  `GET /api/analyses/`  ->  Backend returns list
+- **Update**: Frontend  ->  `PATCH /api/analyses/{id}/`  ->  Backend updates
+- **Stats**: Frontend  ->  `GET /api/analyses/stats/`  ->  Backend returns statistics
 
 #### AI Services
-- **Clarifying Questions**: Frontend → `POST /api/ai/clarifying-questions/` → Backend calls Gemini → Returns questions
-- **Recommend Specialists**: Frontend → `POST /api/ai/recommend-specialists/` → Backend analyzes → Returns recommendations
-- **Generate Diagnoses**: Frontend → `POST /api/ai/generate-diagnoses/` → Backend calls Gemini → Returns diagnoses
-- **Council Debate**: Frontend → `POST /api/ai/council-debate/` → Backend orchestrates → Returns debate results
+- **Clarifying Questions**: Frontend  ->  `POST /api/ai/clarifying-questions/`  ->  Backend calls Gemini  ->  Returns questions
+- **Recommend Specialists**: Frontend  ->  `POST /api/ai/recommend-specialists/`  ->  Backend analyzes  ->  Returns recommendations
+- **Generate Diagnoses**: Frontend  ->  `POST /api/ai/generate-diagnoses/`  ->  Backend calls Gemini  ->  Returns diagnoses
+- **Council Debate**: Frontend  ->  `POST /api/ai/council-debate/`  ->  Backend orchestrates  ->  Returns debate results
 
 ## Error Handling
 

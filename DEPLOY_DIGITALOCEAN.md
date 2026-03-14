@@ -349,12 +349,12 @@ systemctl reload nginx
 Digital Ocean DNS panelida yoki domen provayderingizda:
 
 **A Records:**
-- `AiDoktor.fargana.uz` → Server IP
-- `AiDoktorapi.fargana.uz` → Server IP
+- `AiDoktor.fargana.uz`  ->  Server IP
+- `AiDoktorapi.fargana.uz`  ->  Server IP
 
 Yoki **CNAME** (agar subdomain bo'lsa):
-- `AiDoktor` → `@` yoki asosiy domen
-- `AiDoktorapi` → `@` yoki asosiy domen
+- `AiDoktor`  ->  `@` yoki asosiy domen
+- `AiDoktorapi`  ->  `@` yoki asosiy domen
 
 ---
 

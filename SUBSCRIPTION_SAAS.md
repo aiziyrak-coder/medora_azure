@@ -1,4 +1,4 @@
-# AiDoktorAI — Obuna (SaaS): Klinika va Shifokor
+# AiDoktorAI  -  Obuna (SaaS): Klinika va Shifokor
 
 ## Ikki tur obuna
 
@@ -7,9 +7,9 @@
 | **Klinika (Konsilium)** | **500 $/oy** | Shartnoma asosida. Hisob raqamdan o'tkazma. | Admin to'lovni tekshirgach obunani 30 kunga faollashtiradi. |
 | **Shifokor** | **10 $/oy** | Chek yuborish (karta yoki boshqa usul). | Admin chekni tasdiqlagach **30 kunga** obuna faollashadi. |
 
-- **Klinika** — Obuna sahifasida 500$/oy va bank rekvizitlari (hisob raqam, MFO, INN) ko'rsatiladi. To'lovni hisob raqamdan o'tkazadilar.
-- **Shifokor** — 10$/oy, to'lov chekini yuklash. Admin tasdiqlagach 30 kun faol.
-- **Trial** — Yangi ro'yxatdan o'tgan shifokorlar uchun 7 kunlik trial avtomatik beriladi.
+- **Klinika**  -  Obuna sahifasida 500$/oy va bank rekvizitlari (hisob raqam, MFO, INN) ko'rsatiladi. To'lovni hisob raqamdan o'tkazadilar.
+- **Shifokor**  -  10$/oy, to'lov chekini yuklash. Admin tasdiqlagach 30 kun faol.
+- **Trial**  -  Yangi ro'yxatdan o'tgan shifokorlar uchun 7 kunlik trial avtomatik beriladi.
 
 ---
 
@@ -33,8 +33,8 @@ Bu buyruq 2 ta reja yaratadi: **Klinika (Konsilium)** 500$/oy, **Shifokor (oylik
 
 ### Admin
 
-- **Obuna rejalari** — Reja qo'shish/tahrirlash: `/admin/accounts/subscriptionplan/`
-- **Obuna to'lovlari** — Kutilayotgan to'lovlarni ko'rish va **"Tanlangan to'lovlarni tasdiqlash"** action bilan tasdiqlash: `/admin/accounts/subscriptionpayment/`
+- **Obuna rejalari**  -  Reja qo'shish/tahrirlash: `/admin/accounts/subscriptionplan/`
+- **Obuna to'lovlari**  -  Kutilayotgan to'lovlarni ko'rish va **"Tanlangan to'lovlarni tasdiqlash"** action bilan tasdiqlash: `/admin/accounts/subscriptionpayment/`
 
 To'lov tasdiqlanganda foydalanuvchining `subscription_status` = `active`, `subscription_plan` va `subscription_expiry` o'rnatiladi.
 
@@ -50,9 +50,9 @@ To'lov tasdiqlanganda foydalanuvchining `subscription_status` = `active`, `subsc
 
 ## Frontend
 
-- **Obuna sahifasi** — Rejalar API dan yuklanadi, foydalanuvchi reja tanlaydi, summa va chek yuboriladi; `plan_id` backend'ga yuboriladi.
-- **Profil** — Shifokor profilida obuna rejasi, trial qolgan kunlar yoki obuna tugash sanasi ko'rsatiladi.
-- **Kirish tekshiruvi** — `hasActiveSubscription(user)` trial va `subscription_expiry` ni hisobga oladi; faol obuna bo'lmasa `SubscriptionPage` ko'rsatiladi.
+- **Obuna sahifasi**  -  Rejalar API dan yuklanadi, foydalanuvchi reja tanlaydi, summa va chek yuboriladi; `plan_id` backend'ga yuboriladi.
+- **Profil**  -  Shifokor profilida obuna rejasi, trial qolgan kunlar yoki obuna tugash sanasi ko'rsatiladi.
+- **Kirish tekshiruvi**  -  `hasActiveSubscription(user)` trial va `subscription_expiry` ni hisobga oladi; faol obuna bo'lmasa `SubscriptionPage` ko'rsatiladi.
 
 ---
 
@@ -69,8 +69,8 @@ Klinikalar uchun hisob raqam **frontend** da `SubscriptionPage.tsx` ichida `BANK
 
 ## Xulosa
 
-- **Klinika:** 500$/oy, shartnoma asosida, hisob raqamdan o'tkazma → admin tasdiqlagach 30 kun faol.
-- **Shifokor:** 10$/oy, chek yuborish → admin tasdiqlagach 30 kun faol.
+- **Klinika:** 500$/oy, shartnoma asosida, hisob raqamdan o'tkazma  ->  admin tasdiqlagach 30 kun faol.
+- **Shifokor:** 10$/oy, chek yuborish  ->  admin tasdiqlagach 30 kun faol.
 - Backend: `SubscriptionPlan` (plan_type: clinic/doctor), `SubscriptionPayment`, admin tasdiqlash.
 - Frontend: klinika uchun bank rekvizitlari, shifokor uchun chek yuklash.
 -NoNewline

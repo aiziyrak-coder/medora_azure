@@ -26,12 +26,12 @@ interface Props {
 }
 
 const TASK_OPTIONS: Array<{ value: DoctorTaskType; label: string; icon: string; desc: string }> = [
-  { value: TASK_QUICK_CONSULT,  icon: '\u2705', label: 'Tezkor Maslahat',    desc: 'Tez tashxis va choralar' },
-  { value: TASK_DIAGNOSIS,      icon: '\u2695', label: 'Differensial Tashxis', desc: '3 - 5 ta tashxis + ehtimollik' },
-  { value: TASK_TREATMENT,      icon: '\u2705', label: 'Davolash Rejasi',     desc: 'To\'liq SSV protokol rejasi' },
-  { value: TASK_DRUG_CHECK,     icon: '\u2696', label: 'Dori Tekshiruvi',     desc: 'O\'zaro ta\'sir + xavfsizlik' },
-  { value: TASK_LAB_INTERPRET,  icon: '\u2695', label: 'Lab Tahlili',         desc: 'Laboratoriya natijalarini izohlash' },
-  { value: TASK_FOLLOW_UP,      icon: '\u2705', label: 'Kuzatuv Rejasi',      desc: 'Keyingi qabul va ogohlantirishlar' },
+  { value: TASK_QUICK_CONSULT,  icon: '', label: 'Tezkor Maslahat',    desc: 'Tez tashxis va choralar' },
+  { value: TASK_DIAGNOSIS,      icon: '', label: 'Differensial Tashxis', desc: '3 - 5 ta tashxis + ehtimollik' },
+  { value: TASK_TREATMENT,      icon: '', label: 'Davolash Rejasi',     desc: 'To\'liq SSV protokol rejasi' },
+  { value: TASK_DRUG_CHECK,     icon: '', label: 'Dori Tekshiruvi',     desc: 'O\'zaro ta\'sir + xavfsizlik' },
+  { value: TASK_LAB_INTERPRET,  icon: '', label: 'Lab Tahlili',         desc: 'Laboratoriya natijalarini izohlash' },
+  { value: TASK_FOLLOW_UP,      icon: '', label: 'Kuzatuv Rejasi',      desc: 'Keyingi qabul va ogohlantirishlar' },
 ];
 
 function ResultCard({ result }: { result: DoctorSupportResult }) {
@@ -40,7 +40,7 @@ function ResultCard({ result }: { result: DoctorSupportResult }) {
   if (result.error) {
     return (
       <div className="rounded-2xl bg-red-950/40 border border-red-500/40 p-4 text-red-300 text-sm">
-        {"\u26A0 "}  {result.error}
+        !  {result.error}
       </div>
     );
   }
@@ -50,7 +50,7 @@ function ResultCard({ result }: { result: DoctorSupportResult }) {
       {/* Critical Alert */}
       {result.critical_alert?.present && (
         <div className="rounded-2xl bg-red-950/50 border border-red-500/60 p-4">
-          <p className="font-bold text-red-300 mb-1">\u26A0 Shoshilinch Holat</p>
+          <p className="font-bold text-red-300 mb-1">! Shoshilinch Holat</p>
           <p className="text-red-200 text-sm">{result.critical_alert.message}</p>
         </div>
       )}
@@ -142,13 +142,13 @@ function ResultCard({ result }: { result: DoctorSupportResult }) {
               result.overall_safety === 'CAUTION'   ? 'bg-amber-950/40 border border-amber-500/40 text-amber-300' :
                                                       'bg-red-950/40 border border-red-500/40 text-red-300'
             }`}>
-              {result.overall_safety === 'SAFE' ? '\u2705' : result.overall_safety === 'CAUTION' ? '\u26A0' : '\u26A0'}{' '}
+              {result.overall_safety === 'SAFE' ? '[OK] ' : '[!] '}
               Umumiy xavfsizlik: {result.overall_safety}
             </div>
           )}
           {result.interactions && result.interactions.length > 0 && (
             <div className="rounded-2xl bg-slate-800/60 border border-slate-600/30 p-4">
-              <h4 className="font-semibold text-amber-300 mb-2">вљ- O'zaro Ta'sirlar</h4>
+              <h4 className="font-semibold text-amber-300 mb-2">O'zaro Ta'sirlar</h4>
               {result.interactions.map((it, i) => (
                 <div key={i} className="mb-2 p-2 rounded-lg bg-slate-700/50">
                   <p className="text-white text-xs font-medium">{it.drugs.join(' + ')}</p>
@@ -287,7 +287,7 @@ export const DoctorSupportView: React.FC<Props> = ({ patientData, language, onEr
     <div className="flex flex-col gap-4">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold text-white">вљЎ Doktor Yordamchi</h2>
+        <h2 className="text-xl font-bold text-white">Doktor Yordamchi</h2>
         <p className="text-sm text-slate-400 mt-0.5">
           Gemini · O'zbekiston SSV Protokollari · Tezkor tahlil
         </p>
@@ -337,14 +337,14 @@ export const DoctorSupportView: React.FC<Props> = ({ patientData, language, onEr
           className="px-4 py-3 rounded-2xl bg-slate-700 hover:bg-slate-600
                      text-white font-medium transition-all active:scale-95 disabled:opacity-50"
         >
-          {loading ? '...' : '\u27A1'}
+          {loading ? '...' : '>'}
         </button>
         {streaming && (
           <button
             onClick={handleStop}
-            className="px-4 py-3 rounded-2xl bg-red-700 hover:bg-red-600 text-white transition-all"
+className="px-4 py-3 rounded-2xl bg-red-700 hover:bg-red-600 text-white transition-all"
           >
-            в- 
+            To&apos;xtatish
           </button>
         )}
       </div>
@@ -352,7 +352,7 @@ export const DoctorSupportView: React.FC<Props> = ({ patientData, language, onEr
       {/* Streaming text output */}
       {streamText && (
         <div className="rounded-2xl bg-slate-900/80 border border-slate-600/30 p-4 max-h-64 overflow-y-auto">
-          <p className="text-xs text-slate-500 mb-2 font-mono">в-Џ Javob kelmoqda...</p>
+          <p className="text-xs text-slate-500 mb-2 font-mono">Javob kelmoqda...</p>
           <pre className="text-slate-300 text-xs whitespace-pre-wrap font-mono leading-relaxed">
             {streamText}
           </pre>

@@ -1,4 +1,4 @@
-# AiDoktorAI — Real Bozorga Chiqishda Hal Qilingan Muammolar
+# AiDoktorAI  -  Real Bozorga Chiqishda Hal Qilingan Muammolar
 
 ## ✅ Barcha Asosiy Muammolar Hal Qilindi
 

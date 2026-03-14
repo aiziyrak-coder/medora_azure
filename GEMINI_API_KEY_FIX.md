@@ -1,4 +1,4 @@
-# "API key not valid" – Gemini kalitini to‘g‘rilash
+# "API key not valid"  -  Gemini kalitini to‘g‘rilash
 
 Xato: **API key not valid. Please pass a valid API key.** / **API_KEY_INVALID**
 
@@ -12,7 +12,7 @@ Xato: **API key not valid. Please pass a valid API key.** / **API_KEY_INVALID**
 
 ### 1. Yangi kalit olish (Google AI Studio)
 1. https://aistudio.google.com/apikey ga kiring (Google hisobi bilan).
-2. **Create API key** → loyiha tanlang yoki yangi yarating.
+2. **Create API key**  ->  loyiha tanlang yoki yangi yarating.
 3. Kalitni nusxalang (faqat bir marta ko‘rsatiladi).
 
 ### 2. API yoqilganligini tekshirish (Google Cloud)

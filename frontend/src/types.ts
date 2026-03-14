@@ -4,7 +4,7 @@ import { AIModel } from './constants/specialists';
 // Original types - some modified for new features
 export { AIModel };
 
-export type AppView = 'dashboard' | 'new_analysis' | 'clarification' | 'team_recommendation' | 'live_analysis' | 'history' | 'view_history_item' | 'case_library' | 'research' | 'live_consultation' | 'prescription' | 'patient_education' | 'tumor_board' | 'longitudinal_view' | 'staff_dashboard' | 'tv_display' | 'subscription';
+export type AppView = 'dashboard' | 'new_analysis' | 'clarification' | 'team_recommendation' | 'live_analysis' | 'history' | 'view_history_item' | 'case_library' | 'research' | 'live_consultation' | 'prescription' | 'tumor_board' | 'longitudinal_view' | 'staff_dashboard' | 'tv_display' | 'subscription';
 
 export type UserRole = 'clinic' | 'doctor' | 'staff';
 

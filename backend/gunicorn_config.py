@@ -1,7 +1,7 @@
 """
 Gunicorn Production Config
 Farg'ona JSTI | medora.cdcgroup.uz
-2 vCPU Azure Standard B2s вЂ” 4 worker (2*CPU+1)
+2 vCPU Azure Standard B2s  -  4 worker (2*CPU+1)
 """
 
 import multiprocessing
@@ -12,28 +12,28 @@ _BASE = os.path.dirname(os.path.abspath(__file__))
 _LOGDIR = os.path.join(_BASE, "logs")
 os.makedirs(_LOGDIR, exist_ok=True)
 
-# в”Ђв”Ђ Bind в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# --- Bind ---
 bind             = "127.0.0.1:8000"          # Nginx orqali proxy
 backlog          = 2048
 
-# в”Ђв”Ђ Workers в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-# Azure B2s = 2 vCPU в†’ 2*2+1 = 5 worker; lekin AI zakodirovka uchun 4 qoldiring
+# --- Workers ---
+# Azure B2s = 2 vCPU -> 2*2+1 = 5 worker; lekin AI zakodirovka uchun 4 qoldiring
 workers          = multiprocessing.cpu_count() * 2 + 1
 worker_class     = "gthread"                  # AI streaming uchun threaded
 threads          = 4                           # Har bir worker uchun thread soni
 worker_connections = 1000
 
-# в”Ђв”Ђ Timeout в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# --- Timeout ---
 # AI Consilium so'rovlari 60-120s ga etadi; shuning uchun 180s
 timeout          = 180
 graceful_timeout = 30
 keepalive        = 5
 
-# в”Ђв”Ђ Requests в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# --- Requests ---
 max_requests         = 1000
 max_requests_jitter  = 100
 
-# в”Ђв”Ђ Logging в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# --- Logging ---
 accesslog    = os.path.join(_LOGDIR, "gunicorn_access.log")
 errorlog     = os.path.join(_LOGDIR, "gunicorn_error.log")
 loglevel     = "info"
@@ -41,7 +41,7 @@ access_log_format = (
     '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(D)s'
 )
 
-# в”Ђв”Ђ Process в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# --- Process ---
 preload_app   = True                          # Xotira tejash
 daemon        = False                         # systemd boshqaradi
 pidfile       = os.path.join(_LOGDIR, "FJSTI.pid")
@@ -50,7 +50,7 @@ pidfile       = os.path.join(_LOGDIR, "FJSTI.pid")
 # WSGI
 wsgi_app      = "medoraai_backend.wsgi:application"
 
-# в”Ђв”Ђ Worker lifecycle hooks в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+# --- Worker lifecycle hooks ---
 def on_starting(server):
     server.log.info("Farg'ona JSTI backend starting")
 

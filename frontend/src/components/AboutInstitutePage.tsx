@@ -2,6 +2,7 @@ import React from 'react';
 import {
     INSTITUTE_NAME_FULL,
     INSTITUTE_LOGO_TEXT,
+    INSTITUTE_LOGO_SRC,
     INSTITUTE_PHONE_1,
     INSTITUTE_PHONE_2,
     INSTITUTE_EMAIL_1,
@@ -88,7 +89,8 @@ const AboutInstitutePage: React.FC<Props> = ({ onBack }) => {
                         </svg>
                         Orqaga
                     </button>
-                    <div className="text-center min-w-0 flex-1">
+                    <div className="text-center min-w-0 flex-1 flex items-center justify-center gap-2">
+                        <img src={INSTITUTE_LOGO_SRC} alt="" className="w-9 h-9 rounded-full object-contain" />
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest truncate">{INSTITUTE_LOGO_TEXT}</p>
                     </div>
                     <div className="w-16" />
@@ -100,12 +102,7 @@ const AboutInstitutePage: React.FC<Props> = ({ onBack }) => {
                 <div className="absolute inset-0 bg-gradient-to-b from-blue-950/50 to-slate-950" />
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-blue-600/15 rounded-full blur-[100px] pointer-events-none" />
                 <div className="relative z-10 max-w-4xl mx-auto text-center">
-                    <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-blue-500/30"
-                         style={{ background: 'linear-gradient(135deg,#1d4ed8,#0891b2,#059669)' }}>
-                        <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
-                        </svg>
-                    </div>
+                    <img src={INSTITUTE_LOGO_SRC} alt="" className="w-24 h-24 rounded-full object-contain mx-auto mb-6 shadow-2xl ring-4 ring-white/10" />
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-bold uppercase tracking-widest mb-6">
                         Rasmiy hujjat
                     </div>
@@ -240,10 +237,13 @@ const AboutInstitutePage: React.FC<Props> = ({ onBack }) => {
             {/* Footer */}
             <footer className="border-t border-white/10 mt-8">
                 <div className="page-px py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="text-center sm:text-left">
+                    <div className="text-center sm:text-left flex items-center gap-3">
+                        <img src={INSTITUTE_LOGO_SRC} alt="" className="w-12 h-12 rounded-full object-contain flex-shrink-0" />
+                        <div>
                         <p className="text-white font-black text-sm uppercase">{INSTITUTE_LOGO_TEXT}</p>
                         <p className="text-slate-500 text-xs mt-1">{FOOTER_COPYRIGHT}</p>
                         <p className="text-slate-500 text-xs mt-0.5">{PLATFORM_NAME}</p>
+                        </div>
                     </div>
                     <button
                         onClick={onBack}
