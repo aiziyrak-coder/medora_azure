@@ -156,28 +156,41 @@ const analysisRecordToApi = (record: Partial<AnalysisRecord>): Partial<ApiAnalys
   };
 };
 
+/** Extract list from API response (handles paginated { data: [] } or raw array) */
+function getListFromResponse<T>(response: ApiResponse<unknown>): T[] {
+  const d = response.data;
+  if (Array.isArray(d)) return d as T[];
+  if (d && typeof d === 'object' && Array.isArray((d as Record<string, unknown>).data))
+    return (d as Record<string, T[]>).data;
+  if (d && typeof d === 'object' && Array.isArray((d as Record<string, unknown>).results))
+    return (d as Record<string, T[]>).results;
+  return [];
+}
+
 /**
  * Get analyses list
  */
 export const getAnalyses = async (params?: AnalysisListParams): Promise<ApiResponse<AnalysisRecord[]>> => {
-  const queryParams: Record<string, string> = {};
+  const queryParams: Record<string, string> = {
+    page_size: (params?.page_size ?? 100).toString(),
+  };
   
   if (params?.page) queryParams.page = params.page.toString();
-  if (params?.page_size) queryParams.page_size = params.page_size.toString();
   if (params?.search) queryParams.search = params.search;
   if (params?.patient) queryParams.patient = params.patient.toString();
   if (params?.ordering) queryParams.ordering = params.ordering;
   
-  const response = await apiGet<ApiAnalysisRecord[]>('/analyses/', queryParams);
+  const response = await apiGet<ApiAnalysisRecord[] | { data?: ApiAnalysisRecord[]; results?: ApiAnalysisRecord[] }>('/analyses/', queryParams);
   
-  if (response.success && response.data) {
-    return {
-      ...response,
-      data: response.data.map(apiToAnalysisRecord),
-    };
-  }
+  const rawList = response.success ? getListFromResponse<ApiAnalysisRecord>(response as ApiResponse<unknown>) : [];
+  const data = Array.isArray(rawList) ? rawList.map(apiToAnalysisRecord) : [];
   
-  return response as unknown as ApiResponse<AnalysisRecord[]>;
+  return {
+    success: response.success,
+    data,
+    pagination: response.pagination,
+    error: response.error,
+  };
 };
 
 /**
