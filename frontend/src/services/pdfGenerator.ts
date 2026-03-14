@@ -188,8 +188,16 @@ export const generatePdfReport = (
     });
 
     y += 5;
+    const recommendedTestStr = (t: unknown): string => {
+        if (typeof t === 'string') return t;
+        if (t && typeof t === 'object') {
+            const o = t as Record<string, unknown>;
+            return [o.testName ?? o.name ?? o.test, o.reason, o.urgency].filter(Boolean).map(String).join(' — ') || JSON.stringify(t);
+        }
+        return String(t ?? '');
+    };
     addSectionTitle("Tavsiya Etiladigan Qo'shimcha Tekshiruvlar");
-    (Array.isArray(report.recommendedTests) ? report.recommendedTests : []).forEach(test => addText(test, true));
+    (Array.isArray(report.recommendedTests) ? report.recommendedTests : []).forEach(test => addText(recommendedTestStr(test), true));
 
     if (report.uzbekistanLegislativeNote) {
         y += 5;

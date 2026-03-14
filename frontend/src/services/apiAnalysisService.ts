@@ -48,7 +48,14 @@ const apiToAnalysisRecord = (api: ApiAnalysisRecord): AnalysisRecord => {
       rejectedHypotheses: Array.isArray(fr.rejectedHypotheses) ? fr.rejectedHypotheses : [],
       treatmentPlan: Array.isArray(fr.treatmentPlan) ? fr.treatmentPlan : [],
       medicationRecommendations: Array.isArray(fr.medicationRecommendations) ? fr.medicationRecommendations : [],
-      recommendedTests: Array.isArray(fr.recommendedTests) ? fr.recommendedTests : [],
+      recommendedTests: (Array.isArray(fr.recommendedTests) ? fr.recommendedTests : []).map((t: unknown) => {
+        if (typeof t === 'string') return t;
+        if (t && typeof t === 'object') {
+          const o = t as Record<string, unknown>;
+          return [o.testName ?? o.name ?? o.test, o.reason, o.urgency].filter(Boolean).map(String).join(' — ') || JSON.stringify(t);
+        }
+        return String(t ?? '');
+      }),
     } as FinalReport,
     followUpHistory: api.follow_up_history,
     detectedMedications: api.detected_medications,
@@ -120,7 +127,15 @@ const analysisRecordToApi = (record: Partial<AnalysisRecord>): Partial<ApiAnalys
     rejectedHypotheses: safeArr(fr.rejectedHypotheses).slice(0, 20).map((h: { name?: unknown; reason?: unknown }) => ({ name: String(h?.name ?? ''), reason: String(h?.reason ?? '').slice(0, 2000) })),
     imageAnalysis: fr.imageAnalysis,
     prognosisReport: fr.prognosisReport,
-    recommendedTests: safeArr(fr.recommendedTests).slice(0, 30),
+    recommendedTests: safeArr(fr.recommendedTests).slice(0, 30).map((t: unknown) => {
+      if (typeof t === 'string') return t.slice(0, 500);
+      if (t && typeof t === 'object') {
+        const o = t as Record<string, unknown>;
+        const part = [o.testName ?? o.name ?? o.test, o.reason ?? o.reasoning, o.urgency].filter(Boolean).map(String).join(' — ');
+        return part.slice(0, 500) || JSON.stringify(t).slice(0, 500);
+      }
+      return String(t ?? '').slice(0, 500);
+    }),
     treatmentPlan: safeArr(fr.treatmentPlan).map(s => typeof s === 'string' ? s.slice(0, 2000) : JSON.stringify(s).slice(0, 2000)),
     medicationRecommendations: safeArr(fr.medicationRecommendations).slice(0, 30).map((med: Record<string, unknown>) => ({
       name: String(med?.name ?? ''),

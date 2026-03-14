@@ -75,7 +75,12 @@ export const generateDocxReport = async (
         ]),
 
         createHeading2("Tavsiya Etiladigan Qo'shimcha Tekshiruvlar"),
-        ...report.recommendedTests.map(test => createListItem(test)),
+        ...(Array.isArray(report.recommendedTests) ? report.recommendedTests : []).map((test: unknown) => {
+            const str = typeof test === 'string' ? test : (test && typeof test === 'object'
+                ? [(test as Record<string, unknown>).testName ?? (test as Record<string, unknown>).name, (test as Record<string, unknown>).reason, (test as Record<string, unknown>).urgency].filter(Boolean).map(String).join(' — ') || JSON.stringify(test)
+                : String(test ?? ''));
+            return createListItem(str);
+        }),
         new Paragraph({ text: "" }),
         
         createHeading2("Inkor Etilgan Gipotezalar"),

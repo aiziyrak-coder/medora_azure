@@ -207,12 +207,18 @@ const PlanTab: React.FC<{ report: FinalReport }> = ({ report }) => {
                 {t('report_additional_tests')}
             </h4>
             <ul className="space-y-3">
-                {(report.recommendedTests ?? []).map((testItem, i) => (
+                {(report.recommendedTests ?? []).map((testItem, i) => {
+                    const display = typeof testItem === 'string' ? testItem : (testItem && typeof testItem === 'object'
+                        ? [((testItem as Record<string, unknown>).testName ?? (testItem as Record<string, unknown>).name), (testItem as Record<string, unknown>).reason, (testItem as Record<string, unknown>).urgency]
+                            .filter(Boolean).map(String).join(' — ') || JSON.stringify(testItem)
+                        : String(testItem ?? ''));
+                    return (
                     <li key={i} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5">
                         <div className="w-1.5 h-1.5 rounded-full bg-pink-400 shadow-[0_0_5px_#f472b6]"></div>
-                        <span className="text-sm text-slate-200 font-medium">{testItem}</span>
+                        <span className="text-sm text-slate-200 font-medium">{display}</span>
                     </li>
-                ))}
+                    );
+                })}
             </ul>
         </GlassCard>
     </div>

@@ -120,6 +120,20 @@ const planItemToString = (item: unknown): string => {
     return String(item ?? '');
 };
 
+/** Normalize recommendedTests item: API/AI may return string or object { testName, reason, urgency } */
+const recommendedTestToDisplay = (item: unknown): string => {
+    if (typeof item === 'string') return item;
+    if (item && typeof item === 'object') {
+        const o = item as Record<string, unknown>;
+        const testName = o.testName ?? o.name ?? o.test;
+        const reason = o.reason ?? o.reasoning;
+        const urgency = o.urgency;
+        const parts = [testName, reason, urgency].filter(v => v != null && String(v).trim());
+        return parts.map(String).join(' — ') || JSON.stringify(item);
+    }
+    return String(item ?? '');
+};
+
 const FinalReportCard: React.FC<{
   report: FinalReport;
   patientData: Partial<PatientData>;
@@ -319,7 +333,9 @@ const FinalReportCard: React.FC<{
 
                  <Section title="Qo'shimcha Tekshiruvlar" icon={<DocumentTextIcon className="w-6 h-6"/>}>
                     <ul className="list-disc list-inside space-y-2 text-text-primary">
-                        {(Array.isArray(report.recommendedTests) ? report.recommendedTests : []).map((item, index) => <li key={index}>{item}</li>)}
+                        {(Array.isArray(report.recommendedTests) ? report.recommendedTests : []).map((item, index) => (
+                            <li key={index}>{recommendedTestToDisplay(item)}</li>
+                        ))}
                     </ul>
                 </Section>
                 
