@@ -3,7 +3,7 @@
  * objectiveData dan BP, Puls, Harorat, SpO2, Nafas sonini ajratib chiqadi.
  */
 import React from 'react';
-import { useTranslation } from '../../i18n/LanguageContext';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export interface ParsedVitals {
   bp?: string;

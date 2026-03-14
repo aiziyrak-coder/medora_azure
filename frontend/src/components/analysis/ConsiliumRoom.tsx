@@ -7,8 +7,7 @@ import type { ChatMessage } from '../../types';
 import { AIModel } from '../../types';
 import AIAvatar from '../AIAvatar';
 import { AI_SPECIALISTS } from '../../constants';
-import { useTranslation } from '../../i18n/LanguageContext';
-import type { TranslationKey } from '../../hooks/useTranslation';
+import { useTranslation, type TranslationKey } from '../../hooks/useTranslation';
 
 const SPEAKER_DURATION_MS = 7000;
 const TABLE_R = 28;
