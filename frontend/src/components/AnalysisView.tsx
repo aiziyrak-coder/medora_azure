@@ -188,8 +188,8 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
                 )}
             </div>
             
-            {/* Right Panel: Yakuniy xulosa va yuklab olish — tahlil muvaffaqiyatli yoki xato bilan tugasa ham ko'rinadi */}
-            {(fr || (pd && (dh?.length ?? 0) > 0)) && (
+            {/* Right Panel: Yakuniy xulosa — faqat munozara tugagach ko'rinadi; to'liq hisobot, pastida yuklab olish */}
+            {!isAnalyzing && (fr || (!!error && (dh?.length ?? 0) > 0)) && (
                 <div className="xl:col-span-4 glass-panel overflow-hidden flex flex-col h-full">
                     <div className="p-5 border-b border-white/20 bg-white/30 backdrop-blur-md">
                         <h3 className="text-lg font-bold text-text-primary">Yakuniy Xulosa</h3>
@@ -200,10 +200,12 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
                     <div className="p-5 overflow-y-auto flex-grow custom-scrollbar">
                         <div className="space-y-6">
                             {fr && <FinalReportCard report={fr} patientData={pd} onUpdateReport={onUpdateReport} debateHistory={dh} />}
-                            <DownloadPanel record={record} hasError={!fr && !!error} />
                             {record?.id && !isNaN(parseInt(record.id, 10)) && fr && (
                                 <UsefulnessFeedbackCard analysisId={parseInt(record.id, 10)} />
                             )}
+                            <div className="pt-6 mt-6 border-t border-slate-200 dark:border-slate-600">
+                                <DownloadPanel record={record} hasError={!fr && !!error} />
+                            </div>
                         </div>
                     </div>
                 </div>
