@@ -93,7 +93,7 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({ record, hasError }) => {
                     {t('export_partial_note' as TranslationKey)}
                 </p>
             )}
-            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50/70 dark:bg-slate-800/40">
+            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-600">
                 <h4 className="font-bold text-text-primary mb-3">{t('export_report_title' as TranslationKey)}</h4>
                 <div className="flex flex-col sm:flex-row gap-3">
                     <button
@@ -114,7 +114,7 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({ record, hasError }) => {
             </div>
 
             {specialistLastMsg.size > 0 && (
-                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50/70 dark:bg-slate-800/40">
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-600">
                     <h4 className="font-bold text-text-primary mb-3">{t('export_specialist_conclusion' as TranslationKey)}</h4>
                     <div className="space-y-2">
                         {Array.from(specialistLastMsg.entries()).map(([author, msg]) => {
@@ -124,15 +124,15 @@ const DownloadPanel: React.FC<DownloadPanelProps> = ({ record, hasError }) => {
                                 <button
                                     key={author}
                                     onClick={() => handleSpecialistPdf(author, msg.content)}
-                                    className="w-full flex items-center justify-between gap-2 py-2 px-3 text-sm bg-white dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl transition-colors text-text-primary"
+                                    className="w-full flex items-center justify-between gap-2 py-2 px-3 text-sm font-semibold text-text-primary border border-slate-200 dark:border-slate-600 rounded-xl transition-colors hover:bg-slate-100 dark:hover:bg-slate-800/30"
                                 >
                                     <span className="text-left">
-                                        <span className="font-semibold text-text-primary">{specName}</span>
-                                        {specTitle && <span className="text-xs text-slate-500 ml-1">({specTitle})</span>}
+                                        <span className="font-bold text-text-primary">{specName}</span>
+                                        {specTitle && <span className="text-xs font-semibold text-text-primary ml-1">({specTitle})</span>}
                                     </span>
-                                    <span className="flex items-center gap-1 text-text-secondary shrink-0">
+                                    <span className="flex items-center gap-1 font-semibold text-text-primary shrink-0">
                                         <DownloadIcon className="w-4 h-4" />
-                                        <span className="text-xs">.pdf</span>
+                                        <span>.pdf</span>
                                     </span>
                                 </button>
                             );

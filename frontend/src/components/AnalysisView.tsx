@@ -212,20 +212,20 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
                             {!fr && error && <ErrorReportPlaceholder message={error} />}
                             {!fr && !error && (isAnalyzing || hasDebate) && (
                                 <div className="space-y-4">
-                                    <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50/70 dark:bg-slate-800/40">
+                                    <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-600">
                                         <h4 className="text-sm font-bold text-text-primary mb-2">Jarayon</h4>
-                                        <p className="text-xs text-text-secondary">{statusMessage || 'Konsilium jarayoni'}</p>
+                                        <p className="text-sm font-semibold text-text-primary">{statusMessage || 'Konsilium jarayoni'}</p>
                                     </div>
                                     {hasDebate && (
-                                        <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50/70 dark:bg-slate-800/40">
+                                        <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-600">
                                             <h4 className="text-sm font-bold text-text-primary mb-2">Dastlabki xulosalar (raundlar bo&apos;yicha)</h4>
-                                            <p className="text-xs text-text-secondary">
+                                            <p className="text-sm font-semibold text-text-primary">
                                                 Har bir raund tugagach yakuniy xulosa shu yerda chiqadi. Konsilium tugagach to&apos;liq hisobot va yuklab olish ko&apos;rinadi.
                                             </p>
                                         </div>
                                     )}
                                     {livePrognosis && <PrognosisCard prognosis={livePrognosis} />}
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 italic">Yakuniy hisobot konsilium tugagach shu yerda chiqadi.</p>
+                                    <p className="text-sm font-semibold text-text-primary italic">Yakuniy hisobot konsilium tugagach shu yerda chiqadi.</p>
                                 </div>
                             )}
                             {record?.id && !isNaN(parseInt(record.id, 10)) && fr && (
