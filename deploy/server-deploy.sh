@@ -9,14 +9,27 @@ cd "$APP_DIR" || { echo "Xato: $APP_DIR topilmadi"; exit 1; }
 echo "=== 1. Git pull ==="
 git pull origin main
 
-echo "=== 2. Backend venv va migrate ==="
+echo "=== 2. Backend venv va migrate (SQL bazasi serverda saqlanadi) ==="
 cd "$APP_DIR/backend"
+# SQLite: serverda doimiy path — restart dan keyin ma'lumotlar yo'qolmasin
+MEDORA_DB="$APP_DIR/backend/db.sqlite3"
+if [ -f .env ]; then
+  grep -q '^DB_NAME=' .env || echo "DB_NAME=$MEDORA_DB" >> .env
+  grep -q '^DB_ENGINE=' .env || echo "DB_ENGINE=django.db.backends.sqlite3" >> .env
+else
+  touch .env
+  echo "DB_NAME=$MEDORA_DB" >> .env
+  echo "DB_ENGINE=django.db.backends.sqlite3" >> .env
+fi
 if [ ! -d venv ]; then
   python3 -m venv venv
 fi
 source venv/bin/activate
 pip install -q -r requirements.txt
 python manage.py migrate --noinput
+# Bazaga yozish huquqi (restart dan keyin ham saqlanadi)
+[ -f db.sqlite3 ] && chmod 664 db.sqlite3
+[ -f "$MEDORA_DB" ] && chmod 664 "$MEDORA_DB" 2>/dev/null || true
 python manage.py collectstatic --noinput 2>/dev/null || true
 deactivate
 systemctl restart medoraai-backend-8001.service 2>/dev/null || true

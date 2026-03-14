@@ -101,21 +101,29 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'medoraai_backend.wsgi.application'
 
-# Database
+# Database — SQLite (serverda restart dan keyin ham saqlanadi) yoki PostgreSQL
+_db_engine = config('DB_ENGINE', default='django.db.backends.sqlite3')
+_db_name = config('DB_NAME', default='')
+# SQLite: har doim loyiha papkasidagi aniq fayl (restart dan keyin ma'lumot yo'qolmasin)
+if _db_engine == 'django.db.backends.sqlite3':
+    _db_name = _db_name.strip() or str(BASE_DIR / 'db.sqlite3')
+    # Noto'g'ri path (boshqa server path) bo'lsa, loyiha ichidagi faylga o'tkazamiz
+    if _db_name.startswith('/home/') and not os.path.exists(os.path.dirname(_db_name)):
+        _db_name = str(BASE_DIR / 'db.sqlite3')
+
 DATABASES = {
     'default': {
-        'ENGINE': config('DB_ENGINE', default='django.db.backends.sqlite3'),
-        'NAME': config('DB_NAME', default=BASE_DIR / 'db.sqlite3'),
+        'ENGINE': _db_engine,
+        'NAME': _db_name,
         'USER': config('DB_USER', default=''),
         'PASSWORD': config('DB_PASSWORD', default=''),
         'HOST': config('DB_HOST', default=''),
         'PORT': config('DB_PORT', default=''),
         'OPTIONS': {
-            # PostgreSQL connection pooling
             'connect_timeout': 10,
-            'options': '-c statement_timeout=30000',  # 30 seconds
-        } if config('DB_ENGINE', default='') == 'django.db.backends.postgresql' else {},
-        'CONN_MAX_AGE': 600,  # Connection pooling: reuse connections for 10 minutes
+            'options': '-c statement_timeout=30000',
+        } if _db_engine == 'django.db.backends.postgresql' else {},
+        'CONN_MAX_AGE': 600,
     }
 }
 

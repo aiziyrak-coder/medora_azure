@@ -40,9 +40,10 @@ ALLOWED_HOSTS=AiDoktorapi.fargana.uz,127.0.0.1,localhost
 # CORS  -  frontend manzili
 CORS_ALLOWED_ORIGINS=https://AiDoktor.fargana.uz,http://localhost:3000
 
-# Ma'lumotlar bazasi (SQLite ishlatilsa)
+# Ma'lumotlar bazasi (SQL — serverda saqlanadi, restart dan keyin ham)
 DB_ENGINE=django.db.backends.sqlite3
-DB_NAME=db.sqlite3
+# To'liq path: serverda restart dan keyin ma'lumot yo'qolmasin (masalan: /root/medoraai/backend/db.sqlite3)
+DB_NAME=/root/medoraai/backend/db.sqlite3
 
 # AI (Gemini)
 GEMINI_API_KEY=your-gemini-api-key-here
