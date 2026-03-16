@@ -246,6 +246,7 @@ export const generatePdfReport = (
     }
 
     // --- Har bir mutaxassisning yakuniy shaxsiy xulosasi (hujjat bo'limi) ---
+    // Har bir mutaxassisning faqat eng so'nggi va eng qisqa asosiy xulosasini ko'rsatamiz (PDF ni 2–3 sahifadan oshirmaslik uchun).
     const specialistMessages = debateHistory.filter((m: ChatMessage) => !m.isSystemMessage && !m.isUserIntervention);
     const lastByAuthor = new Map<string, ChatMessage>();
     specialistMessages.forEach((m: ChatMessage) => lastByAuthor.set(m.author, m));
@@ -278,7 +279,9 @@ export const generatePdfReport = (
             doc.setFont(PDF_FONT, 'normal');
             doc.setTextColor(40, 40, 40);
             const rawContent = String(msg.content || '');
-            const contentLines = doc.splitTextToSize(stripSalutation(rawContent), pageWidth - margin * 2);
+            // Juda uzun xulosalarni 600 belgigacha qisqartiramiz (hujjatni ixcham saqlash uchun).
+            const trimmedContent = stripSalutation(rawContent).slice(0, 600);
+            const contentLines = doc.splitTextToSize(trimmedContent, pageWidth - margin * 2);
             contentLines.forEach((line: string) => {
                 if (y > pageHeight - margin - FOOTER_RESERVE) {
                     doc.addPage();
@@ -292,27 +295,7 @@ export const generatePdfReport = (
         y += 8;
     }
 
-    // --- Consultation History Section ---
-    if (debateHistory.length > 0) {
-        if (y > pageHeight - 60) {
-             doc.addPage();
-             y = margin;
-        } else {
-            y += 10;
-        }
-        addHeader("Konsilium Munozara Tarixi");
-        
-        debateHistory.forEach(item => {
-            if (item.isSystemMessage || item.isUserIntervention) return;
-            if (y > pageHeight - margin - FOOTER_RESERVE) {
-                doc.addPage();
-                y = margin;
-            }
-            const authorName = item.author ? specialistName(item.author) : 'Foydalanuvchi';
-            addKeyValue(authorName, item.content);
-            y += 2;
-        });
-    }
+    // Konsilium munozara tarixining to'liq matnini PDF ga kiritmaymiz, faqat yuqoridagi yakuniy xulosalar va asosiy bo'limlar qoldiriladi.
 
     const footerText = report.uzbekistanLegislativeNote
         ? `O'zbekiston Respublikasi sog'liqni saqlash qonunchiligi va SSV klinik protokollariga muvofiq shakllantirilgan va faqat ma'lumot uchun mo'ljallangan. U professional tibbiy maslahat o'rnini bosa olmaydi.`

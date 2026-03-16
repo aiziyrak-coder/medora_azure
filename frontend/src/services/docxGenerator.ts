@@ -154,24 +154,18 @@ export const generateDocxReport = async (
             const specialistMessages = debateHistory.filter(m => !m.isSystemMessage && !m.isUserIntervention);
             const lastByAuthor = new Map<string, ChatMessage>();
             specialistMessages.forEach(m => lastByAuthor.set(m.author, m));
-            return Array.from(lastByAuthor.entries()).map(([author, msg]) => new Paragraph({
-                children: [
-                    new TextRun({ text: `${specialistName(author)}: `, bold: true }),
-                    new TextRun(stripSalutation(String(msg.content || ''))),
-                ],
-                spacing: { after: 200 },
-            }));
+            return Array.from(lastByAuthor.entries()).map(([author, msg]) => {
+                const raw = String(msg.content || '');
+                const trimmed = stripSalutation(raw).slice(0, 800); // har bir mutaxassis uchun ~1 paragraf
+                return new Paragraph({
+                    children: [
+                        new TextRun({ text: `${specialistName(author)}: `, bold: true }),
+                        new TextRun(trimmed),
+                    ],
+                    spacing: { after: 150 },
+                });
+            });
         })(),
-        new Paragraph({ text: "" }),
-
-        createHeading1("Konsilium Munozara Tarixi"),
-        ...debateHistory.filter(msg => !msg.isSystemMessage && !msg.isUserIntervention).map(msg => new Paragraph({
-            children: [
-                new TextRun({ text: `${msg.author ? specialistName(msg.author) : 'Foydalanuvchi'}: `, bold: true }),
-                new TextRun(stripSalutation(String(msg.content || '')))
-            ],
-            spacing: { after: 200 }
-        })),
     );
     
     const doc = new Document({
