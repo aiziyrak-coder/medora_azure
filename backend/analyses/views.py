@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import AnalysisRecord, DiagnosisFeedback, AnalysisAuditLog, AnalysisUsefulnessFeedback
+from django.db.models import Q
 from .serializers import (
     AnalysisRecordSerializer, AnalysisRecordCreateSerializer,
     AnalysisRecordUpdateSerializer, DiagnosisFeedbackSerializer
@@ -38,7 +39,8 @@ class AnalysisRecordViewSet(viewsets.ModelViewSet):
         elif user.is_doctor:
             return queryset.filter(created_by=user)
         elif user.is_staff_member and getattr(user, 'linked_doctor', None):
-            return queryset.filter(created_by=user.linked_doctor)
+            # Registrator uchun: o'zi yaratgan va u bog'langan shifokor yaratgan barcha tahlillarni ko'rsatamiz
+            return queryset.filter(Q(created_by=user.linked_doctor) | Q(created_by=user))
         return queryset.none()
 
     def _log_audit(self, analysis, action, extra=None):
