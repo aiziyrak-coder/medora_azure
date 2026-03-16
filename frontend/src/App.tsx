@@ -269,6 +269,7 @@ const AppContent: React.FC = () => {
     const [cmeTopics, setCmeTopics] = useState<CMETopic[]>([]);
     
     const [currentAnalysisRecord, setCurrentAnalysisRecord] = useState<AnalysisRecord | null>(null);
+    const [createdPatientId, setCreatedPatientId] = useState<number | null>(null);
     const [clarificationQuestions, setClarificationQuestions] = useState<string[] | null>([]);
     
     const debateScrollRef = useRef<HTMLDivElement>(null);
@@ -347,6 +348,41 @@ const AppContent: React.FC = () => {
                             return;
                         }
 
+                        const patientIdToUse = (createdPatientId != null && createdPatientId > 0) ? createdPatientId : null;
+
+                        const doCreateAnalysis = (patientId: number) => {
+                            createAnalysis(patientId, newRecord).then((createRes) => {
+                                if (createRes.success && createRes.data) {
+                                    const fromApi = {
+                                        ...newRecord,
+                                        id: String(createRes.data.id),
+                                        patientId: String(createRes.data.patientId ?? patientId),
+                                    };
+                                    setError(null);
+                                    return getAnalyses().then((response) => {
+                                        if (response?.success && Array.isArray(response.data)) {
+                                            applyHistoryAndRecord(response.data, fromApi);
+                                        } else {
+                                            applyHistoryAndRecord([fromApi], fromApi);
+                                        }
+                                    });
+                                } else {
+                                    const errCode = createRes.error?.code;
+                                    setError(errCode === 401 ? (t('error_save_server_login') || "Tahlilni serverga saqlash uchun tizimga kiring. Tahlil serverga saqlanmadi.") : (createRes.error?.message || "Tahlil serverga saqlanmadi."));
+                                    applyHistoryAndRecord([], newRecord);
+                                }
+                            }).catch((err: unknown) => {
+                                applyHistoryAndRecord([], newRecord);
+                                const msg = err && typeof err === 'object' && 'message' in err ? String((err as { message: unknown }).message) : null;
+                                setError(msg || "Serverga ulanishda xatolik. Tahlil serverga saqlanmadi.");
+                            });
+                        };
+
+                        if (patientIdToUse != null) {
+                            doCreateAnalysis(patientIdToUse);
+                            return;
+                        }
+
                         import('./services/apiPatientService').then(({ createPatient }) => {
                             createPatient(patientData).then(patientResponse => {
                                 if (!patientResponse.success || !patientResponse.data) {
@@ -357,31 +393,7 @@ const AppContent: React.FC = () => {
                                     return;
                                 }
                                 const patientId = patientResponse.data.id;
-                                createAnalysis(patientId, newRecord).then((createRes) => {
-                                    if (createRes.success && createRes.data) {
-                                        const fromApi = {
-                                            ...newRecord,
-                                            id: String(createRes.data.id),
-                                            patientId: String(createRes.data.patientId ?? patientId),
-                                        };
-                                        setError(null);
-                                        return getAnalyses().then((response) => {
-                                            if (response?.success && Array.isArray(response.data)) {
-                                                applyHistoryAndRecord(response.data, fromApi);
-                                            } else {
-                                                applyHistoryAndRecord([fromApi], fromApi);
-                                            }
-                                        });
-                                    } else {
-                                        const errCode = createRes.error?.code;
-                                        setError(errCode === 401 ? (t('error_save_server_login') || "Tahlilni serverga saqlash uchun tizimga kiring. Tahlil serverga saqlanmadi.") : (createRes.error?.message || "Tahlil serverga saqlanmadi."));
-                                        applyHistoryAndRecord([], newRecord);
-                                    }
-                                }).catch((err: unknown) => {
-                                    applyHistoryAndRecord([], newRecord);
-                                    const msg = err && typeof err === 'object' && 'message' in err ? String((err as { message: unknown }).message) : null;
-                                    setError(msg || "Serverga ulanishda xatolik. Tahlil serverga saqlanmadi.");
-                                });
+                                doCreateAnalysis(patientId);
                             }).catch(() => {
                                 applyHistoryAndRecord([], newRecord);
                                 setError("Bemor yoki tahlil serverga saqlanmadi.");
@@ -401,7 +413,7 @@ const AppContent: React.FC = () => {
                 setStatusMessage(t('analysis_error_status'));
                 break;
         }
-    }, [currentUser, patientData, debateHistory, selectedSpecialistsConfig, t, currentAnalysisRecord, language]);
+    }, [currentUser, patientData, debateHistory, selectedSpecialistsConfig, t, currentAnalysisRecord, createdPatientId, language]);
 
     const handleLoginSuccess = (user: User) => {
         setCurrentUser(user);
@@ -457,6 +469,7 @@ const AppContent: React.FC = () => {
         setError(null);
         setStatusMessage('');
         setCurrentAnalysisRecord(null);
+        setCreatedPatientId(null);
         setCriticalFinding(null);
         setRationaleMessage(null);
         setUserIntervention(null);
@@ -601,6 +614,13 @@ const AppContent: React.FC = () => {
         setStatusMessage(t('debate_start_status'));
         const enrichedPatientData = { ...patientData, userDiagnosisFeedback: diagnosisFeedback };
         setPatientData(enrichedPatientData);
+        if (currentUser) {
+            import('./services/apiPatientService').then(({ createPatient }) => {
+                createPatient(enrichedPatientData).then((res) => {
+                    if (res.success && res.data?.id) setCreatedPatientId(res.data.id);
+                }).catch(() => {});
+            });
+        }
         const getUserInterventionCallback = () => {
             const intervention = userInterventionRef.current;
             userInterventionRef.current = null;
@@ -614,6 +634,13 @@ const AppContent: React.FC = () => {
         if (!patientData) return;
         const enrichedPatientData = { ...patientData, userDiagnosisFeedback: diagnosisFeedback };
         setPatientData(enrichedPatientData);
+        if (currentUser) {
+            import('./services/apiPatientService').then(({ createPatient }) => {
+                createPatient(enrichedPatientData).then((res) => {
+                    if (res.success && res.data?.id) setCreatedPatientId(res.data.id);
+                }).catch(() => {});
+            });
+        }
         setIsProcessing(true);
         setStatusMessage(t('debate_start_status'));
         const getUserInterventionCallback = () => {
