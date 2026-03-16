@@ -385,14 +385,22 @@ const AppContent: React.FC = () => {
 
                         import('./services/apiPatientService').then(({ createPatient }) => {
                             createPatient(patientData).then(patientResponse => {
-                                if (!patientResponse.success || !patientResponse.data) {
+                                if (!patientResponse.success) {
                                     applyHistoryAndRecord([], newRecord);
                                     const errMsg = patientResponse.error?.message;
                                     const errCode = patientResponse.error?.code;
                                     setError(errCode === 401 ? (t('error_save_server_login') || "Tahlilni serverga saqlash uchun tizimga kiring. Tahlil serverga saqlanmadi.") : (errMsg || "Bemor serverga saqlanmadi."));
                                     return;
                                 }
-                                const patientId = patientResponse.data.id;
+                                const raw = patientResponse.data as { id?: number; data?: { id?: number } } | undefined;
+                                const patientId = (raw?.id != null ? raw.id : raw?.data?.id) != null
+                                    ? Number(raw?.id ?? raw?.data?.id)
+                                    : 0;
+                                if (patientId <= 0) {
+                                    applyHistoryAndRecord([], newRecord);
+                                    setError("Bemor yaratildi, lekin ID olinmadi. Iltimos, qayta urinib ko'ring.");
+                                    return;
+                                }
                                 doCreateAnalysis(patientId);
                             }).catch(() => {
                                 applyHistoryAndRecord([], newRecord);
@@ -601,7 +609,7 @@ const AppContent: React.FC = () => {
         handleRecommendTeamFromData(enrichedPatientData);
     };
 
-    const handleTeamConfirmation = (confirmedTeam: { role: AIModel, backEndModel: string }[], orchestrator: string) => {
+    const handleTeamConfirmation = async (confirmedTeam: { role: AIModel, backEndModel: string }[], orchestrator: string) => {
         if (!patientData) return;
         setSelectedSpecialistsConfig(confirmedTeam);
         setOrchestratorModel(orchestrator);
@@ -614,13 +622,18 @@ const AppContent: React.FC = () => {
         setStatusMessage(t('debate_start_status'));
         const enrichedPatientData = { ...patientData, userDiagnosisFeedback: diagnosisFeedback };
         setPatientData(enrichedPatientData);
+
         if (currentUser) {
-            import('./services/apiPatientService').then(({ createPatient }) => {
-                createPatient(enrichedPatientData).then((res) => {
-                    if (res.success && res.data?.id) setCreatedPatientId(res.data.id);
-                }).catch(() => {});
-            });
+            try {
+                const { createPatient } = await import('./services/apiPatientService');
+                const res = await createPatient(enrichedPatientData);
+                const id = res?.data && (res.data as { id?: number }).id;
+                if (id != null && Number(id) > 0) setCreatedPatientId(Number(id));
+            } catch {
+                // Report paytida qayta urinamiz
+            }
         }
+
         const getUserInterventionCallback = () => {
             const intervention = userInterventionRef.current;
             userInterventionRef.current = null;
@@ -630,16 +643,19 @@ const AppContent: React.FC = () => {
         aiService.runCouncilDebate(enrichedPatientData, [], confirmedTeam, orchestrator, handleProgress, getUserInterventionCallback, language);
     };
 
-    const handleStartDebate = () => {
+    const handleStartDebate = async () => {
         if (!patientData) return;
         const enrichedPatientData = { ...patientData, userDiagnosisFeedback: diagnosisFeedback };
         setPatientData(enrichedPatientData);
         if (currentUser) {
-            import('./services/apiPatientService').then(({ createPatient }) => {
-                createPatient(enrichedPatientData).then((res) => {
-                    if (res.success && res.data?.id) setCreatedPatientId(res.data.id);
-                }).catch(() => {});
-            });
+            try {
+                const { createPatient } = await import('./services/apiPatientService');
+                const res = await createPatient(enrichedPatientData);
+                const id = res?.data && (res.data as { id?: number }).id;
+                if (id != null && Number(id) > 0) setCreatedPatientId(Number(id));
+            } catch {
+                // Report paytida qayta urinamiz
+            }
         }
         setIsProcessing(true);
         setStatusMessage(t('debate_start_status'));

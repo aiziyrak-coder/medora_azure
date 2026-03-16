@@ -67,7 +67,6 @@ const Dashboard: React.FC<DashboardProps> = ({
     recentAnalyses, onSelectAnalysis, stats, cmeTopics,
 }) => {
     const { t } = useTranslation();
-    const firstName = userName.split(' ')[0];
 
     const avatarGrads = [
         'linear-gradient(135deg,#06b6d4,#10b981)',
@@ -95,7 +94,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                             WebkitTextFillColor: 'transparent',
                             filter: 'drop-shadow(0 0 8px rgba(8,145,178,0.25))',
                         }}>
-                            {firstName}!
+                            Doktor!
                         </span>
                     </h1>
                 </div>
