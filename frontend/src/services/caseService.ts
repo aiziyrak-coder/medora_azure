@@ -18,12 +18,10 @@ const saveAnonymizedCases = (cases: AnonymizedCase[]) => {
     localStorage.setItem(ANONYMIZED_CASES_KEY, JSON.stringify(cases));
 };
 
-export const addCaseToLibrary = (record: AnalysisRecord) => {
-    const allCases = getAnonymizedCases();
-    
-    // Simple anonymization and tagging
+/** Bitta yozuvni anonimlashtirilgan holatga aylantirish */
+const recordToAnonymizedCase = (record: AnalysisRecord): AnonymizedCase => {
     const consensus = normalizeConsensusDiagnosis(record.finalReport?.consensusDiagnosis);
-    const newCase: AnonymizedCase = {
+    return {
         id: record.id,
         finalDiagnosis: consensus[0]?.name || 'Noma\'lum',
         tags: [
@@ -33,7 +31,18 @@ export const addCaseToLibrary = (record: AnalysisRecord) => {
         ].filter((value, index, self) => self.indexOf(value) === index),
         outcome: `Tashxis ehtimolligi ${consensus[0]?.probability ?? 0}% bilan yakunlandi.`
     };
+};
 
+/** Serverdan kelgan tahlillar ro'yxatini holatlar kutubxonasi formatiga o'giradi (barcha ma'lumot serverda bo'lganda ishlatiladi) */
+export const analysesToAnonymizedCases = (records: AnalysisRecord[]): AnonymizedCase[] => {
+    if (!Array.isArray(records)) return [];
+    return records.map(recordToAnonymizedCase);
+};
+
+/** Local saqlash — faqat API yo'q rejimda; asosiy manba server (getAnalyses) */
+export const addCaseToLibrary = (record: AnalysisRecord) => {
+    const allCases = getAnonymizedCases();
+    const newCase = recordToAnonymizedCase(record);
     allCases.unshift(newCase);
     saveAnonymizedCases(allCases);
 };

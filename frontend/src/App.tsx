@@ -640,7 +640,7 @@ const AppContent: React.FC = () => {
             setUserIntervention(null);
             return intervention;
         };
-        aiService.runCouncilDebate(enrichedPatientData, [], confirmedTeam, orchestrator, handleProgress, getUserInterventionCallback, language);
+        aiService.runCouncilDebate(enrichedPatientData, [], confirmedTeam, orchestrator, handleProgress, getUserInterventionCallback, language, userHistory);
     };
 
     const handleStartDebate = async () => {
@@ -665,7 +665,7 @@ const AppContent: React.FC = () => {
             setUserIntervention(null);
             return intervention;
         };
-        aiService.runCouncilDebate(enrichedPatientData, differentialDiagnoses, selectedSpecialistsConfig, orchestratorModel, handleProgress, getUserInterventionCallback, language);
+        aiService.runCouncilDebate(enrichedPatientData, differentialDiagnoses, selectedSpecialistsConfig, orchestratorModel, handleProgress, getUserInterventionCallback, language, userHistory);
     };
     
     const handleDiagnosisFeedback = (name: string, feedback: DiagnosisFeedback) => {
@@ -894,7 +894,7 @@ const AppContent: React.FC = () => {
                         <BackBar title="Holatlar Kutubxonasi" onBack={() => setAppView('history')} backLabel="Arxiv" />
                         <ScrollWrapper>
                             <Suspense fallback={<div className="flex items-center justify-center p-8 text-text-secondary">Yuklanmoqda...</div>}>
-                                <CaseLibraryView onBack={() => setAppView('history')} />
+                                <CaseLibraryView onBack={() => setAppView('history')} analyses={userHistory} />
                             </Suspense>
                         </ScrollWrapper>
                     </div>

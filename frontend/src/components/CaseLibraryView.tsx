@@ -1,16 +1,23 @@
 import React, { useState, useMemo } from 'react';
-import { AnonymizedCase } from '../types';
+import type { AnalysisRecord, AnonymizedCase } from '../types';
 import * as caseService from '../services/caseService';
 import SearchIcon from './icons/SearchIcon';
 
 interface CaseLibraryViewProps {
     onBack: () => void;
     currentPatientComplaints?: string;
+    /** Serverdan yuklangan tahlillar — berilsa holatlar shu ro'yxatdan olinadi (barcha ma'lumot serverda) */
+    analyses?: AnalysisRecord[];
 }
 
-const CaseLibraryView: React.FC<CaseLibraryViewProps> = ({ onBack, currentPatientComplaints }) => {
+const CaseLibraryView: React.FC<CaseLibraryViewProps> = ({ onBack, currentPatientComplaints, analyses }) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [cases, setCases] = useState<AnonymizedCase[]>(() => caseService.getAnonymizedCases());
+    const cases: AnonymizedCase[] = useMemo(() => {
+        if (analyses && analyses.length > 0) {
+            return caseService.analysesToAnonymizedCases(analyses);
+        }
+        return caseService.getAnonymizedCases();
+    }, [analyses]);
     
     const filteredCases = useMemo(() => {
         if (!searchTerm) return cases;

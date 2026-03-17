@@ -376,10 +376,10 @@ const isMobile = (): boolean => {
         || (navigator.maxTouchPoints > 0 && window.innerWidth < 768);
 };
 
-// Simulated RAG: Get relevant context from past successful cases
-const getRelevantHistoryContext = (currentComplaints: string): string => {
+// Simulated RAG: Get relevant context from past cases (serverdan yuborilgan yoki local)
+const getRelevantHistoryContext = (currentComplaints: string, pastCasesIn?: import('../types').AnonymizedCase[]): string => {
     try {
-        const pastCases = caseService.getAnonymizedCases();
+        const pastCases = pastCasesIn && pastCasesIn.length > 0 ? pastCasesIn : caseService.getAnonymizedCases();
         if (pastCases.length === 0) return "";
 
         // Simple keyword matching simulation for RAG
@@ -536,10 +536,10 @@ const buildMultimodalMessages = (
 ): { parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> } => prompt;
 
 // Helper to construct multimodal prompts (Text + Images)
-const buildMultimodalPrompt = (introText: string, data: PatientData) => {
+const buildMultimodalPrompt = (introText: string, data: PatientData, pastCases?: import('../types').AnonymizedCase[]) => {
     const { attachments, ...rest } = data;
     const textData = JSON.stringify(rest);
-    const historyContext = getRelevantHistoryContext(data.complaints);
+    const historyContext = getRelevantHistoryContext(data.complaints, pastCases);
     
     const parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [
         { text: `${introText}\n\n${historyContext}\n\nPATIENT CLINICAL DATA (Structured): ${textData}` }
@@ -1081,8 +1081,11 @@ export const runCouncilDebate = async (
     orchestratorModel: string,
     onProgress: (update: ProgressUpdate) => void,
     getUserIntervention: () => string | null,
-    language: Language
+    language: Language,
+    /** Serverdan yuklangan tahlillar — RAG konteksti uchun (barcha ma'lumot serverda) */
+    userHistory?: AnalysisRecord[]
 ): Promise<void> => {
+    const pastCasesForContext = userHistory?.length ? caseService.analysesToAnonymizedCases(userHistory) : undefined;
     const systemInstr = getSystemInstruction(language);
     const introMessages: Record<Language, string> = {
         'uz-L': 'O\'zbekiston yetakchi tibbiyot mutaxassislari yig\'ilmoqda...',
@@ -1120,7 +1123,7 @@ QOIDA: Ob'ektiv ko'rik va (agar bor bo'lsa) yuklangan laboratoriya/diagnostika h
     const introContentPrompt = `Siz Konsilium Professori. QOIDA: Konsiliumda hech bir matn oldindan kiritilmaydi — barcha yozuv faqat siz quyidagi bemor va kasallik ma'lumotlarini (va agar ilovada bo'lsa — laboratoriya/diagnostika hujjatlarini) O'QIB, TUSHUNIB, umumlashtirib o'zingiz yozasiz. Tayyor ibora yoki shablon ISHLATMANG. "Hurmatli hamkasblar" kabi rasmiy ochilish SHART EMAS — to'g'ridan-to'g'ri bemor va kasallik haqida mazmunli ochilish (3-5 jumla). Ob'ektiv ko'rik (vital) va yuklangan hujjatlar allaqachon berilgan — ularni qayta so'ramang. Agar bemor hujjat yuklagan bo'lsa — asosiy topilmalarni qisqacha yetkazing. Maqsad: aniq tashxis va davolash; e'tibor kasallikga. Javobni oxirigacha yozing. TIL: ${langMap[language]}.
 
 ${patientSummaryForRais}`;
-    const introMultimodal = attachmentCount > 0 ? buildMultimodalPrompt(introContentPrompt, patientData) : introContentPrompt;
+    const introMultimodal = attachmentCount > 0 ? buildMultimodalPrompt(introContentPrompt, patientData, pastCasesForContext) : introContentPrompt;
     const introContent = await callGemini(introMultimodal, DEPLOY_PRO, undefined, false, systemInstr, true, 3072) as string;
 
     const orchestratorIntro: ChatMessage = { id: `sys-intro-${Date.now()}`, author: AIModel.SYSTEM, content: (introContent || '').trim(), isSystemMessage: true };
@@ -1134,7 +1137,7 @@ ${patientSummaryForRais}`;
     const currentTopicPrompt = `Siz Konsilium professori. QOIDA: Hech qanday oldindan kiritilgan matn bo'lmasin — faqat quyidagi bemor va kasallik ma'lumotlarini (va ilovadagi hujjatlarini) o'qib, o'zingiz birinchi mavzuni yozing. Rasmiy salomlashuv ("Hurmatli hamkasblar" va h.k.) yozmang — to'g'ridan-to'g'ri mavzu va kasallikga e'tibor. Ob'ektiv ko'rik va yuklangan hujjatlar berilgan — shifokordan qayta so'ramang. Mutaxassislardan dastlabki baho va xavf belgilari so'ring; hujjatlar bo'lsa topilmalarni qisqacha yetkazing. Bitta to'liq paragraf, mazmunli. TIL: ${langMap[language]}.
 
 ${patientSummaryForRais}`;
-    const topicMultimodal = attachmentCount > 0 ? buildMultimodalPrompt(currentTopicPrompt, patientData) : currentTopicPrompt;
+    const topicMultimodal = attachmentCount > 0 ? buildMultimodalPrompt(currentTopicPrompt, patientData, pastCasesForContext) : currentTopicPrompt;
     let currentTopic = await callGemini(topicMultimodal, DEPLOY_PRO, undefined, false, systemInstr, true, 3072) as string;
 
     for (let round = 1; round <= DEBATE_ROUNDS; round++) {
@@ -1221,7 +1224,7 @@ QOIDALAR:
 Javob 3-6 jumla, oxirigacha; keraksiz tantana yo'q. TIL: ${langMap[language]}.`;
 
             
-            const specialistMultimodalPrompt = buildMultimodalPrompt(textPrompt, patientData);
+            const specialistMultimodalPrompt = buildMultimodalPrompt(textPrompt, patientData, pastCasesForContext);
             
             try {
                 const responseText = await callGemini(specialistMultimodalPrompt, DEPLOY_FAST, undefined, false, systemInstr, true, 3072) as string;
@@ -1307,7 +1310,7 @@ VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu matni
         Debate history: ${JSON.stringify(debateHistory)}
     `;
     
-    const finalReportMultimodalPrompt = buildMultimodalPrompt(finalReportTextPrompt, patientData);
+    const finalReportMultimodalPrompt = buildMultimodalPrompt(finalReportTextPrompt, patientData, pastCasesForContext);
 
     const runFinalReport = async (maxTok: number): Promise<FinalReport> => {
         const raw = await callGemini(finalReportMultimodalPrompt, DEPLOY_PRO, finalReportSchema, false, systemInstr, true, maxTok) as FinalReport;
@@ -1326,7 +1329,7 @@ VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu matni
             if (isParseErr) {
                 logger.warn('Final report JSON kesilgan, qisqaroq reasoningChain bilan qayta urinilmoqda');
                 const shortPrompt = finalReportTextPrompt + '\n\nQISQACHA: reasoningChain da har bir element FAQAT 1 jumla (max 15 so\'z). To\'liq yopilgan JSON qaytaring.';
-                const shortMultimodal = buildMultimodalPrompt(shortPrompt, patientData);
+                const shortMultimodal = buildMultimodalPrompt(shortPrompt, patientData, pastCasesForContext);
                 const raw = await callGemini(shortMultimodal, DEPLOY_PRO, finalReportSchema, false, systemInstr, true, 8192) as FinalReport;
                 rawReport = { ...raw, consensusDiagnosis: normalizeConsensusDiagnosis(raw.consensusDiagnosis) };
             } else {
