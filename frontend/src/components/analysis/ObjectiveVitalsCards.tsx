@@ -34,14 +34,14 @@ const VitalCard: React.FC<{
   icon: React.ReactNode;
   color: string;
 }> = ({ label, value, unit, icon, color }) => (
-  <div className={`rounded-lg border p-2 min-w-0 flex-shrink-0 ${color} bg-white/60 backdrop-blur-sm shadow`}>
-    <div className="flex items-center gap-1 mb-0.5">
-      <span className="text-slate-600 flex-shrink-0">{icon}</span>
-      <span className="text-[10px] font-bold uppercase tracking-wide text-slate-600 truncate">{label}</span>
+  <div className={`rounded-md border px-1.5 py-1 min-w-0 flex-shrink-0 ${color} bg-white/60 backdrop-blur-sm shadow`}>
+    <div className="flex items-center gap-0.5 mb-0.5">
+      <span className="text-slate-600 flex-shrink-0 text-[11px]">{icon}</span>
+      <span className="text-[8px] font-semibold uppercase tracking-wide text-slate-600 truncate">{label}</span>
     </div>
-    <p className="text-sm font-bold text-slate-800 tabular-nums truncate">
+    <p className="text-[10px] font-semibold text-slate-800 tabular-nums truncate leading-tight">
       {value}
-      {unit && <span className="text-[10px] font-normal text-slate-600 ml-0.5">{unit}</span>}
+      {unit && <span className="text-[8px] font-normal text-slate-600 ml-0.5">{unit}</span>}
     </p>
   </div>
 );

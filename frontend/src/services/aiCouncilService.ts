@@ -1209,7 +1209,7 @@ ${patientSummaryForRais}`;
 VITAL KO'RSATKICHLAR (shifokor kiritgan — SO'RAMANG, hisobga oling):
 ${objectiveForSpec || '-'}
 ${labForSpec ? `Laboratoriya ma'lumoti: ${labForSpec}` : ''}${attachmentsNoteForSpec}`;
-            const textPrompt = `Siz - ${specName} (${specTitle}). QOIDA: Konsiliumda hech bir yozuv oldindan kiritilmaydi — suhbat va kasallikni o'qib, o'z fikringizni yozasiz. "Hurmatli professor" yoki boshqa rasmiy salomlashuv YOZMANG — to'g'ridan-to'g'ri tashxis va fikr. Bir-birini rozi qilish yoki mulozamat ko'rsatish maqsad emas; muhimi aniq tashxis va dalilli fikrlar, e'tibor kasallikga. Ob'ektiv ko'rik va laboratoriya/hujjatlar berilgan — shifokordan so'ramang.
+            const textPrompt = `Siz - ${specName} (${specTitle}). QOIDA: Konsiliumda hech bir yozuv oldindan kiritilmaydi — suhbat va kasallikni o'qib, o'z fikringizni yozasiz. "Hurmatli professor" yoki boshqa rasmiy salomlashuv YOZMANG — to'g'ridan-to'g'ri tashxis va fikr. Bir-birini rozi qilish yoki mulozamat ko'rsatish maqsad emas; muhimi aniq tashxis va dalilli, CHUQUR tahlil; e'tibor kasallikga. Ob'ektiv ko'rik va laboratoriya/hujjatlar berilgan — shifokordan so'ramang.
 
 --- BEMOR MA'LUMOTLARI (ob'ektiv ko'rik, lab va hujjatlar allaqachon kiritilgan — hisobga oling, qayta so'ramang) ---
 ${bemorSummaryForSpec}
@@ -1223,18 +1223,19 @@ Professorning hozirgi mavzusi: "${currentTopic}"
 
 QOIDALAR:
 1. Aloqasi BOR bo'lsa: Boshqa mutaxassislar gaplariga javob (qo'shilish, rad, savol), o'z sohangizdagi aniq taklif. Hammasi faqat yuqoridagi suhbatdan kelib chiqsin. Rasmiy salomlashuvsiz, mazmunan.
-2. Aloqasi YO'Q bo'lsa: Bitta qisqa jumla o'zingiz yozing, keyin to'xtang.
+2. Aloqasi YO'Q bo'lsa: Bitta juda qisqa jumla o'zingiz yozing, keyin to'xtang.
 3. Shifokordan savol: faqat hayotiy xavf yoki tashxisni aniqlash uchun boshqa iloji bo'lmaganda "FOYDALANUVCHI UCHUN SAVOL: [savol]" yozing; aks holda yozmang.
 4. Ob'ektiv ko'rik (qon bosimi, puls, harorat, SpO2, nafas) yuqorida berilgan — shifokordan HECH QACHON so'ramang, xulosangizda hisobga oling.
 5. Laboratoriya va diagnostika hujjatlari (agar yuklangan bo'lsa) quyida/ilovada — ularni tahlil qiling, xulosangizda ishlating. Bu ma'lumotlarni shifokordan SO'RAMANG — allaqachon berilgan.
+6. Javobingiz uch bo'limdan iborat bo'lsin: (1) "Asosiy tashxis va dalillar" — asosiy ehtimol tashxis va 2–3 asosiy dalil; (2) "Differensial tashxislar" — kamida 2 ta muqobil tashxis va nima uchun kamroq ehtimol; (3) "Tavsiya va keyingi qadamlar" — asosiy tekshiruvlar va davolashning qisqa rejasi.
 
-Javob 3-6 jumla, oxirigacha; keraksiz tantana yo'q. TIL: ${langMap[language]}.`;
+Javob 6–10 jumla atrofida bo'lsin: qisqa, lekin CHUQUR va batafsil tahlil qiling, gap o'rtada uzilib qolmasin. Keraksiz tantana yo'q. TIL: ${langMap[language]}.`;
 
             
             const specialistMultimodalPrompt = buildMultimodalPrompt(textPrompt, patientData, pastCasesForContext);
             
             try {
-                const responseText = await callGemini(specialistMultimodalPrompt, DEPLOY_FAST, undefined, false, systemInstr, true, 1024) as string;
+                const responseText = await callGemini(specialistMultimodalPrompt, DEPLOY_FAST, undefined, false, systemInstr, true, 3072) as string;
                 const trimmed = (responseText || '').trim();
                 const specialistMessage: ChatMessage = { id: `${spec.role}-${Date.now()}`, author: spec.role, content: trimmed };
                 onProgress({ type: 'message', message: specialistMessage });

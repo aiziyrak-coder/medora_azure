@@ -99,30 +99,30 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
 
     return (
         <div className="grid grid-cols-1 gap-6 h-full xl:grid-cols-12">
-            {/* Left Panel: Patient Data — 25% smaller (2 cols instead of 3) */}
-            <div className="xl:col-span-2 glass-panel p-5 overflow-y-auto h-full flex flex-col">
-                <div className="mb-4">
-                    <h3 className="text-lg font-bold text-text-primary">Bemor Ma'lumotlari</h3>
-                    <div className="h-1 w-12 bg-blue-500 rounded-full mt-1"></div>
+            {/* Left Panel: Patient Data — ultra compact (≈3x) */}
+            <div className="xl:col-span-2 glass-panel p-2 overflow-y-auto h-full flex flex-col">
+                <div className="mb-2">
+                    <h3 className="text-[11px] font-semibold text-text-primary">Bemor Ma'lumotlari</h3>
+                    <div className="h-0.5 w-8 bg-blue-500 rounded-full mt-0.5"></div>
                 </div>
                 
-                <div className="space-y-4 text-sm flex-grow">
-                    <div className="p-4 bg-white/40 rounded-2xl border border-white/40 shadow-sm">
-                        <p className="text-2xl font-bold text-text-primary">{patientDisplayName}</p>
-                        <p className="text-text-secondary mt-1">
+                <div className="space-y-2 text-[11px] flex-grow">
+                    <div className="p-2.5 bg-white/40 rounded-lg border border-white/40 shadow-sm">
+                        <p className="text-base font-semibold text-text-primary leading-tight">{patientDisplayName}</p>
+                        <p className="text-[10px] text-text-secondary mt-0.5">
                             {pd.age ? `${pd.age} yosh` : 'Yosh kiritilmagan'} · {pd.gender === 'male' ? 'Erkak' : pd.gender === 'female' ? 'Ayol' : 'Kiritilmagan'}
                         </p>
                     </div>
 
                     <div>
-                        <strong className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-1">Shikoyatlar</strong>
-                        <p className="text-text-primary bg-slate-50/50 p-3 rounded-xl border border-white/20">{pd.complaints}</p>
+                        <strong className="block text-[9px] font-semibold text-text-secondary uppercase tracking-wider mb-0.5">Shikoyatlar</strong>
+                        <p className="text-[10px] text-text-primary bg-slate-50/50 p-1.5 rounded-md border border-white/20 leading-tight">{pd.complaints}</p>
                     </div>
                     
                     {pd.history && (
                         <div>
-                            <strong className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-1">Anamnez</strong>
-                            <p className="text-text-primary bg-slate-50/50 p-3 rounded-xl border border-white/20">{pd.history}</p>
+                            <strong className="block text-[9px] font-semibold text-text-secondary uppercase tracking-wider mb-0.5">Anamnez</strong>
+                            <p className="text-[10px] text-text-primary bg-slate-50/50 p-1.5 rounded-md border border-white/20 leading-tight">{pd.history}</p>
                         </div>
                     )}
                     {pd.objectiveData && (
@@ -130,8 +130,8 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
                     )}
                     {pd.labResults && (
                         <div>
-                            <strong className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-1">Laboratoriya</strong>
-                            <p className="text-text-primary bg-slate-50/50 p-3 rounded-xl border border-white/20">{pd.labResults}</p>
+                            <strong className="block text-[9px] font-semibold text-text-secondary uppercase tracking-wider mb-0.5">Laboratoriya</strong>
+                            <p className="text-[10px] text-text-primary bg-slate-50/50 p-1.5 rounded-md border border-white/20 leading-tight">{pd.labResults}</p>
                         </div>
                     )}
                     {pd.pharmacogenomicsReport && <p className="p-3 bg-purple-50/80 border border-purple-200 rounded-xl text-purple-700 font-medium">Farmakogenomika hisoboti mavjud</p>}
