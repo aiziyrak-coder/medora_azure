@@ -1236,9 +1236,6 @@ Javob 6–10 juda mazmunli jumla bo'lsin: qisqa, lekin CHUQUR va batafsil tahlil
                 onProgress({ type: 'message', message: specialistMessage });
                 debateHistory.push(specialistMessage);
 
-                // Foydalanuvchidan savolni faqat professor so'raganda so'raymiz; mutaxassis yozgan savolni faqat suhbatga qo'shamiz, javob kutmaymiz
-                // Har bir mutaxassisdan keyingi kutish vaqtini ham minimallashtiramiz
-                await sleep(2);
             } catch (e) {
                 // error handling
             }
@@ -1626,17 +1623,14 @@ export const runResearchCouncilDebate = async (
 ): Promise<void> => {
     const systemInstr = getSystemInstruction(language);
     onProgress({ type: 'status', message: `Research Topic: "${diseaseName}". Gathering data...` });
-    await sleep(18);
 
     const specialists = [AIModel.GPT, AIModel.LLAMA, AIModel.CLAUDE];
     for (const model of specialists) {
         const translatedIntro = await callGemini(`Translate to ${langMap[language]}: "I am ${model}, ready to analyze the latest research on ${diseaseName}."`, DEPLOY_FAST, undefined, false, systemInstr);
         onProgress({ type: 'message', message: { id: `${model}-${Date.now()}`, author: model, content: translatedIntro as string, isThinking: false } });
-        await sleep(10);
     }
     
     onProgress({ type: 'status', message: 'Discussing innovative strategies...' });
-    await sleep(18);
     
     const prompt = `Provide detailed research report on "${diseaseName}". Use web search for latest data. Return ONLY valid JSON (no markdown, no extra text). The JSON must have these fields: diseaseName, summary, epidemiology {prevalence, incidence, keyRiskFactors[]}, pathophysiology, emergingBiomarkers [{name, type, description}], clinicalGuidelines [{guidelineTitle, source, recommendations [{category, details[]}]}], potentialStrategies [{name, mechanism, evidence, pros[], cons[], riskBenefit {risk, benefit}, developmentRoadmap [{stage, duration, cost}], molecularTarget {name, pdbId}, ethicalConsiderations[], requiredCollaborations[], companionDiagnosticNeeded}], pharmacogenomics {relevantGenes [{gene, mutation, impact}], targetSubgroup}, patentLandscape {competingPatents [{patentId, title, assignee}], whitespaceOpportunities[]}, relatedClinicalTrials [{trialId, title, status, url}], strategicConclusion, sources [{title, uri}]. LANGUAGE: ${langMap[language]}.`;
 
