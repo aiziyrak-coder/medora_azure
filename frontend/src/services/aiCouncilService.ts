@@ -1124,28 +1124,33 @@ QOIDA: Ob'ektiv ko'rik va (agar bor bo'lsa) yuklangan laboratoriya/diagnostika h
 
 ${patientSummaryForRais}`;
     const introMultimodal = attachmentCount > 0 ? buildMultimodalPrompt(introContentPrompt, patientData, pastCasesForContext) : introContentPrompt;
+    // Intro sifatini saqlash uchun PRO modelda qoldiramiz
     const introContent = await callGemini(introMultimodal, DEPLOY_PRO, undefined, false, systemInstr, true, 3072) as string;
 
     const orchestratorIntro: ChatMessage = { id: `sys-intro-${Date.now()}`, author: AIModel.SYSTEM, content: (introContent || '').trim(), isSystemMessage: true };
     onProgress({ type: 'message', message: orchestratorIntro });
     debateHistory.push(orchestratorIntro);
-    await sleep(12);
+    // Faqat vizual effekt uchun juda qisqa pauza
+    await sleep(3);
 
-    const DEBATE_ROUNDS = 3;
+    // Raundlar tushunchasini UI dan olib tashlaymiz: ichki hisob-kitob uchun 1 marta aylanish
+    const DEBATE_ROUNDS = 1;
     let lastLivePrognosis: PrognosisReport | null = null;
     // Birinchi mavzu — bemor, kasallik va (agar bor bo'lsa) hujjatlar asosida; Professor hujjatlarni ko'radi
     const currentTopicPrompt = `Siz Konsilium professori. QOIDA: Hech qanday oldindan kiritilgan matn bo'lmasin — faqat quyidagi bemor va kasallik ma'lumotlarini (va ilovadagi hujjatlarini) o'qib, o'zingiz birinchi mavzuni yozing. Rasmiy salomlashuv ("Hurmatli hamkasblar" va h.k.) yozmang — to'g'ridan-to'g'ri mavzu va kasallikga e'tibor. Ob'ektiv ko'rik va yuklangan hujjatlar berilgan — shifokordan qayta so'ramang. Mutaxassislardan dastlabki baho va xavf belgilari so'ring; hujjatlar bo'lsa topilmalarni qisqacha yetkazing. Bitta to'liq paragraf, mazmunli. TIL: ${langMap[language]}.
 
 ${patientSummaryForRais}`;
     const topicMultimodal = attachmentCount > 0 ? buildMultimodalPrompt(currentTopicPrompt, patientData, pastCasesForContext) : currentTopicPrompt;
+    // Birinchi mavzu ham PRO modelda, chunki u butun munozaraning asosini beradi
     let currentTopic = await callGemini(topicMultimodal, DEPLOY_PRO, undefined, false, systemInstr, true, 3072) as string;
 
     for (let round = 1; round <= DEBATE_ROUNDS; round++) {
+        // Raund raqamini ko'rsatmaymiz, faqat umumiy holat xabari
         const roundMessages: Record<Language, string> = {
-            'uz-L': `${round}-bosqich munozarasi boshlanmoqda...`,
-            'uz-C': `${round}-боскич мунозараси бошланмоқда...`,
-            'ru': `Начинается ${round}-й раунд обсуждения...`,
-            'en': `Round ${round} of debate starting...`
+            'uz-L': `Konsilium munozarasi davom etmoqda...`,
+            'uz-C': `Консилиум муҳокамаси давом этмоқда...`,
+            'ru': `Идёт обсуждение консилиума...`,
+            'en': `Council debate in progress...`
         };
         onProgress({ type: 'status', message: roundMessages[language] });
         
@@ -1175,7 +1180,8 @@ ${patientSummaryForRais}`;
              debateHistory.push(orchestratorMessage);
         }
         
-        await sleep(22);
+        // Sun'iy pauzani juda kichik qiymatga tushiramiz
+        await sleep(2);
 
         // Specialists Turn
         for (const spec of specialistsConfig) {
@@ -1234,7 +1240,8 @@ Javob 3-6 jumla, oxirigacha; keraksiz tantana yo'q. TIL: ${langMap[language]}.`;
                 debateHistory.push(specialistMessage);
 
                 // Foydalanuvchidan savolni faqat professor so'raganda so'raymiz; mutaxassis yozgan savolni faqat suhbatga qo'shamiz, javob kutmaymiz
-                await sleep(15);
+                // Har bir mutaxassisdan keyingi kutish vaqtini ham minimallashtiramiz
+                await sleep(2);
             } catch (e) {
                 // error handling
             }
@@ -1255,6 +1262,7 @@ ${debateSummary}
 --- TUGADI ---
 
 VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu matnini TO'LIQ yozing — bo'sh qoldirmang. Rasmiy mulozamat yo'q; mazmun — tashxis va kasallik. FOYDALANUVCHI UCHUN SAVOLni faqat tashxis yoki shoshilinch qaror uchun mutlaqo zarur bo'lsagina ishlating (juda kam); aksincha keyingi mavzuni aniq jumla bilan yozing. Javobni oxirigacha yozing. TIL: ${langMap[language]}.`;
+            // Agar yana bosqichlar qo'shilsa, keyingi mavzularni PRO modelda hisoblaymiz
             currentTopic = await callGemini(summarizationPrompt, DEPLOY_PRO, undefined, false, systemInstr, true, 3072) as string;
         }
     }
@@ -1266,7 +1274,8 @@ VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu matni
         'en': 'Preparing final report...'
     };
     onProgress({ type: 'status', message: finalizingMessages[language] });
-    await sleep(22);
+    // Yakuniy hisobotdan oldingi kutish ham minimal
+    await sleep(2);
 
     const finalReportSchema = {
         type: 'object',
