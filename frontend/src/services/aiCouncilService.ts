@@ -1183,8 +1183,8 @@ ${patientSummaryForRais}`;
         // Sun'iy pauzani juda kichik qiymatga tushiramiz
         await sleep(2);
 
-        // Specialists Turn (faqat eng muhim 4 ta mutaxassis – tezkor ishlashi uchun)
-        const limitedSpecialists = specialistsConfig.slice(0, 4);
+        // Specialists Turn (faqat eng muhim 2 ta mutaxassis – maksimal tezlik uchun)
+        const limitedSpecialists = specialistsConfig.slice(0, 2);
         for (const spec of limitedSpecialists) {
             onProgress({ type: 'thinking', model: spec.role });
             const specialist = AI_SPECIALISTS[spec.role];
@@ -1248,11 +1248,9 @@ Javob 3-6 jumla, oxirigacha; keraksiz tantana yo'q. TIL: ${langMap[language]}.`;
             }
         }
         
-        const livePrognosis = await generatePrognosisUpdate(debateHistory, patientData, language);
+        // Tezkor rejimda qo'shimcha prognoz hisobotini o'tkazib yuboramiz (asosiy Final Report PRO/FAST orqali qoladi)
+        const livePrognosis = null as PrognosisReport | null;
         lastLivePrognosis = livePrognosis;
-        if (livePrognosis) {
-            onProgress({ type: 'prognosis_update', data: livePrognosis });
-        }
         
         if (round < DEBATE_ROUNDS) {
             const debateSummary = debateHistory.slice(-10).map(m => `[${m.author === AIModel.SYSTEM ? 'Professor' : m.author}]: ${(m.content || '').trim().slice(0, 300)}`).join('\n');
@@ -1322,8 +1320,9 @@ VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu matni
     
     const finalReportMultimodalPrompt = buildMultimodalPrompt(finalReportTextPrompt, patientData, pastCasesForContext);
 
-        const runFinalReport = async (maxTok: number): Promise<FinalReport> => {
-        const raw = await callGemini(finalReportMultimodalPrompt, DEPLOY_PRO, finalReportSchema, false, systemInstr, true, maxTok) as FinalReport;
+    const runFinalReport = async (maxTok: number): Promise<FinalReport> => {
+        // Tezlikni oshirish uchun yakuniy hisobot FAST model orqali, lekin to'liq JSON struktura bilan
+        const raw = await callGemini(finalReportMultimodalPrompt, DEPLOY_FAST, finalReportSchema, false, systemInstr, true, maxTok) as FinalReport;
         return {
             ...raw,
             consensusDiagnosis: normalizeConsensusDiagnosis(raw.consensusDiagnosis),
@@ -1333,7 +1332,7 @@ VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu matni
     try {
         let rawReport: FinalReport;
         try {
-            rawReport = await runFinalReport(8192);
+            rawReport = await runFinalReport(4096);
         } catch (firstErr) {
             const isParseErr = (firstErr as Error & { cause?: string })?.cause === 'parse_json' || String((firstErr as Error).message).includes('AI_JSON_PARSE_ERROR');
             if (isParseErr) {
