@@ -1323,7 +1323,8 @@ VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu matni
     try {
         let rawReport: FinalReport;
         try {
-            rawReport = await runFinalReport(4096);
+            // Yakuniy hisobot uchun kengroq token limiti — kesilmasdan to'liq JSON chiqishi uchun
+            rawReport = await runFinalReport(8192);
         } catch (firstErr) {
             const isParseErr = (firstErr as Error & { cause?: string })?.cause === 'parse_json' || String((firstErr as Error).message).includes('AI_JSON_PARSE_ERROR');
             if (isParseErr) {
@@ -1340,9 +1341,16 @@ VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu matni
             onProgress({ type: 'critical_finding', data: rawReport.criticalFinding });
         }
 
-        const rejectedHypotheses = Array.isArray(rawReport.rejectedHypotheses) && rawReport.rejectedHypotheses.length > 0
+        let rejectedHypotheses = Array.isArray(rawReport.rejectedHypotheses) && rawReport.rejectedHypotheses.length > 0
             ? rawReport.rejectedHypotheses.map((h: { name?: string; reason?: string }) => ({ name: String(h?.name ?? ''), reason: String(h?.reason ?? '') }))
             : (rawReport.rejectedHypotheses ?? []);
+        // Hech qanday rad etilgan gipoteza bo'lmasa ham, foydalanuvchi uchun chala bo'lib ko'rinmasligi uchun izoh beramiz
+        if (!Array.isArray(rejectedHypotheses) || rejectedHypotheses.length === 0) {
+            rejectedHypotheses = [{
+                name: 'Aniq rad etilgan differensial tashxislar kiritilmagan',
+                reason: 'Konsilium davomida muqobil tashxislar ustida bahs bo\'lgan bo\'lishi mumkin, ammo yakuniy hisobotda aniq rad etilgan gipoteza alohida ko\'rsatilmagan.'
+            }];
+        }
         let medicationRecommendations = (Array.isArray(rawReport.medicationRecommendations) ? rawReport.medicationRecommendations : []).map((m: { name?: string; dosage?: string; notes?: string; localAvailability?: string; priceEstimate?: string }) => {
             const name = String(m?.name ?? '').trim();
             const localAvailability = String(m?.localAvailability ?? '').trim();
