@@ -95,6 +95,8 @@ export interface PatientData {
   // --- Basic Info ---
   firstName: string;
   lastName: string;
+  /** Otasining ismi (patronimik) */
+  fatherName?: string;
   age: string;
   gender: 'male' | 'female' | 'other' | '';
   // --- Clinical Info ---

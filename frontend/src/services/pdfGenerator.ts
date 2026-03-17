@@ -16,8 +16,9 @@ interface jsPDFInternal {
 export type SpecialistNameResolver = (author: string) => string;
 
 const PDF_FONT = 'times' as const; // Times New Roman — haqiqiy hujjat uslubi
-const LINE_HEIGHT = 8;
-const FOOTER_RESERVE = 16;
+// Rasmiy ko‘rinish saqlangan holda siqilgan layout
+const LINE_HEIGHT = 6;
+const FOOTER_RESERVE = 12;
 
 /** Optional institute branding for document header */
 export interface InstituteBranding {
@@ -37,7 +38,7 @@ export const generatePdfReport = (
     const doc = new jsPDF();
     const pageHeight = doc.internal.pageSize.height;
     const pageWidth = doc.internal.pageSize.width;
-    const margin = 18;
+    const margin = 14;
     let y = margin;
 
     const addHeader = (text: string) => {
@@ -45,7 +46,7 @@ export const generatePdfReport = (
             doc.addPage();
             y = margin;
         }
-        doc.setFontSize(18);
+        doc.setFontSize(16);
         doc.setFont(PDF_FONT, 'bold');
         doc.setTextColor(30, 41, 59);
         doc.text(text, margin, y);
@@ -61,7 +62,7 @@ export const generatePdfReport = (
             y = margin;
         }
         y += 1;
-        doc.setFontSize(16);
+        doc.setFontSize(13);
         doc.setFont(PDF_FONT, 'bold');
         doc.setTextColor(30, 41, 59);
         doc.text(text, margin, y);
@@ -69,7 +70,7 @@ export const generatePdfReport = (
     };
 
     const addText = (text: string, isListItem = false) => {
-        doc.setFontSize(14);
+        doc.setFontSize(11);
         doc.setFont(PDF_FONT, 'normal');
         doc.setTextColor(40, 40, 40);
         const textToSplit = text || 'N/A';
@@ -93,7 +94,7 @@ export const generatePdfReport = (
     const addKeyValue = (key: string, value: string | undefined | null) => {
         if (!value) return;
         const keyString = `${key}:`;
-        doc.setFontSize(14);
+        doc.setFontSize(11);
         doc.setFont(PDF_FONT, 'bold');
         doc.setTextColor(40, 40, 40);
         const keyWidth = doc.getTextWidth(keyString) + 4;
@@ -126,7 +127,9 @@ export const generatePdfReport = (
     y += LINE_HEIGHT + 3;
 
     addSectionTitle("Bemor Ma'lumotlari");
-    addKeyValue("Bemor", `${patientData.firstName} ${patientData.lastName}`);
+    const fullName = `${patientData.lastName} ${patientData.firstName}`.trim();
+    const fatherLine = patientData.fatherName ? `, ${patientData.fatherName}` : '';
+    addKeyValue("Bemor", `${fullName}${fatherLine}`);
     addKeyValue("Yoshi", patientData.age);
     addKeyValue("Jinsi", patientData.gender === 'male' ? 'Erkak' : patientData.gender === 'female' ? 'Ayol' : 'Boshqa');
     y += 3;

@@ -1124,8 +1124,8 @@ QOIDA: Ob'ektiv ko'rik va (agar bor bo'lsa) yuklangan laboratoriya/diagnostika h
 
 ${patientSummaryForRais}`;
     const introMultimodal = attachmentCount > 0 ? buildMultimodalPrompt(introContentPrompt, patientData, pastCasesForContext) : introContentPrompt;
-    // Intro sifatini saqlash uchun PRO modelda qoldiramiz
-    const introContent = await callGemini(introMultimodal, DEPLOY_PRO, undefined, false, systemInstr, true, 3072) as string;
+    // Intro sifatini saqlash uchun PRO modelda qoldiramiz, lekin maksimal uzunlikni biroz qisqartiramiz
+    const introContent = await callGemini(introMultimodal, DEPLOY_PRO, undefined, false, systemInstr, true, 2048) as string;
 
     const orchestratorIntro: ChatMessage = { id: `sys-intro-${Date.now()}`, author: AIModel.SYSTEM, content: (introContent || '').trim(), isSystemMessage: true };
     onProgress({ type: 'message', message: orchestratorIntro });
@@ -1142,7 +1142,7 @@ ${patientSummaryForRais}`;
 ${patientSummaryForRais}`;
     const topicMultimodal = attachmentCount > 0 ? buildMultimodalPrompt(currentTopicPrompt, patientData, pastCasesForContext) : currentTopicPrompt;
     // Birinchi mavzu ham PRO modelda, chunki u butun munozaraning asosini beradi
-    let currentTopic = await callGemini(topicMultimodal, DEPLOY_PRO, undefined, false, systemInstr, true, 3072) as string;
+    let currentTopic = await callGemini(topicMultimodal, DEPLOY_PRO, undefined, false, systemInstr, true, 2048) as string;
 
     for (let round = 1; round <= DEBATE_ROUNDS; round++) {
         // Raund raqamini ko'rsatmaymiz, faqat umumiy holat xabari
@@ -1233,7 +1233,7 @@ Javob 3-6 jumla, oxirigacha; keraksiz tantana yo'q. TIL: ${langMap[language]}.`;
             const specialistMultimodalPrompt = buildMultimodalPrompt(textPrompt, patientData, pastCasesForContext);
             
             try {
-                const responseText = await callGemini(specialistMultimodalPrompt, DEPLOY_FAST, undefined, false, systemInstr, true, 3072) as string;
+                const responseText = await callGemini(specialistMultimodalPrompt, DEPLOY_FAST, undefined, false, systemInstr, true, 2048) as string;
                 const trimmed = (responseText || '').trim();
                 const specialistMessage: ChatMessage = { id: `${spec.role}-${Date.now()}`, author: spec.role, content: trimmed };
                 onProgress({ type: 'message', message: specialistMessage });

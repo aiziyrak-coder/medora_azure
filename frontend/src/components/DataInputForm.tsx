@@ -478,6 +478,7 @@ const DataInputForm: React.FC<DataInputFormProps> = ({ isAnalyzing, onSubmit }) 
     const [formData, setFormData] = useState<Partial<PatientData>>({
         firstName: '',
         lastName: '',
+        fatherName: '',
         age: '',
         gender: '',
         complaints: '',
@@ -740,6 +741,7 @@ const DataInputForm: React.FC<DataInputFormProps> = ({ isAnalyzing, onSubmit }) 
         const fullPatientData: PatientData = {
             firstName: formData.firstName || '',
             lastName: formData.lastName || '',
+            fatherName: formData.fatherName || '',
             age: formData.age || '',
             gender: formData.gender as 'male' | 'female' | 'other' | '',
             complaints: formData.complaints || '',
@@ -817,6 +819,16 @@ const DataInputForm: React.FC<DataInputFormProps> = ({ isAnalyzing, onSubmit }) 
                             <div>
                                 <Input id="lastName" label={t('data_input_patient_lastname')} type="text" value={formData.lastName || ''} onChange={e => handleChange('lastName', e.target.value)} required placeholder={t('data_input_placeholder_lastname')} />
                                 {formErrors.lastName && <p className="text-[9px] text-red-500 mt-0.5 ml-0.5">{formErrors.lastName}</p>}
+                            </div>
+                            <div>
+                                <Input
+                                    id="fatherName"
+                                    label={t('data_input_patient_fathername') || "Otasining ismi"}
+                                    type="text"
+                                    value={formData.fatherName || ''}
+                                    onChange={e => handleChange('fatherName', e.target.value)}
+                                    placeholder={t('data_input_placeholder_fathername') || "Masalan: Otabek o'g'li"}
+                                />
                             </div>
                             <div className="grid grid-cols-2 gap-1.5">
                                 <div>
