@@ -235,7 +235,7 @@ export const uzL: TranslationSet = {
   dashboard_tools_title: 'Instrumentlar Paneli',
   dashboard_tools_desc: 'Kundalik vazifalar uchun AI yordamchi vositalaridan foydalaning.',
   dashboard_start: 'Boshlash',
-  dashboard_stats_title: 'Shaxsiy Statistika',
+  dashboard_stats_title: 'Shaxsiy Analitika',
   dashboard_cme_title: 'Siz uchun Tavsiyalar (UTT)',
   dashboard_recent_analyses_title: 'So\'nggi Tahlillar',
   dashboard_stats_loading: 'Statistika yuklanmoqda...',
@@ -248,6 +248,10 @@ export const uzL: TranslationSet = {
   stats_top_diagnoses: 'Top 3 Tashxis',
   stats_case: '{count} holat',
   stats_no_data: 'Hali yetarli ma\'lumot yo\'q.',
+  stats_range_day: 'Bugun',
+  stats_range_week: '7 kun',
+  stats_range_month: '30 kun',
+  stats_range_all: 'Umumiy',
   
   // CME Component
   cme_recommendations_info: 'Siz uchun tavsiyalar shakllantirilmoqda.',

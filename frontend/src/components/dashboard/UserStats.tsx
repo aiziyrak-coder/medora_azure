@@ -1,8 +1,12 @@
 import React from 'react';
-import type { UserStats } from '../../types';
+import type { UserStats, AnalysisRecord } from '../../types';
 import { useTranslation } from '../../hooks/useTranslation';
+import { getDashboardStats } from '../../services/caseService';
 
-interface UserStatsProps { stats: UserStats }
+interface UserStatsProps {
+    stats: UserStats;
+    analyses: AnalysisRecord[];
+}
 
 const RadialRing: React.FC<{
     value: number; max?: number;
@@ -35,10 +39,31 @@ const RadialRing: React.FC<{
     );
 };
 
-const UserStatsComponent: React.FC<UserStatsProps> = ({ stats }) => {
+type RangeKey = 'day' | 'week' | 'month' | 'all';
+
+const UserStatsComponent: React.FC<UserStatsProps> = ({ stats, analyses }) => {
     const { t } = useTranslation();
-    const acc   = Math.round(stats.feedbackAccuracy * 100);
-    const maxD  = Math.max(...stats.commonDiagnoses.map(d => d.count), 1);
+    const [range, setRange] = React.useState<RangeKey>('all');
+
+    const now = React.useMemo(() => new Date(), []);
+    const msInDay = 1000 * 60 * 60 * 24;
+
+    const rangedStats = React.useMemo<UserStats>(() => {
+        if (range === 'all' || !analyses || analyses.length === 0) return stats;
+        const filtered = analyses.filter(a => {
+            const dt = new Date(a.date);
+            if (Number.isNaN(dt.getTime())) return false;
+            const diffDays = (now.getTime() - dt.getTime()) / msInDay;
+            if (range === 'day') return diffDays <= 1;
+            if (range === 'week') return diffDays <= 7;
+            if (range === 'month') return diffDays <= 30;
+            return true;
+        });
+        return getDashboardStats(filtered);
+    }, [analyses, msInDay, now, range, stats]);
+
+    const acc   = Math.round(rangedStats.feedbackAccuracy * 100);
+    const maxD  = Math.max(...rangedStats.commonDiagnoses.map(d => d.count), 1);
     const barColors  = ['#0891b2', '#059669', '#7c3aed'];
     const barGlows   = ['rgba(8,145,178,0.4)', 'rgba(5,150,105,0.4)', 'rgba(124,58,237,0.4)'];
 
@@ -52,17 +77,38 @@ const UserStatsComponent: React.FC<UserStatsProps> = ({ stats }) => {
 
     return (
         <div className="rounded-[22px] p-5 h-full flex flex-col gap-4" style={{ ...glass, minHeight:'230px' }}>
-            <div className="flex items-center gap-2">
-                <div className="w-1 h-4 rounded-full"
-                     style={{ background:'linear-gradient(180deg,#0891b2,#059669)' }} />
-                <h2 className="text-sm font-bold text-slate-700 tracking-wide">{t('dashboard_stats_title')}</h2>
+            <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                    <div className="w-1 h-4 rounded-full"
+                         style={{ background:'linear-gradient(180deg,#0891b2,#059669)' }} />
+                    <h2 className="text-sm font-bold text-slate-700 tracking-wide">{t('dashboard_stats_title')}</h2>
+                </div>
+                <div className="flex items-center gap-1.5 bg-slate-50 rounded-full px-1.5 py-0.5">
+                    {(['day','week','month','all'] as RangeKey[]).map(key => (
+                        <button
+                            key={key}
+                            type="button"
+                            onClick={() => setRange(key)}
+                            className={`px-2 py-0.5 rounded-full text-[9px] font-semibold transition-all ${
+                                range === key
+                                    ? 'bg-sky-600 text-white shadow-sm'
+                                    : 'text-slate-500 hover:bg-slate-100'
+                            }`}
+                        >
+                            {key === 'day' && (t('stats_range_day') || 'Kun')}
+                            {key === 'week' && (t('stats_range_week') || '7 kun')}
+                            {key === 'month' && (t('stats_range_month') || '30 kun')}
+                            {key === 'all' && (t('stats_range_all') || 'Umumiy')}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* Rings */}
             <div className="flex items-center justify-around py-1">
                 <RadialRing
-                    value={Math.min(stats.totalAnalyses,100)} max={100}
-                    label={String(stats.totalAnalyses)} sublabel={t('stats_total_analyses')}
+                    value={Math.min(rangedStats.totalAnalyses,100)} max={100}
+                    label={String(rangedStats.totalAnalyses)} sublabel={t('stats_total_analyses')}
                     color="#059669" trackColor="rgba(5,150,105,0.12)"
                 />
                 <div className="w-px h-14 bg-slate-100" />
@@ -81,8 +127,8 @@ const UserStatsComponent: React.FC<UserStatsProps> = ({ stats }) => {
                     {t('stats_top_diagnoses')}
                 </p>
                 <div className="space-y-2.5">
-                    {stats.commonDiagnoses.length > 0
-                        ? stats.commonDiagnoses.map((d, i) => (
+                    {rangedStats.commonDiagnoses.length > 0
+                        ? rangedStats.commonDiagnoses.map((d, i) => (
                             <div key={i}>
                                 <div className="flex justify-between items-center mb-1.5">
                                     <p className="text-xs font-semibold text-slate-700 truncate pr-2">{d.name}</p>

@@ -45,9 +45,10 @@ export function validatePatientDataSmart(data: Partial<PatientData> | null): Sma
   }
 
   // Xavfsizlik: allergiya va dori-darmonlar
+  // Allergiya maydoni bo'sh bo'lsa, endi xato EMAS (\"yo'q\" yozish majburiy emas).
+  // Faqat tavsiya sifatida, dori yozishdan oldin tekshirish mantiqida ishlatiladi.
   if (EMPTY(data.allergies)) {
-    result.missingCritical.push('Allergiya (yo\'q bo\'lsa "Yo\'q" yozing)');
-    result.valid = false;
+    result.warnings.push('Allergiya kiritilmagan - agar maʼlum bo‘lsa, dori tanlashda xavfsizlik uchun ko‘rsatish foydali.');
   }
   if (EMPTY(data.currentMedications)) {
     result.warnings.push('Joriy dori-darmonlar  -  aralashuv xavfi uchun kiritish tavsiya etiladi');

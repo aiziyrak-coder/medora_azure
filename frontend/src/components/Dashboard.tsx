@@ -10,6 +10,7 @@ interface DashboardProps {
     onNewAnalysis: () => void;
     onViewHistory: () => void;
     recentAnalyses: AnalysisRecord[];
+    allAnalyses: AnalysisRecord[];
     onSelectAnalysis: (record: AnalysisRecord) => void;
     stats: UserStats | null;
     cmeTopics: CMETopic[];
@@ -64,7 +65,7 @@ const glass: React.CSSProperties = {
 
 const Dashboard: React.FC<DashboardProps> = ({
     userName, onNewAnalysis, onViewHistory,
-    recentAnalyses, onSelectAnalysis, stats, cmeTopics,
+    recentAnalyses, allAnalyses, onSelectAnalysis, stats, cmeTopics,
 }) => {
     const { t } = useTranslation();
 
@@ -213,7 +214,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                 {/* Stats - span 4 */}
                 <div className="lg:col-span-4">
                     {stats
-                        ? <UserStatsComponent stats={stats} />
+                        ? <UserStatsComponent stats={stats} analyses={allAnalyses} />
                         : (
                             <div className="rounded-[22px] p-8 h-full flex flex-col items-center justify-center text-center gap-4"
                                  style={{ ...glass, minHeight:'230px' }}>
@@ -300,20 +301,63 @@ const Dashboard: React.FC<DashboardProps> = ({
                     </div>
                 </div>
 
-                {/* CME - span 4 */}
+                {/* Secondary analytics - span 4 */}
                 <div className="lg:col-span-4 flex flex-col gap-3">
                     <div className="flex items-center gap-2.5 px-1">
                         <div className="w-1 h-5 rounded-full"
                              style={{ background:'linear-gradient(180deg,#6366f1,#0891b2)' }} />
                         <h2 className="text-base font-bold text-slate-700 tracking-wide">
-                            {t('dashboard_cme_title')}
+                            {t('dashboard_analytics_title') || 'Analitika va trendlar'}
                         </h2>
-                        <span className="ml-auto text-[9px] font-mono font-black px-2 py-0.5 rounded tracking-widest uppercase text-violet-600"
-                              style={{ background:'rgba(237,233,254,0.9)', border:'1px solid rgba(124,58,237,0.25)' }}>
-                            AI
-                        </span>
                     </div>
-                    <CmeSuggestions topics={cmeTopics} />
+                    <div className="rounded-[20px] p-4 flex flex-col gap-3" style={glass}>
+                        {(() => {
+                            const now = new Date();
+                            const msInDay = 1000 * 60 * 60 * 24;
+                            const inLast = (days: number) =>
+                                allAnalyses.filter(a => {
+                                    const dt = new Date(a.date);
+                                    if (Number.isNaN(dt.getTime())) return false;
+                                    return (now.getTime() - dt.getTime()) / msInDay <= days;
+                                }).length;
+                            const today = inLast(1);
+                            const week = inLast(7);
+                            const month = inLast(30);
+                            const total = stats?.totalAnalyses ?? allAnalyses.length;
+                            return (
+                                <div className="grid grid-cols-2 gap-3 text-xs">
+                                    <div className="rounded-xl px-3 py-2.5 bg-sky-50 border border-sky-100">
+                                        <p className="text-[10px] font-semibold text-sky-700 uppercase tracking-widest">
+                                            {t('stats_range_day') || 'Bugun'}
+                                        </p>
+                                        <p className="mt-1 text-2xl font-black text-sky-700">{today}</p>
+                                        <p className="text-[10px] text-slate-500">{t('stats_total_analyses')}</p>
+                                    </div>
+                                    <div className="rounded-xl px-3 py-2.5 bg-emerald-50 border border-emerald-100">
+                                        <p className="text-[10px] font-semibold text-emerald-700 uppercase tracking-widest">
+                                            {t('stats_range_week') || '7 kun'}
+                                        </p>
+                                        <p className="mt-1 text-2xl font-black text-emerald-700">{week}</p>
+                                        <p className="text-[10px] text-slate-500">{t('stats_total_analyses')}</p>
+                                    </div>
+                                    <div className="rounded-xl px-3 py-2.5 bg-indigo-50 border border-indigo-100">
+                                        <p className="text-[10px] font-semibold text-indigo-700 uppercase tracking-widest">
+                                            {t('stats_range_month') || '30 kun'}
+                                        </p>
+                                        <p className="mt-1 text-2xl font-black text-indigo-700">{month}</p>
+                                        <p className="text-[10px] text-slate-500">{t('stats_total_analyses')}</p>
+                                    </div>
+                                    <div className="rounded-xl px-3 py-2.5 bg-slate-900 text-white border border-slate-800">
+                                        <p className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest">
+                                            {t('stats_range_all') || 'Umumiy'}
+                                        </p>
+                                        <p className="mt-1 text-2xl font-black">{total}</p>
+                                        <p className="text-[10px] text-slate-400">{t('stats_total_analyses')}</p>
+                                    </div>
+                                </div>
+                            );
+                        })()}
+                    </div>
                 </div>
             </div>
         </div>

@@ -985,7 +985,7 @@ const DataInputForm: React.FC<DataInputFormProps> = ({ isAnalyzing, onSubmit }) 
                                             placeholder={t('data_input_complaints_placeholder')}
                                             value={formData.complaints || ''} 
                                             onChange={e => handleChange('complaints', e.target.value)} 
-                                            className="flex-grow"
+                                            className="flex-grow min-h-[120px]"
                                         />
                                         {formErrors.complaints && <p className="text-[9px] text-red-500 mt-0.5 ml-0.5">{formErrors.complaints}</p>}
                                     </div>
@@ -996,7 +996,7 @@ const DataInputForm: React.FC<DataInputFormProps> = ({ isAnalyzing, onSubmit }) 
                                     placeholder={t('data_input_history_placeholder')} 
                                     value={formData.history || ''} 
                                     onChange={e => handleChange('history', e.target.value)} 
-                                    className="flex-grow"
+                                    className="flex-grow min-h-[120px]"
                                 />
                             </div>
                         </div>
