@@ -266,6 +266,8 @@ export const uzC: TranslationSet = {
   data_input_patient_name: 'Бемор Исми',
   data_input_patient_lastname: 'Бемор Фамилийаси',
   data_input_patient_fathername: 'Отасининг исми',
+  data_input_placeholder_fathername: 'Масалан: Отабек ўғли',
+  data_input_patient_fathername: 'Отасининг исми',
   data_input_age: 'Йоши',
   data_input_allergies: 'Аллергийа',
   data_input_current_medications: 'Жорий дори-дармонлар',

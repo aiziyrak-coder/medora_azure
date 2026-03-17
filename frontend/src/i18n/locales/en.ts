@@ -283,6 +283,7 @@ export const en = {
   data_input_patient_name: 'Patient First Name',
   data_input_patient_lastname: 'Patient Last Name',
   data_input_patient_fathername: 'Patient Middle Name / Patronymic',
+  data_input_placeholder_fathername: 'E.g.: Otabek og\'li /ovna',
   data_input_age: 'Age',
   data_input_allergies: 'Allergies',
   data_input_current_medications: 'Current medications',

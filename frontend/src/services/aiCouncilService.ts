@@ -1124,8 +1124,8 @@ QOIDA: Ob'ektiv ko'rik va (agar bor bo'lsa) yuklangan laboratoriya/diagnostika h
 
 ${patientSummaryForRais}`;
     const introMultimodal = attachmentCount > 0 ? buildMultimodalPrompt(introContentPrompt, patientData, pastCasesForContext) : introContentPrompt;
-    // Intro sifatini saqlash uchun PRO modelda qoldiramiz, lekin maksimal uzunlikni biroz qisqartiramiz
-    const introContent = await callGemini(introMultimodal, DEPLOY_PRO, undefined, false, systemInstr, true, 2048) as string;
+    // Tezlikni oshirish uchun intro FAST modelda (keng, lekin ixcham matn)
+    const introContent = await callGemini(introMultimodal, DEPLOY_FAST, undefined, false, systemInstr, true, 1024) as string;
 
     const orchestratorIntro: ChatMessage = { id: `sys-intro-${Date.now()}`, author: AIModel.SYSTEM, content: (introContent || '').trim(), isSystemMessage: true };
     onProgress({ type: 'message', message: orchestratorIntro });
@@ -1141,8 +1141,8 @@ ${patientSummaryForRais}`;
 
 ${patientSummaryForRais}`;
     const topicMultimodal = attachmentCount > 0 ? buildMultimodalPrompt(currentTopicPrompt, patientData, pastCasesForContext) : currentTopicPrompt;
-    // Birinchi mavzu ham PRO modelda, chunki u butun munozaraning asosini beradi
-    let currentTopic = await callGemini(topicMultimodal, DEPLOY_PRO, undefined, false, systemInstr, true, 2048) as string;
+    // Birinchi mavzu ham FAST modelda — tezkor, ammo to'liq paragraf
+    let currentTopic = await callGemini(topicMultimodal, DEPLOY_FAST, undefined, false, systemInstr, true, 1024) as string;
 
     for (let round = 1; round <= DEBATE_ROUNDS; round++) {
         // Raund raqamini ko'rsatmaymiz, faqat umumiy holat xabari
@@ -1183,8 +1183,9 @@ ${patientSummaryForRais}`;
         // Sun'iy pauzani juda kichik qiymatga tushiramiz
         await sleep(2);
 
-        // Specialists Turn
-        for (const spec of specialistsConfig) {
+        // Specialists Turn (faqat eng muhim 4 ta mutaxassis – tezkor ishlashi uchun)
+        const limitedSpecialists = specialistsConfig.slice(0, 4);
+        for (const spec of limitedSpecialists) {
             onProgress({ type: 'thinking', model: spec.role });
             const specialist = AI_SPECIALISTS[spec.role];
 
@@ -1233,7 +1234,7 @@ Javob 3-6 jumla, oxirigacha; keraksiz tantana yo'q. TIL: ${langMap[language]}.`;
             const specialistMultimodalPrompt = buildMultimodalPrompt(textPrompt, patientData, pastCasesForContext);
             
             try {
-                const responseText = await callGemini(specialistMultimodalPrompt, DEPLOY_FAST, undefined, false, systemInstr, true, 2048) as string;
+                const responseText = await callGemini(specialistMultimodalPrompt, DEPLOY_FAST, undefined, false, systemInstr, true, 1024) as string;
                 const trimmed = (responseText || '').trim();
                 const specialistMessage: ChatMessage = { id: `${spec.role}-${Date.now()}`, author: spec.role, content: trimmed };
                 onProgress({ type: 'message', message: specialistMessage });
@@ -1321,7 +1322,7 @@ VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu matni
     
     const finalReportMultimodalPrompt = buildMultimodalPrompt(finalReportTextPrompt, patientData, pastCasesForContext);
 
-    const runFinalReport = async (maxTok: number): Promise<FinalReport> => {
+        const runFinalReport = async (maxTok: number): Promise<FinalReport> => {
         const raw = await callGemini(finalReportMultimodalPrompt, DEPLOY_PRO, finalReportSchema, false, systemInstr, true, maxTok) as FinalReport;
         return {
             ...raw,
@@ -1332,7 +1333,7 @@ VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu matni
     try {
         let rawReport: FinalReport;
         try {
-            rawReport = await runFinalReport(16384);
+            rawReport = await runFinalReport(8192);
         } catch (firstErr) {
             const isParseErr = (firstErr as Error & { cause?: string })?.cause === 'parse_json' || String((firstErr as Error).message).includes('AI_JSON_PARSE_ERROR');
             if (isParseErr) {
