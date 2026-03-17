@@ -808,6 +808,7 @@ const AppContent: React.FC = () => {
                             onNewAnalysis={() => handleNavigation('new_analysis')}
                             onViewHistory={() => setAppView('history')}
                             recentAnalyses={userHistory.slice(0, 5)}
+                            allAnalyses={userHistory}
                             onSelectAnalysis={viewHistoryItem}
                             stats={dashboardStats}
                             cmeTopics={cmeTopics}

@@ -49,8 +49,9 @@ const UserStatsComponent: React.FC<UserStatsProps> = ({ stats, analyses }) => {
     const msInDay = 1000 * 60 * 60 * 24;
 
     const rangedStats = React.useMemo<UserStats>(() => {
-        if (range === 'all' || !analyses || analyses.length === 0) return stats;
-        const filtered = analyses.filter(a => {
+        const baseAnalyses = Array.isArray(analyses) ? analyses : [];
+        if (range === 'all' || baseAnalyses.length === 0) return stats;
+        const filtered = baseAnalyses.filter(a => {
             const dt = new Date(a.date);
             if (Number.isNaN(dt.getTime())) return false;
             const diffDays = (now.getTime() - dt.getTime()) / msInDay;
