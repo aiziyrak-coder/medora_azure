@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback, useEffect, useRef, useMemo, Suspense, lazy } from 'react';
-import type { PatientData, ChatMessage, FinalReport, ProgressUpdate, User, AnalysisRecord, Diagnosis, DetectedMedication, DiagnosisFeedback, CriticalFinding, CMETopic, UserStats, AppView, PrognosisReport } from './types';
+import type { PatientData, ChatMessage, FinalReport, ProgressUpdate, User, AnalysisRecord, Diagnosis, DetectedMedication, DiagnosisFeedback, CriticalFinding, UserStats, AppView, PrognosisReport } from './types';
 import { normalizeConsensusDiagnosis } from './types';
 import * as aiService from './services/aiCouncilService';
 import * as authService from './services/apiAuthService';
@@ -9,6 +9,7 @@ import * as tvLinkService from './services/tvLinkService'; // Import TV Service
 import { useTranslation } from './hooks/useTranslation';
 import { getSpecialistsFromComplaint } from './utils/specialistRecommendation';
 import { checkPatientComplaintConsistency } from './utils/smartValidation';
+import { getPriorAnalysesForPatient, buildLongitudinalClinicalNotes } from './utils/longitudinalContext';
 import { useApiHealth } from './hooks/useApiHealth';
 import { Language } from './i18n/LanguageContext';
 import { isApiConfigured } from './config/api';
@@ -225,7 +226,6 @@ const AppContent: React.FC = () => {
             if (result) {
                 setUserHistory(result.list);
                 setDashboardStats(result.stats);
-                aiService.suggestCmeTopics(result.list, language).then(setCmeTopics);
             } else {
                 setUserHistory([]);
                 setDashboardStats(null);
@@ -234,7 +234,7 @@ const AppContent: React.FC = () => {
             setUserHistory([]);
             setDashboardStats(null);
         });
-    }, [currentUser, language]);
+    }, [currentUser]);
 
     // Core Analysis State
     const [patientData, setPatientData] = useState<PatientData | null>(null);
@@ -259,10 +259,11 @@ const AppContent: React.FC = () => {
 
     const [userHistory, setUserHistory] = useState<AnalysisRecord[]>([]);
     const [dashboardStats, setDashboardStats] = useState<UserStats | null>(null);
-    const [cmeTopics, setCmeTopics] = useState<CMETopic[]>([]);
     
     const [currentAnalysisRecord, setCurrentAnalysisRecord] = useState<AnalysisRecord | null>(null);
     const [createdPatientId, setCreatedPatientId] = useState<number | null>(null);
+    /** Bazadan tanlangan bemor patient.id (string) — avvalgi tahlillar bilan bog'lash va updatePatient uchun */
+    const [linkedPatientKey, setLinkedPatientKey] = useState<string | null>(null);
     const [clarificationQuestions, setClarificationQuestions] = useState<string[] | null>([]);
     
     const debateScrollRef = useRef<HTMLDivElement>(null);
@@ -324,7 +325,6 @@ const AppContent: React.FC = () => {
                                 .catch(() => setDashboardStats(base));
                         });
                         setCurrentAnalysisRecord(savedRecord);
-                        aiService.suggestCmeTopics(list, language).then(setCmeTopics);
                     };
 
                     import('./services/apiAnalysisService').then(({ createAnalysis, updateAnalysis, getAnalyses }) => {
@@ -435,7 +435,6 @@ const AppContent: React.FC = () => {
             if (result) {
                 setUserHistory(result.list);
                 setDashboardStats(result.stats);
-                aiService.suggestCmeTopics(result.list, language).then(setCmeTopics);
             } else {
                 setUserHistory([]);
                 setDashboardStats(null);
@@ -476,6 +475,7 @@ const AppContent: React.FC = () => {
         setStatusMessage('');
         setCurrentAnalysisRecord(null);
         setCreatedPatientId(null);
+        setLinkedPatientKey(null);
         setCriticalFinding(null);
         setRationaleMessage(null);
         setUserIntervention(null);
@@ -589,8 +589,15 @@ const AppContent: React.FC = () => {
             return;
         }
         setError(null);
-        setPatientData(data);
-        await handleGenerateClarificationQuestions(data);
+        let merged: PatientData = { ...data };
+        if (linkedPatientKey) {
+            const prior = getPriorAnalysesForPatient(userHistory, linkedPatientKey);
+            merged.longitudinalClinicalNotes = buildLongitudinalClinicalNotes(prior, data, language);
+        } else {
+            merged.longitudinalClinicalNotes = undefined;
+        }
+        setPatientData(merged);
+        await handleGenerateClarificationQuestions(merged);
     };
     
     const handleClarificationSubmit = async (answers: Record<string, string>) => {
@@ -601,6 +608,12 @@ const AppContent: React.FC = () => {
                 .map((q, i) => `Q: ${q}\nA: ${answers[i] || t('clarification_not_answered')}`)
                 .join('\n\n');
             enrichedPatientData.additionalInfo = `${patientData.additionalInfo || ''}\n\n--- ${t('clarification_additional_qa')} ---\n${qaString}`.trim();
+        }
+        if (linkedPatientKey) {
+            const prior = getPriorAnalysesForPatient(userHistory, linkedPatientKey);
+            enrichedPatientData.longitudinalClinicalNotes = buildLongitudinalClinicalNotes(prior, enrichedPatientData, language);
+        } else {
+            enrichedPatientData.longitudinalClinicalNotes = undefined;
         }
         setPatientData(enrichedPatientData);
         setAppView('team_recommendation');
@@ -623,10 +636,16 @@ const AppContent: React.FC = () => {
 
         if (currentUser) {
             try {
-                const { createPatient } = await import('./services/apiPatientService');
-                const res = await createPatient(enrichedPatientData);
-                const id = res?.data && (res.data as { id?: number }).id;
-                if (id != null && Number(id) > 0) setCreatedPatientId(Number(id));
+                const { createPatient, updatePatient } = await import('./services/apiPatientService');
+                const n = linkedPatientKey && /^\d+$/.test(linkedPatientKey.trim()) ? Number(linkedPatientKey) : null;
+                if (n != null && n > 0) {
+                    const res = await updatePatient(n, enrichedPatientData);
+                    if (res?.success !== false) setCreatedPatientId(n);
+                } else {
+                    const res = await createPatient(enrichedPatientData);
+                    const id = res?.data && (res.data as { id?: number }).id;
+                    if (id != null && Number(id) > 0) setCreatedPatientId(Number(id));
+                }
             } catch {
                 // Report paytida qayta urinamiz
             }
@@ -647,10 +666,16 @@ const AppContent: React.FC = () => {
         setPatientData(enrichedPatientData);
         if (currentUser) {
             try {
-                const { createPatient } = await import('./services/apiPatientService');
-                const res = await createPatient(enrichedPatientData);
-                const id = res?.data && (res.data as { id?: number }).id;
-                if (id != null && Number(id) > 0) setCreatedPatientId(Number(id));
+                const { createPatient, updatePatient } = await import('./services/apiPatientService');
+                const n = linkedPatientKey && /^\d+$/.test(linkedPatientKey.trim()) ? Number(linkedPatientKey) : null;
+                if (n != null && n > 0) {
+                    const res = await updatePatient(n, enrichedPatientData);
+                    if (res?.success !== false) setCreatedPatientId(n);
+                } else {
+                    const res = await createPatient(enrichedPatientData);
+                    const id = res?.data && (res.data as { id?: number }).id;
+                    if (id != null && Number(id) > 0) setCreatedPatientId(Number(id));
+                }
             } catch {
                 // Report paytida qayta urinamiz
             }
@@ -809,7 +834,6 @@ const AppContent: React.FC = () => {
                             allAnalyses={userHistory}
                             onSelectAnalysis={viewHistoryItem}
                             stats={dashboardStats}
-                            cmeTopics={cmeTopics}
                         />
                     </ScrollWrapper>
                 );
@@ -826,7 +850,13 @@ const AppContent: React.FC = () => {
                             </div>
                         )}
                         <div className="flex-1 page-px py-4 overflow-hidden">
-                            <DataInputForm onSubmit={handleDataSubmit} isAnalyzing={isProcessing} />
+                            <DataInputForm
+                                onSubmit={handleDataSubmit}
+                                isAnalyzing={isProcessing}
+                                priorAnalyses={userHistory}
+                                linkedPatientKey={linkedPatientKey}
+                                onLinkedPatientChange={setLinkedPatientKey}
+                            />
                         </div>
                     </div>
                 );

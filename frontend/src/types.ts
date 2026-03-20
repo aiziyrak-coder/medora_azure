@@ -122,6 +122,8 @@ export interface PatientData {
     mimeType: string;
   }[];
   userDiagnosisFeedback?: Record<string, DiagnosisFeedback>;
+  /** Avvalgi tahlillar bo'yicha AI uchun qisqa dinamika (ichki, konsilium promptiga qo'shiladi) */
+  longitudinalClinicalNotes?: string;
 }
 
 export interface ChatMessage {

@@ -1,6 +1,6 @@
 
-import React, { useState, useRef, useCallback } from 'react';
-import type { PatientData } from '../types';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import type { PatientData, AnalysisRecord } from '../types';
 import SpinnerIcon from './icons/SpinnerIcon';
 import UploadCloudIcon from './icons/UploadCloudIcon';
 import ChevronRightIcon from './icons/ChevronRightIcon';
@@ -9,6 +9,10 @@ import DocumentTextIcon from './icons/DocumentTextIcon';
 import { validateFileSize, validateFileType, validateAge, validateRequired, validateVitalSign } from '../utils/validation';
 import { handleError } from '../utils/errorHandler';
 import { validatePatientDataSmart, getSmartValidationMessage } from '../utils/smartValidation';
+import { groupRecentPatientsFromHistory } from '../utils/longitudinalContext';
+import { getPatients, convertPatientToPatientData, type Patient } from '../services/apiPatientService';
+import { getAuthToken } from '../services/api';
+import SearchIcon from './icons/SearchIcon';
 
 type SpecialtyKey = 'gastro' | 'cardio' | 'neuro' | 'therapist' | 'endo' | 'pulmo' | 'nephro' | 'derma' | 'ortho' | 'gynec' | 'uro' | 'ophth' | 'ent' | 'reuma';
 
@@ -429,6 +433,49 @@ const HISTORY_TEMPLATES: Record<SpecialtyKey, string[]> = {
 interface DataInputFormProps {
     isAnalyzing: boolean;
     onSubmit: (data: PatientData) => void;
+    /** Mahalliy arxiv — oxirgi bemorlar ro'yxati */
+    priorAnalyses?: AnalysisRecord[];
+    /** Tanlangan bemor patient.id (string) — App longitudinal kontekst uchun */
+    linkedPatientKey?: string | null;
+    onLinkedPatientChange?: (patientKey: string | null) => void;
+}
+
+type VitalsState = {
+    bpSystolic: string;
+    bpDiastolic: string;
+    heartRate: string;
+    temperature: string;
+    spO2: string;
+    respirationRate: string;
+};
+
+const emptyVitals = (): VitalsState => ({
+    bpSystolic: '',
+    bpDiastolic: '',
+    heartRate: '',
+    temperature: '',
+    spO2: '',
+    respirationRate: '',
+});
+
+/** Ob'ektiv matndan vital ko'rsatkichlarni qisman ajratish (avtoimport) */
+function parseVitalsFromObjective(text: string | undefined): Partial<VitalsState> {
+    const raw = (text || '').replace(/\s+/g, ' ');
+    const out: Partial<VitalsState> = {};
+    const bp = raw.match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
+    if (bp) {
+        out.bpSystolic = bp[1];
+        out.bpDiastolic = bp[2];
+    }
+    const hr = raw.match(/(?:puls|pulse|HR)[:\s]*(\d{2,3})\b/i) || raw.match(/\b(\d{2,3})\s*bpm\b/i);
+    if (hr) out.heartRate = hr[1];
+    const temp = raw.match(/(?:°C|temp)[:\s]*(\d{1,2}[.,]\d)/i) || raw.match(/\b(\d{1,2}[.,]\d)\s*°?\s*C/i);
+    if (temp) out.temperature = temp[1].replace(',', '.');
+    const spo2 = raw.match(/SpO[2₂]?[:\s]*(\d{2,3})/i);
+    if (spo2) out.spO2 = spo2[1];
+    const rr = raw.match(/(?:resp|nafas)[:\s]*(\d{1,2})\s*\/?\s*min/i);
+    if (rr) out.respirationRate = rr[1];
+    return out;
 }
 
 // Ultra-compact Input (barcha yozuvlar kichik — sig‘ishi uchun)
@@ -473,7 +520,13 @@ const VitalInput: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { label
     );
 };
 
-const DataInputForm: React.FC<DataInputFormProps> = ({ isAnalyzing, onSubmit }) => {
+const DataInputForm: React.FC<DataInputFormProps> = ({
+    isAnalyzing,
+    onSubmit,
+    priorAnalyses = [],
+    linkedPatientKey = null,
+    onLinkedPatientChange,
+}) => {
     const { t } = useTranslation();
     const [formData, setFormData] = useState<Partial<PatientData>>({
         firstName: '',
@@ -493,14 +546,7 @@ const DataInputForm: React.FC<DataInputFormProps> = ({ isAnalyzing, onSubmit }) 
     const [selectedHistoryIdx, setSelectedHistoryIdx] = useState<number | ''>('');
     
     // Vitals State
-    const [vitals, setVitals] = useState({
-        bpSystolic: '',
-        bpDiastolic: '',
-        heartRate: '',
-        temperature: '',
-        spO2: '',
-        respirationRate: ''
-    });
+    const [vitals, setVitals] = useState<VitalsState>(() => emptyVitals());
     const [vitalErrors, setVitalErrors] = useState<Record<string, string>>({});
 
     const [attachments, setAttachments] = useState<File[]>([]);
@@ -508,6 +554,90 @@ const DataInputForm: React.FC<DataInputFormProps> = ({ isAnalyzing, onSubmit }) 
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [smartMessage, setSmartMessage] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const [patientSearch, setPatientSearch] = useState('');
+    const [apiPatients, setApiPatients] = useState<Patient[]>([]);
+    const [patientSearchLoading, setPatientSearchLoading] = useState(false);
+    const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const applyPatientDataToForm = useCallback((pd: PatientData) => {
+        setFormData({
+            firstName: pd.firstName || '',
+            lastName: pd.lastName || '',
+            fatherName: pd.fatherName || '',
+            age: pd.age || '',
+            gender: pd.gender || '',
+            complaints: pd.complaints || '',
+            history: pd.history || '',
+            allergies: pd.allergies || '',
+            currentMedications: pd.currentMedications || '',
+            familyHistory: pd.familyHistory || '',
+            additionalInfo: pd.additionalInfo || '',
+        });
+        const parsed = parseVitalsFromObjective(pd.objectiveData);
+        setVitals({ ...emptyVitals(), ...parsed });
+        setVitalErrors({});
+        setSelectedSpecialty('');
+        setSelectedComplaintIdx('');
+        setSelectedHistoryIdx('');
+        setAttachments([]);
+        setFileErrors({});
+    }, []);
+
+    useEffect(() => {
+        if (!getAuthToken()) return;
+        const q = patientSearch.trim();
+        if (q.length < 2) {
+            setApiPatients([]);
+            setPatientSearchLoading(false);
+            return;
+        }
+        if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+        setPatientSearchLoading(true);
+        searchDebounceRef.current = setTimeout(() => {
+            getPatients({ search: q, page_size: 15 })
+                .then(res => {
+                    if (res.success && Array.isArray(res.data)) setApiPatients(res.data);
+                    else setApiPatients([]);
+                })
+                .catch(() => setApiPatients([]))
+                .finally(() => setPatientSearchLoading(false));
+        }, 380);
+        return () => {
+            if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+        };
+    }, [patientSearch]);
+
+    const recentGroups = React.useMemo(
+        () => groupRecentPatientsFromHistory(priorAnalyses),
+        [priorAnalyses]
+    );
+
+    const selectFromApiPatient = useCallback(
+        (p: Patient) => {
+            applyPatientDataToForm(convertPatientToPatientData(p));
+            onLinkedPatientChange?.(String(p.id));
+            setPatientSearch('');
+            setApiPatients([]);
+        },
+        [applyPatientDataToForm, onLinkedPatientChange]
+    );
+
+    const selectFromHistoryGroup = useCallback(
+        (key: string) => {
+            const list = priorAnalyses.filter(r => String(r.patientId ?? '').trim() === key);
+            const sorted = [...list].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            const last = sorted[0];
+            if (!last) return;
+            applyPatientDataToForm(last.patientData);
+            onLinkedPatientChange?.(key);
+        },
+        [priorAnalyses, applyPatientDataToForm, onLinkedPatientChange]
+    );
+
+    const clearPatientLink = useCallback(() => {
+        onLinkedPatientChange?.(null);
+    }, [onLinkedPatientChange]);
 
     // Aqlli validatsiya: form ma'lumotlari o'zgarganda maslahat/warning yangilash
     React.useEffect(() => {
@@ -793,6 +923,76 @@ const DataInputForm: React.FC<DataInputFormProps> = ({ isAnalyzing, onSubmit }) 
                             </>
                         )}
                     </button>
+                </div>
+
+                {/* Bemor bazasidan qidiruv va mahalliy arxiv */}
+                <div className="flex-shrink-0 mb-2 rounded-xl border border-sky-100/80 bg-sky-50/40 px-2 py-2 space-y-2">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <p className="text-[10px] font-bold text-sky-900 uppercase tracking-wide">{t('data_form_patient_lookup_title')}</p>
+                        {linkedPatientKey && (
+                            <button
+                                type="button"
+                                onClick={clearPatientLink}
+                                className="text-[9px] font-semibold text-rose-700 hover:underline"
+                            >
+                                {t('data_form_patient_clear_link')}
+                            </button>
+                        )}
+                    </div>
+                    {linkedPatientKey && (
+                        <p className="text-[9px] text-sky-800 font-mono bg-white/60 rounded px-2 py-1 border border-sky-100">
+                            {t('data_form_patient_linked', { id: linkedPatientKey })}
+                        </p>
+                    )}
+                    {getAuthToken() && (
+                        <div className="relative">
+                            <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                            <input
+                                type="search"
+                                value={patientSearch}
+                                onChange={e => setPatientSearch(e.target.value)}
+                                placeholder={t('data_form_patient_search_placeholder')}
+                                className="w-full rounded-lg border border-slate-200 bg-white/90 pl-7 pr-2 py-1.5 text-[10px] text-slate-800 placeholder:text-slate-400"
+                                autoComplete="off"
+                            />
+                            {patientSearchLoading && (
+                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] text-slate-500">{t('data_form_patient_searching')}</span>
+                            )}
+                            {patientSearch.trim().length >= 2 && apiPatients.length > 0 && (
+                                <ul className="absolute z-20 mt-1 w-full max-h-36 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg text-[10px]">
+                                    {apiPatients.map(p => (
+                                        <li key={p.id}>
+                                            <button
+                                                type="button"
+                                                className="w-full text-left px-2 py-1.5 hover:bg-sky-50"
+                                                onClick={() => selectFromApiPatient(p)}
+                                            >
+                                                {p.first_name} {p.last_name} · {p.age} y. · ID {p.id}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    )}
+                    {recentGroups.length > 0 && (
+                        <div>
+                            <p className="text-[9px] font-semibold text-slate-600 mb-1">{t('data_form_patient_recent')}</p>
+                            <div className="flex flex-wrap gap-1">
+                                {recentGroups.map(g => (
+                                    <button
+                                        key={g.patientKey}
+                                        type="button"
+                                        onClick={() => selectFromHistoryGroup(g.patientKey)}
+                                        className="text-[9px] px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-700 hover:border-sky-400 hover:bg-sky-50/80"
+                                    >
+                                        {g.label}
+                                        <span className="text-slate-400 ml-1">×{g.count}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Aqlli maslahat / ogohlantirish */}

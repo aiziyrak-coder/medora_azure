@@ -1106,6 +1106,11 @@ export const runCouncilDebate = async (
     const attachmentsLine = attachmentCount > 0
         ? `LABORATORIYA VA DIAGNOSTIKA HUJJATLARI: Bemor ${attachmentCount} ta fayl yuklagan (quyida/ilovada). Ularni TO'LIQ TAHLIL QILING, mutaxassislarga qisqacha xulosa bilan yetkazing. Bu hujjatlarni shifokordan QAYTA SO'RAMANG — allaqachon berilgan.`
         : '';
+    const longitudinalBlock = (patientData.longitudinalClinicalNotes || '').trim();
+    const longitudinalLine = longitudinalBlock
+        ? `\n\nOLDINGI TAHLILLAR VA DINAMIKA (MUHIM — QAYTA KO'RISH, OLDINGI TAVSIYALAR BILAN ZIDLIK BO'LSA, SABABINI BAHOLANG):\n${longitudinalBlock.slice(0, 4500)}`
+        : '';
+
     const patientSummaryForRais = `Bemor: ${(patientData.firstName || '')} ${(patientData.lastName || '')}, ${patientData.age || '-'} yosh.
 Shikoyat: ${(patientData.complaints || '').slice(0, 500)}.
 Anamnez: ${(patientData.history || '-').slice(0, 300)}.
@@ -1116,6 +1121,7 @@ ${objectiveFull || '(kiritilmagan)'}
 ${labAndDocsLine}
 ${attachmentsLine}
 Dastlabki tashxislar: ${diagnoses.map(d => d.name).join(', ') || '-'}.
+${longitudinalLine}
 
 QOIDA: Ob'ektiv ko'rik va (agar bor bo'lsa) yuklangan laboratoriya/diagnostika hujjatlari berilgan; shifokordan ularni so'ramang. Barcha ma'lumotlardan to'liq foydalaning va mutaxassislarga aniq yetkazing.`;
 

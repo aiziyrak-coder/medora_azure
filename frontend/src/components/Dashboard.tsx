@@ -1,8 +1,7 @@
 import React from 'react';
-import type { AnalysisRecord, UserStats, CMETopic } from '../types';
+import type { AnalysisRecord, UserStats } from '../types';
 import { normalizeConsensusDiagnosis } from '../types';
 import AnalyticsHubPanel from './dashboard/AnalyticsHubPanel';
-import CmeSuggestions from './dashboard/CmeSuggestions';
 import { useTranslation } from '../hooks/useTranslation';
 
 interface DashboardProps {
@@ -13,7 +12,6 @@ interface DashboardProps {
     allAnalyses: AnalysisRecord[];
     onSelectAnalysis: (record: AnalysisRecord) => void;
     stats: UserStats | null;
-    cmeTopics: CMETopic[];
 }
 
 const EcgLine: React.FC = () => (
@@ -65,7 +63,7 @@ const glass: React.CSSProperties = {
 
 const Dashboard: React.FC<DashboardProps> = ({
     userName, onNewAnalysis, onViewHistory,
-    recentAnalyses, allAnalyses, onSelectAnalysis, stats, cmeTopics,
+    recentAnalyses, allAnalyses, onSelectAnalysis, stats,
 }) => {
     const { t } = useTranslation();
 
@@ -128,10 +126,10 @@ const Dashboard: React.FC<DashboardProps> = ({
             {/* ── Grid ──────────────────────────────────────── */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:items-stretch">
 
-                {/* Hero - span 8 */}
+                {/* Hero — torroq; Analitika Hub keng */}
                 <div
                     onClick={onNewAnalysis}
-                    className="lg:col-span-8 relative overflow-hidden rounded-[24px] cursor-pointer"
+                    className="lg:col-span-4 relative overflow-hidden rounded-[24px] cursor-pointer"
                     style={{
                         background: 'linear-gradient(135deg, #071322 0%, #0c1e3a 55%, #082040 100%)',
                         border: '1px solid rgba(0,210,255,0.25)',
@@ -211,15 +209,15 @@ const Dashboard: React.FC<DashboardProps> = ({
                     </div>
                 </div>
 
-                {/* Analitika Hub — kengaytirilgan (eski Shaxsiy Analitika o‘rnida) */}
-                <div className="lg:col-span-4 flex min-h-0">
-                    <div className="w-full flex flex-col min-h-0">
+                {/* Analitika Hub — katta (UTT bloki olib tashlangan) */}
+                <div className="lg:col-span-8 flex min-h-0">
+                    <div className="w-full flex flex-col min-h-0 lg:min-h-[420px]">
                         <AnalyticsHubPanel stats={stats} allAnalyses={allAnalyses} />
                     </div>
                 </div>
 
-                {/* Recent Analyses - span 8 */}
-                <div className="lg:col-span-8">
+                {/* So‘nggi tahlillar — to‘liq kenglik */}
+                <div className="lg:col-span-12">
                     <div className="flex justify-between items-center mb-3 px-1">
                         <div className="flex items-center gap-2.5">
                             <div className="w-1 h-5 rounded-full"
@@ -290,20 +288,6 @@ const Dashboard: React.FC<DashboardProps> = ({
                                 </button>
                             </div>
                         )}
-                    </div>
-                </div>
-
-                {/* UTT / CME — o‘ng ustun */}
-                <div className="lg:col-span-4 flex flex-col gap-3 min-h-0">
-                    <div className="flex items-center gap-2.5 px-1 shrink-0">
-                        <div className="w-1 h-5 rounded-full"
-                             style={{ background:'linear-gradient(180deg,#7c3aed,#0891b2)' }} />
-                        <h2 className="text-base font-bold text-slate-700 tracking-wide">
-                            {t('dashboard_cme_title')}
-                        </h2>
-                    </div>
-                    <div className="flex-1 min-h-[200px] flex flex-col">
-                        <CmeSuggestions topics={cmeTopics} />
                     </div>
                 </div>
             </div>
