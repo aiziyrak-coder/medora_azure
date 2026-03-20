@@ -364,7 +364,6 @@ export const uzC: TranslationSet = {
   export_report_title: 'Умумий консилиум ҳисоботини юклаб олиш',
   export_download_pdf: 'PDF юклаб олиш',
   export_download_word: 'Word юклаб олиш',
-  export_specialist_conclusion: 'Ҳар бир мутахассиснинг якуний хулосаси',
   export_partial_note: 'Таҳлил хатолик билан тугади. PDF/Word да фақат бемор ма\'лумотлари ва мунозара киритилади.',
 
   help_faq_title: 'Тез-тез сўраладиган саволлар',

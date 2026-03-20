@@ -208,7 +208,7 @@ const AnalysisView: React.FC<AnalysisViewProps> = (props) => {
                     </div>
                     <div className="p-5 overflow-y-auto flex-grow custom-scrollbar min-h-0">
                         <div className="space-y-6">
-                            {fr && <FinalReportCard report={fr} patientData={pd} onUpdateReport={onUpdateReport} debateHistory={dh} />}
+                            {fr && <FinalReportCard report={fr} patientData={pd} onUpdateReport={onUpdateReport} />}
                             {!fr && error && <ErrorReportPlaceholder message={error} />}
                             {!fr && !error && (isAnalyzing || hasDebate) && (
                                 <div className="space-y-4">

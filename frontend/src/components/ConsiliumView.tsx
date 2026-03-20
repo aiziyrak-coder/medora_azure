@@ -6,8 +6,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import type { PatientData, FinalReport } from '../types';
 import { normalizeConsensusDiagnosis } from '../types';
 import { runConsilium, type ConsiliumResult, type DebateMessage } from '../services/apiAiService';
-import { useTranslation } from '../i18n/LanguageContext';
-import { generatePdfReport, generateSpecialistConclusionPdf } from '../services/pdfGenerator';
+import { generatePdfReport } from '../services/pdfGenerator';
 import { generateDocxReport } from '../services/docxGenerator';
 import { INSTITUTE_LOGO_SRC, INSTITUTE_NAME_FULL } from '../constants/brand';
 
@@ -103,7 +102,7 @@ function PhaseIndicator({
   );
 }
 
-function DebateCard({ msg, onDownload }: { msg: DebateMessage; onDownload?: (msg: DebateMessage) => void }) {
+function DebateCard({ msg }: { msg: DebateMessage }) {
   const agentId = msg.id.split('-')[0];
   const colorClass = PROFESSOR_COLORS[agentId] || 'bg-slate-600';
   const icon       = PROFESSOR_ICONS[agentId]  || 'K';
@@ -122,16 +121,6 @@ function DebateCard({ msg, onDownload }: { msg: DebateMessage; onDownload?: (msg
         <span className={`ml-auto text-xs px-2 py-0.5 rounded-full ${isDebate ? 'bg-amber-600 text-white' : 'bg-slate-600 text-slate-200'}`}>
           {isDebate ? 'Bahslar' : 'Mustaqil'}
         </span>
-        {onDownload && (
-          <button
-            type="button"
-            onClick={() => onDownload(msg)}
-            className="text-slate-400 hover:text-sky-400 text-xs px-2 py-1 rounded border border-slate-500 hover:border-sky-500 transition-colors"
-            title="Yuklab olish"
-          >
-            â†" Yuklab olish
-          </button>
-        )}
       </div>
       <div className="text-sm text-slate-300 whitespace-pre-wrap leading-relaxed">
         {msg.content}
@@ -141,8 +130,6 @@ function DebateCard({ msg, onDownload }: { msg: DebateMessage; onDownload?: (msg
 }
 
 export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport, onError }) => {
-  const { t } = useTranslation();
-
   const [loading,   setLoading]   = useState(false);
   const [result,    setResult]    = useState<ConsiliumResult | null>(null);
   const [phases,    setPhases]    = useState<PhaseState>({ independent: 'waiting', debate: 'waiting', consensus: 'waiting' });
@@ -276,30 +263,12 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
 
           {activeTab === 'debate' && (
             <div ref={debateRef} className="max-h-[60vh] overflow-y-auto pr-1 space-y-1">
-              {/* Professor summary + har bir mutaxassis xulosasini yuklab olish */}
               <div className="grid grid-cols-2 gap-2 mb-3">
                 {(Array.isArray(result.professors) ? result.professors : []).filter((p: { id?: string }) => p.id !== 'gpt4o').map((prof: { id?: string; name?: string; title?: string; initialDiagnosis?: string }) => (
                   <div key={prof.id}
                        className={`rounded-xl p-3 text-xs ${PROFESSOR_COLORS[prof.id] || 'bg-slate-600'} bg-opacity-20 border border-slate-600/30 flex flex-col`}>
                     <p className="font-semibold text-white">{PROFESSOR_ICONS[prof.id]} {prof.name}</p>
                     <p className="text-slate-300 truncate">{prof.title}</p>
-                    {prof.initialDiagnosis && (
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          const logo = await getInstituteLogoDataUrl();
-                          generateSpecialistConclusionPdf(
-                            prof.name || prof.id || 'Mutaxassis',
-                            prof.initialDiagnosis,
-                            { instituteName: INSTITUTE_NAME_FULL, instituteLogoDataUrl: logo },
-                            `${(prof.name || prof.id || 'mutaxassis').replace(/\s+/g, '_')}_xulosa`
-                          );
-                        }}
-                        className="mt-2 text-sky-400 hover:text-sky-300 text-xs underline"
-                      >
-                        PDF yuklab olish
-                      </button>
-                    )}
                   </div>
                 ))}
               </div>
@@ -308,16 +277,6 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
                 <DebateCard
                   key={msg.id}
                   msg={msg}
-                  onDownload={async (m) => {
-                  const logo = await getInstituteLogoDataUrl();
-                  const displayName = t(`specialist_name_${String(m.author).toLowerCase()}`) || m.author;
-                  generateSpecialistConclusionPdf(
-                    displayName,
-                    m.content,
-                    { instituteName: INSTITUTE_NAME_FULL, instituteLogoDataUrl: logo },
-                    `${m.author.replace(/\s+/g, '_')}_xulosa`
-                  );
-                }}
                 />
               ))}
 
@@ -397,18 +356,10 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
                 <button
                   type="button"
                   onClick={async () => {
-                    const debateAsChat = (result.final_report.debateHistory || []).map((m: DebateMessage) => ({
-                      author: m.author,
-                      content: m.content,
-                      isSystemMessage: false,
-                      isUserIntervention: false,
-                    }));
                     const logoDataUrl = await getInstituteLogoDataUrl();
                     generatePdfReport(
                       result.final_report as unknown as FinalReport,
                       patientData,
-                      debateAsChat,
-                      undefined,
                       { instituteName: INSTITUTE_NAME_FULL, instituteLogoDataUrl: logoDataUrl }
                     );
                   }}
@@ -419,18 +370,10 @@ export const ConsiliumView: React.FC<Props> = ({ patientData, language, onReport
                 <button
                   type="button"
                   onClick={async () => {
-                    const debateAsChat = (result.final_report.debateHistory || []).map((m: DebateMessage) => ({
-                      author: m.author,
-                      content: m.content,
-                      isSystemMessage: false,
-                      isUserIntervention: false,
-                    }));
                     const logoDataUrl = await getInstituteLogoDataUrl();
                     await generateDocxReport(
                       result.final_report as unknown as FinalReport,
                       patientData,
-                      debateAsChat,
-                      undefined,
                       { instituteName: INSTITUTE_NAME_FULL, instituteLogoDataUrl: logoDataUrl }
                     );
                   }}

@@ -1,7 +1,6 @@
 import { Document, DocumentDefaults, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, ImageRun } from 'docx';
-import type { FinalReport, PatientData, ChatMessage } from '../types';
+import type { FinalReport, PatientData } from '../types';
 import { normalizeConsensusDiagnosis } from '../types';
-import { AI_SPECIALISTS } from '../constants';
 import { logger } from '../utils/logger';
 import type { InstituteBranding } from './pdfGenerator';
 
@@ -17,8 +16,6 @@ const createKeyValue = (key: string, value: string | undefined | null) => new Pa
 });
 const createListItem = (text: string) => new Paragraph({ text, bullet: { level: 0 } });
 
-export type SpecialistNameResolver = (author: string) => string;
-
 /** Decode data URL to Uint8Array for docx ImageRun */
 function dataUrlToArrayBuffer(dataUrl: string): Uint8Array {
     const base64 = dataUrl.includes('base64,') ? dataUrl.split(',')[1] : dataUrl;
@@ -32,14 +29,8 @@ function dataUrlToArrayBuffer(dataUrl: string): Uint8Array {
 export const generateDocxReport = async (
     report: FinalReport,
     patientData: PatientData,
-    debateHistory: ChatMessage[],
-    getSpecialistName?: SpecialistNameResolver,
     branding?: InstituteBranding
 ) => {
-    const specialistName = (author: string) => getSpecialistName ? getSpecialistName(author) : (AI_SPECIALISTS[author]?.name || author);
-    const stripSalutation = (text: string) =>
-        text.replace(/^\s*Hurmatli\s+Kengash\s+Raisi\s*,?\s*/i, '').trim();
-
     const children: Paragraph[] = [];
 
     if (branding?.instituteName || branding?.instituteLogoDataUrl) {
@@ -148,24 +139,6 @@ export const generateDocxReport = async (
             createHeading2("Qonuniy eslatma"),
             new Paragraph({ children: [new TextRun(report.uzbekistanLegislativeNote)], spacing: { after: 200 } }),
         ] : []),
-
-        createHeading1("Har bir mutaxassisning yakuniy shaxsiy xulosasi"),
-        ...((): Paragraph[] => {
-            const specialistMessages = debateHistory.filter(m => !m.isSystemMessage && !m.isUserIntervention);
-            const lastByAuthor = new Map<string, ChatMessage>();
-            specialistMessages.forEach(m => lastByAuthor.set(m.author, m));
-            return Array.from(lastByAuthor.entries()).map(([author, msg]) => {
-                const raw = String(msg.content || '');
-                const trimmed = stripSalutation(raw).slice(0, 800); // har bir mutaxassis uchun ~1 paragraf
-                return new Paragraph({
-                    children: [
-                        new TextRun({ text: `${specialistName(author)}: `, bold: true }),
-                        new TextRun(trimmed),
-                    ],
-                    spacing: { after: 150 },
-                });
-            });
-        })(),
     );
     
     const doc = new Document({

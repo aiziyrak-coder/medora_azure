@@ -383,7 +383,6 @@ export const ru: TranslationSet = {
   export_report_title: 'Скачать общий отчёт консилиума',
   export_download_pdf: 'Скачать PDF',
   export_download_word: 'Скачать Word',
-  export_specialist_conclusion: 'Заключение каждого специалиста',
   export_partial_note: 'Анализ завершён с ошибкой. В PDF/Word будут только данные пациента и обсуждение.',
 
   help_faq_title: 'Часто задаваемые вопросы',

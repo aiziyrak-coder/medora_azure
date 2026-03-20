@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import type { FinalReport, PatientData, ChatMessage } from '../types';
+import type { FinalReport, PatientData } from '../types';
 import { normalizeConsensusDiagnosis, getReasoningChainArray } from '../types';
 import ClipboardListIcon from './icons/ClipboardListIcon';
 import BrainCircuitIcon from './icons/BrainCircuitIcon';
@@ -139,8 +139,6 @@ const FinalReportCard: React.FC<{
   patientData: Partial<PatientData>;
   isScenario?: boolean;
   onUpdateReport?: (updatedReport: Partial<FinalReport>) => void;
-  /** Agar berilsa, har bir mutaxassisning yakuniy xulosasi alohida hujjat bo'limida ko'rsatiladi */
-  debateHistory?: ChatMessage[];
 }> = ({ report, patientData, isScenario = false, onUpdateReport }) => {
     const safePlan = (Array.isArray(report.treatmentPlan) ? report.treatmentPlan : []).map(planItemToString);
 
@@ -386,8 +384,6 @@ const FinalReportCard: React.FC<{
                         <p className="text-slate-500 text-sm italic">Ma'lumot kiritilmagan.</p>
                     )}
                 </Section>
-
-                {/* Mutaxassislar xulosalari faqat yuklab olinganda (PDF/DOCX) da ko'rsatiladi — ekranda ko'rsatilmaydi */}
 
                 {/* Legal Disclaimer specific to Uzbekistan */}
                 <div className="mt-8 p-4 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-500 text-center">

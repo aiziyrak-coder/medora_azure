@@ -178,7 +178,7 @@ const getSystemInstruction = (language: Language): string => {
     4. Overconfidence dan saqlaning: dalil yetarli bo'lmasa yoki shubha bo'lsa, "Qo'shimcha tekshiruv kerak" yoki "Tasdiqlash uchun laboratoriya/rentgen kerak" deb aniq yozing; taxminiy tashxisni yakuniy deb bermang.
     5. criticalFinding: hayotga xavf yoki shoshilinch davolash kerak bo'lsa, finding, implication va urgency ni aniq to'ldiring.
     AMALIY YORDAM (majburiy): Javoblaringiz shifokor darhol qo'llashi mumkin bo'lsin. Dori nomi + aniq doza + kuniga necha marta + davomiyligi; davolash rejasi 1-qadam, 2-qadam tarzida; SSV protokolga havola yoki agar taklif protokoldan farq qilsa — protokoldan voz kechish sababini (dalil asosida) ko'rsating; "darhol qilish kerak" va "keyinroq/kuzatuv" ni ajrating. Umumiy so'zlar o'rniga konkret, amaliy tavsiyalar bering.
-    ANIQLIK (majburiy): (1) Faqat kiritilgan ma'lumot va klinik dalillarga asoslangan xulosa chiqaring; ma'lumot yetishmasa "Tasdiqlash uchun ... tekshiruv kerak" deb aniq yozing. (2) Har bir tashxis uchun probability ni dalil kuchiga mos qo'ying; shubha bo'lsa pastroq bering. (3) reasoningChain va justification da "nima uchun shunday" savoliga aniq javob bo'lsin; umumiy iboralardan saqlaning. (4) SSV protokol havolasi yoki protokoldan chetga chiqish sababi (dalil bilan). (5) Taxminiy tashxisni yakuniy deb yozmang; differensial tashxisda eng ehtimolini birinchi qo'ying va dalil asosini ko'rsating.
+    ANIQLIK (majburiy): (1) Faqat kiritilgan ma'lumot va klinik dalillarga asoslangan xulosa chiqaring; ma'lumot yetishmasa "Tasdiqlash uchun ... tekshiruv kerak" deb aniq yozing. (2) Har bir tashxis uchun probability (0-100) ni faqat dalil kuchiga mos RAQAM sifatida bering — taxminiy yoki "chiroyli" shablonlar (masalan doim 60/25/20, 50/50, 75/25) ISHLATMANG; shubha bo'lsa pastroq bering. Bir nechta differensial tashxis bo'lsa, ular bir-birini istisno qiluvchi bo'lishi uchun probability lar yig'indisi 100% ga yaqin bo'lishi kerak. (3) reasoningChain va justification da "nima uchun shunday" savoliga aniq javob bo'lsin; umumiy iboralardan saqlaning. (4) SSV protokol havolasi yoki protokoldan chetga chiqish sababi (dalil bilan). (5) Taxminiy tashxisni yakuniy deb yozmang; differensial tashxisda eng ehtimolini birinchi qo'ying va dalil asosini ko'rsating.
     `;
 };
 
@@ -594,7 +594,7 @@ export const generateFastDoctorConsultation = async (
     language: Language
 ): Promise<FinalReport> => {
     const systemInstr = getFastDoctorSystemInstruction(language);
-    const promptText = `Tashxis (name, probability, justification 2 jumla, reasoningChain 3 band, uzbekProtocolMatch). treatmentPlan 3-5 qadam. medications: name, dosage, frequency, duration, timing, instructions (qanday ichish, 1 jumla). recommendedTests, criticalFinding agar kerak. Til: ${langMap[language]}. JSON.`;
+    const promptText = `Tashxis (name, probability 0-100 dalilga mos — taxminiy 60/25/75 kabi shablon raqamlar yo'q, justification 2 jumla, reasoningChain 3 band, uzbekProtocolMatch). treatmentPlan 3-5 qadam. medications: name, dosage, frequency, duration, timing, instructions (qanday ichish, 1 jumla). recommendedTests, criticalFinding agar kerak. Til: ${langMap[language]}. JSON.`;
 
     const finalReportSchema = {
         type: 'object',
@@ -668,14 +668,18 @@ export const generateFastDoctorConsultation = async (
     const reasoningChain = primaryDiag ? arr(primaryDiag.reasoningChain, []) as string[] : [];
 
     return {
-        consensusDiagnosis: primaryDiag ? [{
-            name: String(primaryDiag.name || 'Tashxis'),
-            probability: Number(primaryDiag.probability ?? 85),
-            justification: String(primaryDiag.justification || ''),
-            evidenceLevel: 'High',
-            reasoningChain,
-            uzbekProtocolMatch: String(primaryDiag.uzbekProtocolMatch || 'SSV protokoliga muvofiq')
-        }] : [],
+        consensusDiagnosis: normalizeConsensusDiagnosis(
+            primaryDiag
+                ? [{
+                    name: String(primaryDiag.name || 'Tashxis'),
+                    probability: primaryDiag.probability,
+                    justification: String(primaryDiag.justification || ''),
+                    evidenceLevel: 'High',
+                    reasoningChain,
+                    uzbekProtocolMatch: String(primaryDiag.uzbekProtocolMatch || 'SSV protokoliga muvofiq'),
+                }]
+                : [],
+        ),
         rejectedHypotheses: [],
         treatmentPlan,
         medicationRecommendations: medications.map(med => ({
@@ -704,7 +708,7 @@ export const generateFastDoctorConsultationStream = async (
     onChunk: (text: string) => void
 ): Promise<FinalReport> => {
     const systemInstr = getSystemInstruction(language);
-    const promptText = `Tez tahlil. Javobni FAQAT quyidagi JSON ko'rinishida bering, boshqa matn yozmang. primaryDiagnosis: { name, probability, justification, reasoningChain, uzbekProtocolMatch }, treatmentPlan: [], medications: [{ name, dosage, frequency, duration, timing, instructions }], recommendedTests: [], criticalFinding: { finding, implication, urgency }. Til: ${langMap[language]}.`;
+    const promptText = `Tez tahlil. Javobni FAQAT quyidagi JSON ko'rinishida bering, boshqa matn yozmang. primaryDiagnosis: { name, probability (0-100, faqat klinik dalilga mos raqam; taxminiy 60/25/75 kabi shablonlar yo'q), justification, reasoningChain, uzbekProtocolMatch }, treatmentPlan: [], medications: [{ name, dosage, frequency, duration, timing, instructions }], recommendedTests: [], criticalFinding: { finding, implication, urgency }. Til: ${langMap[language]}.`;
     const multimodalPrompt = buildMultimodalPrompt(promptText, patientData);
     let fullText = '';
     try {
@@ -725,14 +729,18 @@ export const generateFastDoctorConsultationStream = async (
     }
     const primaryDiag = result.primaryDiagnosis as Record<string, unknown> | undefined;
     return {
-        consensusDiagnosis: primaryDiag ? [{
-            name: String(primaryDiag.name || 'Tashxis'),
-            probability: Number(primaryDiag.probability || 85),
-            justification: String(primaryDiag.justification || ''),
-            evidenceLevel: 'High',
-            reasoningChain: (primaryDiag.reasoningChain as string[]) || [],
-            uzbekProtocolMatch: String(primaryDiag.uzbekProtocolMatch || 'SSV protokoliga muvofiq')
-        }] : [],
+        consensusDiagnosis: normalizeConsensusDiagnosis(
+            primaryDiag
+                ? [{
+                    name: String(primaryDiag.name || 'Tashxis'),
+                    probability: primaryDiag.probability,
+                    justification: String(primaryDiag.justification || ''),
+                    evidenceLevel: 'High',
+                    reasoningChain: (primaryDiag.reasoningChain as string[]) || [],
+                    uzbekProtocolMatch: String(primaryDiag.uzbekProtocolMatch || 'SSV protokoliga muvofiq'),
+                }]
+                : [],
+        ),
         rejectedHypotheses: [],
         treatmentPlan: (result.treatmentPlan as string[]) || [],
         medicationRecommendations: ((result.medications as Array<Record<string, unknown>>) || []).map(med => ({
@@ -1399,7 +1407,7 @@ VAZIFA: Suhbatdagi asosiy fikr/farqni qisqacha ko'rsating va keyingi mavzu matni
         5. recommendedTests: yetishmayotgan muhim tekshiruvlar (O'zbekiston LITS va standartlariga mos).
         6. uzbekistanLegislativeNote: "O'zbekiston Respublikasi sog'liqni saqlash qonunchiligi va SSV klinik protokollariga muvofiq" yoki agar takliflar protokoldan chetga chiqsa "Dalil asosida innovatsion/alternativ yondashuv sifatida taklif qilindi" kabi qisqacha eslatma.
         7. rejectedHypotheses: MAJBURIY. Munozarada ko'rib chiqilgan lekin rad etilgan tashxislar (differensial tashxislar). Har biri uchun name (tashxis nomi) va reason (nimaga rad etildi, qisqa sabab). Kamida 1-3 ta yozing agar bahsda boshqa variantlar tilga olingan bo'lsa; agar hech qanday rad etilgan tashxis bo'lmasa, bo'sh massiv [] qaytaring.
-        ANIQLIK: consensusDiagnosis da probability ni dalil kuchiga mos qo'ying; reasoningChain har qadamda "nima uchun" javob bersin (HAR BIR ELEMENT 1-2 JUMLADAN OSHMASIN, qisqa holda yozing - to'liq JSON kesilmasin); uzbekProtocolMatch — aniq protokol nomi/yo'nalishi yoki protokoldan chetga chiqish sababi. Taxminiy tashxisni yakuniy deb yozmang.
+        ANIQLIK: consensusDiagnosis da har bir element uchun probability — 0-100 oralig'ida, faqat klinik dalil va justification ga mos RAQAM (taxminiy 60/25/20 yoki 75/15 kabi takrorlanuvchi shablonlar YO'Q). Bir nechta tashxis bo'lsa, probability lar yig'indisi 100% bo'lishi kerak (bir-birini istisno qiluvchi differensial ro'yxat). reasoningChain har qadamda "nima uchun" javob bersin (HAR BIR ELEMENT 1-2 JUMLADAN OSHMASIN, qisqa holda yozing - to'liq JSON kesilmasin); uzbekProtocolMatch — aniq protokol nomi/yo'nalishi yoki protokoldan chetga chiqish sababi. Taxminiy tashxisni yakuniy deb yozmang.
         KRITIK TOPILMA: Suhbat (debate history) yoki bemor ma'lumotlarida shoshilinch, hayotga xavf, kritik holat tilga olingan bo'lsa — criticalFinding ni albatta to'ldiring (finding, implication, urgency). Bo'sh qoldirmang.
         Debate history: ${JSON.stringify(debateHistory)}
     `;

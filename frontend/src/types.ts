@@ -253,6 +253,8 @@ export function getReasoningChainArray(d: { reasoningChain?: unknown }): string[
  *  Foydalanuvchiga har doim FOIZ ko'rinishida ko'rsatish uchun:
  *    - agar 0 <= p <= 1 bo'lsa, 100 ga ko'paytiramiz (0.85 -> 85);
  *    - aks holda p ni o'zini qoldiramiz.
+ *  Bir nechta tashxisda barcha foizlar > 0 bo'lsa va yig'indi 100% dan sezilarli farq qilsa,
+ *  nisbatlar saqlangan holda 100% ga normallashtiriladi (shablon 60/25 emas, matematik muvozanat).
  */
 export function normalizeConsensusDiagnosis(raw: unknown): Diagnosis[] {
   if (!Array.isArray(raw)) return [];
@@ -272,15 +274,62 @@ export function normalizeConsensusDiagnosis(raw: unknown): Diagnosis[] {
     } as Diagnosis;
   });
 
-  // Agar hamma probability 0 bo'lsa, tartib bo'yicha taxminiy foizlar taqsimlaymiz (faqat ko'rinish uchun)
-  if (mapped.length > 0 && mapped.every(d => !d.probability || d.probability <= 0)) {
-    const base = [60, 25, 10, 5, 3];
-    mapped.forEach((d, idx) => {
-      d.probability = base[idx] ?? 1;
-    });
-  }
+  reconcileConsensusProbabilities(mapped);
 
   return mapped;
+}
+
+/**
+ * Bir nechta differensial tashxis uchun: model bergan nisbiy foizlarni 100% ga moslashtiradi.
+ * Bitta tashxis: faqat 0–100 oralig'ida qisqartiradi.
+ * Foiz kiritilmagan (0) qiymatlar shablon bilan to'ldirilmaydi.
+ */
+function reconcileConsensusProbabilities(diagnoses: Diagnosis[]): void {
+  if (diagnoses.length === 0) return;
+
+  if (diagnoses.length === 1) {
+    const p = diagnoses[0].probability;
+    if (!Number.isFinite(p) || p <= 0) {
+      diagnoses[0].probability = 0;
+    } else {
+      diagnoses[0].probability = Math.min(100, Math.max(0, Math.round(p)));
+    }
+    return;
+  }
+
+  const allPositive = diagnoses.every(d => d.probability > 0);
+  if (!allPositive) {
+    diagnoses.forEach(d => {
+      if (Number.isFinite(d.probability) && d.probability > 0) {
+        d.probability = Math.min(100, Math.max(0, Math.round(d.probability)));
+      } else {
+        d.probability = 0;
+      }
+    });
+    return;
+  }
+
+  const sum = diagnoses.reduce((s, d) => s + d.probability, 0);
+  if (sum <= 0) return;
+
+  if (Math.abs(sum - 100) <= 1) {
+    diagnoses.forEach(d => {
+      d.probability = Math.min(100, Math.max(0, Math.round(d.probability)));
+    });
+    return;
+  }
+
+  const raw = diagnoses.map(d => d.probability);
+  const scaled = raw.map(p => (100 * p) / sum);
+  const rounded = scaled.map(x => Math.round(x));
+  let drift = 100 - rounded.reduce((a, b) => a + b, 0);
+  if (drift !== 0) {
+    const idx = rounded.reduce((bestIdx, val, i, arr) => (val >= arr[bestIdx] ? i : bestIdx), 0);
+    rounded[idx] = Math.min(100, Math.max(0, rounded[idx] + drift));
+  }
+  rounded.forEach((p, i) => {
+    diagnoses[i].probability = p;
+  });
 }
 
 export type ProgressUpdate =

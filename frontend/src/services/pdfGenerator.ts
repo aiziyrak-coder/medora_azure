@@ -1,8 +1,6 @@
 import { jsPDF } from "jspdf";
-import type { FinalReport, PatientData, ChatMessage } from '../types';
+import type { FinalReport, PatientData } from '../types';
 import { normalizeConsensusDiagnosis } from '../types';
-import { AI_SPECIALISTS } from "../constants";
-
 // Extend jsPDF internal type for pages property
 interface jsPDFInternal {
     pages: unknown[];
@@ -11,9 +9,6 @@ interface jsPDFInternal {
         width: number;
     };
 }
-
-/** Optional: author key -> display name (e.g. translated) for PDF */
-export type SpecialistNameResolver = (author: string) => string;
 
 const PDF_FONT = 'times' as const; // Times New Roman — haqiqiy hujjat uslubi
 // Rasmiy ko‘rinish saqlangan holda siqilgan layout
@@ -29,12 +24,8 @@ export interface InstituteBranding {
 export const generatePdfReport = (
     report: FinalReport,
     patientData: PatientData,
-    debateHistory: ChatMessage[],
-    getSpecialistName?: SpecialistNameResolver,
     branding?: InstituteBranding
 ) => {
-    const specialistName = (author: string): string =>
-        getSpecialistName ? getSpecialistName(author) : (AI_SPECIALISTS[author]?.name || author);
     const doc = new jsPDF();
     const pageHeight = doc.internal.pageSize.height;
     const pageWidth = doc.internal.pageSize.width;
@@ -219,58 +210,6 @@ export const generatePdfReport = (
         addText(report.uzbekistanLegislativeNote);
     }
 
-    // --- Har bir mutaxassisning yakuniy shaxsiy xulosasi (hujjat bo'limi) ---
-    // Har bir mutaxassisning faqat eng so'nggi va eng qisqa asosiy xulosasini ko'rsatamiz (PDF ni 2–3 sahifadan oshirmaslik uchun).
-    const specialistMessages = debateHistory.filter((m: ChatMessage) => !m.isSystemMessage && !m.isUserIntervention);
-    const lastByAuthor = new Map<string, ChatMessage>();
-    specialistMessages.forEach((m: ChatMessage) => lastByAuthor.set(m.author, m));
-    if (lastByAuthor.size > 0) {
-        if (y > pageHeight - 60) {
-            doc.addPage();
-            y = margin;
-        } else {
-            y += 10;
-        }
-        addHeader("Har bir mutaxassisning yakuniy shaxsiy xulosasi");
-        doc.setFontSize(10);
-        doc.setFont(PDF_FONT, 'normal');
-        doc.setTextColor(80, 80, 80);
-        doc.text("Konsilium ishtirokchilarining tibbiy xulosalari. Har bir mutaxassis o'z so'nggi xulosasini keltiradi (doktor tavsiyasi sifatida).", margin, y);
-        y += LINE_HEIGHT + 4;
-        const stripSalutation = (text: string) =>
-            text.replace(/^\s*Hurmatli\s+Kengash\s+Raisi\s*,?\s*/i, '').trim();
-        Array.from(lastByAuthor.entries()).slice(0, 6).forEach(([author, msg]) => {
-            const authorName = specialistName(author);
-            if (y > pageHeight - 60) {
-                doc.addPage();
-                y = margin;
-            }
-            doc.setFontSize(11);
-            doc.setFont(PDF_FONT, 'bold');
-            doc.setTextColor(30, 41, 59);
-            doc.text(authorName, margin, y);
-            y += LINE_HEIGHT;
-            doc.setFont(PDF_FONT, 'normal');
-            doc.setTextColor(40, 40, 40);
-            const rawContent = String(msg.content || '');
-            // Juda uzun xulosalarni 600 belgigacha qisqartiramiz (hujjatni ixcham saqlash uchun).
-            const trimmedContent = stripSalutation(rawContent).slice(0, 600);
-            const contentLines = doc.splitTextToSize(trimmedContent, pageWidth - margin * 2);
-            contentLines.forEach((line: string) => {
-                if (y > pageHeight - margin - FOOTER_RESERVE) {
-                    doc.addPage();
-                    y = margin;
-                }
-                doc.text(line, margin, y);
-                y += LINE_HEIGHT;
-            });
-            y += 5;
-        });
-        y += 8;
-    }
-
-    // Konsilium munozara tarixining to'liq matnini PDF ga kiritmaymiz, faqat yuqoridagi yakuniy xulosalar va asosiy bo'limlar qoldiriladi.
-
     const footerText = report.uzbekistanLegislativeNote
         ? `O'zbekiston Respublikasi sog'liqni saqlash qonunchiligi va SSV klinik protokollariga muvofiq shakllantirilgan va faqat ma'lumot uchun mo'ljallangan. U professional tibbiy maslahat o'rnini bosa olmaydi.`
         : `Ushbu hisobot ilg'or raqamli tizim yordamida shakllantirilgan, faqat ma'lumot va doktor tavsiyasi sifatida mo'ljallangan. U professional tibbiy maslahat o'rnini bosa olmaydi.`;
@@ -291,83 +230,4 @@ export const generatePdfReport = (
 
     // --- Save the PDF ---
     doc.save(`Tibbiy_Xulosa_${patientData.lastName}_${patientData.firstName}.pdf`);
-};
-
-/**
- * Generates a single specialist conclusion as a PDF (for "Har bir mutaxassisning yakuniy xulosasi").
- */
-export const generateSpecialistConclusionPdf = (
-    specialistDisplayName: string,
-    content: string,
-    branding?: InstituteBranding,
-    fileName?: string
-) => {
-    const doc = new jsPDF();
-    const pageHeight = doc.internal.pageSize.height;
-    const pageWidth = doc.internal.pageSize.width;
-    const margin = 18;
-    let y = margin;
-
-    // Institute branding (logo + name)
-    if (branding?.instituteName || branding?.instituteLogoDataUrl) {
-        const logoSize = 16;
-        if (branding.instituteLogoDataUrl) {
-            try {
-                const imgData = branding.instituteLogoDataUrl.includes('base64,')
-                    ? branding.instituteLogoDataUrl.split(',')[1]
-                    : branding.instituteLogoDataUrl;
-                if (imgData) doc.addImage(imgData, 'PNG', margin, y, logoSize, logoSize);
-            } catch {
-                // ignore
-            }
-        }
-        if (branding.instituteName) {
-            doc.setFontSize(11);
-            doc.setFont(PDF_FONT, 'bold');
-            doc.setTextColor(30, 41, 59);
-            const nameX = branding.instituteLogoDataUrl ? margin + logoSize + 6 : margin;
-            doc.text(branding.instituteName, nameX, y + (branding.instituteLogoDataUrl ? logoSize / 2 + 3 : 4));
-        }
-        y += (branding.instituteLogoDataUrl ? logoSize : LINE_HEIGHT) + 6;
-        doc.setDrawColor(200, 200, 200);
-        doc.line(margin, y, pageWidth - margin, y);
-        y += LINE_HEIGHT + 6;
-    }
-
-    // Title
-    doc.setFontSize(16);
-    doc.setFont(PDF_FONT, 'bold');
-    doc.setTextColor(30, 41, 59);
-    doc.text("Mutaxassisning yakuniy xulosasi", margin, y);
-    y += LINE_HEIGHT + 2;
-    doc.setFontSize(12);
-    doc.setFont(PDF_FONT, 'normal');
-    doc.setTextColor(60, 60, 60);
-    doc.text(specialistDisplayName, margin, y);
-    y += LINE_HEIGHT + 8;
-    doc.setDrawColor(200, 200, 200);
-    doc.line(margin, y, pageWidth - margin, y);
-    y += LINE_HEIGHT + 6;
-
-    // Content
-    doc.setFontSize(11);
-    doc.setFont(PDF_FONT, 'normal');
-    doc.setTextColor(40, 40, 40);
-    const textToSplit = content || '-';
-    const splitText = doc.splitTextToSize(textToSplit, pageWidth - margin * 2);
-    splitText.forEach((line: string) => {
-        if (y > pageHeight - margin - FOOTER_RESERVE) {
-            doc.addPage();
-            y = margin;
-        }
-        doc.text(line, margin, y);
-        y += LINE_HEIGHT;
-    });
-
-    doc.setFontSize(9);
-    doc.setTextColor(90, 90, 90);
-    doc.text("Tibbiy maslahat hujjati - faqat ma'lumot uchun. Professional tibbiy maslahat o'rnini bosa olmaydi.", margin, pageHeight - 14);
-
-    const name = (fileName || specialistDisplayName).replace(/\s+/g, '_').replace(/[^\w\-_.]/g, '');
-    doc.save(`${name}_xulosa.pdf`);
 };
