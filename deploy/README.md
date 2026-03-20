@@ -1,39 +1,53 @@
-# Server deploy (167.71.53.238)
+# Server deploy
 
-Loyiha: `/root/AiDoktorai`. Backend port **8001** (8000 da boshqa loyiha – advokat).
+Loyiha serverda odatda quyidagilardan birida:
 
-## Bir marta ishga tushirish
+| Yo‘l | Izoh |
+|------|------|
+| `/root/medoraai` | `deploy/server-deploy.sh` — **asosiy** (MedoraAI, `medoraai-backend-8001`) |
+| `/root/AiDoktorai` | Eski nom; skript topilsa xuddi shu ish ketadi |
 
-Serverga SSH orqali kiring, keyin:
+IP misol: **167.71.53.238**. Backend port **8001**.
+
+---
+
+## 1) Qo‘lda SSH (eng ishonchli)
 
 ```bash
-cd /root/AiDoktorai
+ssh root@167.71.53.238
+cd /root/medoraai || cd /root/AiDoktorai
 git pull origin main
 sudo bash deploy/server-deploy.sh
 ```
 
-Yoki skriptni o‘zingiz copy-paste qilmasdan, faqat repo yangilab skriptni ishga tushiring:
+Skript: `pip install`, `migrate --noinput`, `collectstatic`, frontend `npm run build`, systemd + nginx.
 
-```bash
-cd /root/AiDoktorai && git pull origin main && sudo bash deploy/server-deploy.sh
-```
+**Migratsiya** skript ichida: `python manage.py migrate --noinput`.
 
-## Skript nima qiladi
+---
 
-1. `git pull origin main`
-2. Backend: venv, `pip install`, `migrate`, `collectstatic`
-3. Frontend: `npm install`, `npm run build` → `/root/AiDoktorai/dist`
-4. Gateway uchun dependencylar (backend venv da)
-5. Systemd: `AiDoktorai-backend-8001.service` ni o‘rnatadi va ishga tushiradi (port 8001)
-6. Nginx: `nginx-AiDoktorai-ip.conf` ni `sites-available` ga qo‘yadi, `sites-enabled` ga link, `nginx -t` va `reload`
+## 2) GitHub Actions (bir marta secret, keyin “Run workflow”)
 
-## Parol
+Repo: **Settings → Secrets and variables → Actions** — qo‘shing:
 
-Skriptda parol yo‘q. SSH kirishda o‘zingiz ishlatasiz: `ssh root@167.71.53.238`.
+- `DEPLOY_HOST` — server IP
+- `DEPLOY_USER` — masalan `root`
+- `DEPLOY_SSH_KEY` — **SSH private key** (butun matn)
 
-## Xatolik bo‘lsa
+Keyin: **Actions → Deploy server → Run workflow**.
 
-- **Backend ishlamasa:** `sudo systemctl status AiDoktorai-backend-8001` va `journalctl -u AiDoktorai-backend-8001 -n 50`
-- **Nginx xato:** `sudo nginx -t` va `/etc/nginx/sites-enabled/` ostidagi konfliktlarni tekshiring
-- **Frontend 404:** Build chiqish joyi ` /root/AiDoktorai/dist`; Nginx `root` shu papkaga qarashi kerak
--NoNewline
+Fayl: `.github/workflows/deploy-server.yml`
+
+---
+
+## 3) Faqat tezkor restart (kod o‘zgarmagan bo‘lsa)
+
+Serverda `deploy/quick-restart.sh` — faqat gunicorn + nginx (repo `README` dagi eski yo‘l bilan mos kelishi mumkin).
+
+---
+
+## Xatolik
+
+- Backend: `sudo systemctl status medoraai-backend-8001` yoki `journalctl -u medoraai-backend-8001 -n 50`
+- Nginx: `sudo nginx -t`
+- Frontend 404: build `frontend/dist`; nginx `root` shu papkaga qarashi kerak

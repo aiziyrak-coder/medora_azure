@@ -1,0 +1,43 @@
+# Serverda: git pull + migrate + frontend build + backend restart (deploy/server-deploy.sh)
+#
+# GitHub → Settings → Secrets → Actions:
+#   DEPLOY_HOST     (masalan 167.71.53.238)
+#   DEPLOY_USER     (odatda root)
+#   DEPLOY_SSH_KEY  (SSH private key)
+#
+# Keyin: Actions → Deploy server → Run workflow
+
+name: Deploy server
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-server
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git pull va deploy skripti
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -e
+            for APP in /root/medoraai /root/AiDoktorai; do
+              if [ -f "$APP/deploy/server-deploy.sh" ]; then
+                cd "$APP"
+                git fetch origin main
+                git reset --hard origin/main
+                sudo bash deploy/server-deploy.sh
+                exit 0
+              fi
+            done
+            echo "XATO: /root/medoraai yoki /root/AiDoktorai ichida deploy/server-deploy.sh topilmadi"
+            exit 1
