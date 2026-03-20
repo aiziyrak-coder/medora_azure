@@ -132,10 +132,12 @@ class AnalysisRecordViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='stats')
     def stats(self, request):
         """Get analysis statistics for current user"""
+        from datetime import timedelta
         from django.core.cache import cache
+        from django.utils import timezone as dj_tz
         
         user = request.user
-        cache_key = f'analysis_stats:{user.id}'
+        cache_key = f'analysis_stats_v3:{user.id}'
         
         # Try cache first (5 minutes)
         cached = cache.get(cache_key)
@@ -144,10 +146,18 @@ class AnalysisRecordViewSet(viewsets.ModelViewSet):
         
         queryset = self.get_queryset()
         total_analyses = queryset.count()
+
+        now = dj_tz.now()
+        one_day_ago = now - timedelta(days=1)
+        seven_days_ago = now - timedelta(days=7)
+        thirty_days_ago = now - timedelta(days=30)
+        count_last_24h = queryset.filter(created_at__gte=one_day_ago).count()
+        count_last_7d = queryset.filter(created_at__gte=seven_days_ago).count()
+        count_last_30d = queryset.filter(created_at__gte=thirty_days_ago).count()
         
-        # Get common diagnoses (limit to last 100 for performance)
+        # Get common diagnoses (limit batch for performance; top 8 for dashboard)
         common_diagnoses = {}
-        for analysis in queryset[:100]:
+        for analysis in queryset[:300]:
             final_report = analysis.final_report or {}
             diagnoses = final_report.get('consensusDiagnosis', [])
             for diag in diagnoses[:1]:  # Top diagnosis
@@ -156,11 +166,14 @@ class AnalysisRecordViewSet(viewsets.ModelViewSet):
         
         common_diagnoses_list = [
             {'name': name, 'count': count}
-            for name, count in sorted(common_diagnoses.items(), key=lambda x: x[1], reverse=True)[:3]
+            for name, count in sorted(common_diagnoses.items(), key=lambda x: x[1], reverse=True)[:8]
         ]
         
         data = {
             'total_analyses': total_analyses,
+            'count_last_24h': count_last_24h,
+            'count_last_7d': count_last_7d,
+            'count_last_30d': count_last_30d,
             'common_diagnoses': common_diagnoses_list,
             'feedback_accuracy': 0.85  # TODO: Calculate actual accuracy
         }

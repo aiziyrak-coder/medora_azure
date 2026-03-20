@@ -370,15 +370,11 @@ const ProfileView: React.FC<{ user: User, onLogout: () => void }> = ({ user, onL
         let cancelled = false;
         (async () => {
             try {
-                const { getAnalyses } = await import('../services/apiAnalysisService');
-                const response = await getAnalyses();
+                const result = await caseService.loadDashboardStatsFromApi();
                 if (cancelled) return;
-                if (response.success && response.data) {
-                    setStats(caseService.getDashboardStats(response.data));
-                } else {
-                    setStats(null);
-                }
-            } catch { 
+                if (result) setStats(result.stats);
+                else setStats(null);
+            } catch {
                 setStats(null);
             }
         })();

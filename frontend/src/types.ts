@@ -384,10 +384,26 @@ export interface CMETopic {
 
 // --- DASHBOARD & HISTORY ---
 
+/** GET /analyses/stats/ javobi (barcha tahlillar bo'yicha agregatsiya) */
+export interface AnalysisStatsPayload {
+  total_analyses: number;
+  common_diagnoses: { name: string; count: number }[];
+  feedback_accuracy: number;
+  count_last_24h?: number;
+  count_last_7d?: number;
+  count_last_30d?: number;
+}
+
 export interface UserStats {
   totalAnalyses: number;
   commonDiagnoses: { name: string; count: number }[];
   feedbackAccuracy: number; // 0-1, how often user feedback matched final diagnosis
+  /** Server aggregatsiyasi: ro'yxat page_size bilan cheklanmaganda */
+  serverCounts?: {
+    last24h: number;
+    last7d: number;
+    last30d: number;
+  };
 }
 
 export interface AnonymizedCase {

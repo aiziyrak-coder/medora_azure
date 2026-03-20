@@ -2,7 +2,7 @@
  * Analysis API Service
  */
 import { apiGet, apiPost, apiPut, apiPatch, apiDelete, type ApiResponse } from './api';
-import type { AnalysisRecord, DiagnosisFeedback, FinalReport, ChatMessage } from '../types';
+import type { AnalysisRecord, DiagnosisFeedback, FinalReport, ChatMessage, AnalysisStatsPayload } from '../types';
 import { normalizeConsensusDiagnosis } from '../types';
 
 export interface ApiAnalysisRecord {
@@ -331,11 +331,7 @@ export const addDiagnosisFeedback = async (
 /**
  * Get analysis statistics
  */
-export const getAnalysisStats = async (): Promise<ApiResponse<{
-  total_analyses: number;
-  common_diagnoses: Array<{ name: string; count: number }>;
-  feedback_accuracy: number;
-}>> => {
+export const getAnalysisStats = async (): Promise<ApiResponse<AnalysisStatsPayload>> => {
   return apiGet('/analyses/stats/');
 };
 

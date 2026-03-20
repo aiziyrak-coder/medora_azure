@@ -1,7 +1,7 @@
 import React from 'react';
 import type { AnalysisRecord, UserStats, CMETopic } from '../types';
 import { normalizeConsensusDiagnosis } from '../types';
-import UserStatsComponent from './dashboard/UserStats';
+import AnalyticsHubPanel from './dashboard/AnalyticsHubPanel';
 import CmeSuggestions from './dashboard/CmeSuggestions';
 import { useTranslation } from '../hooks/useTranslation';
 
@@ -126,7 +126,7 @@ const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             {/* ── Grid ──────────────────────────────────────── */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:items-stretch">
 
                 {/* Hero - span 8 */}
                 <div
@@ -211,19 +211,11 @@ const Dashboard: React.FC<DashboardProps> = ({
                     </div>
                 </div>
 
-                {/* Stats - span 4 */}
-                <div className="lg:col-span-4">
-                    {stats
-                        ? <UserStatsComponent stats={stats} analyses={allAnalyses} />
-                        : (
-                            <div className="rounded-[22px] p-8 h-full flex flex-col items-center justify-center text-center gap-4"
-                                 style={{ ...glass, minHeight:'230px' }}>
-                                <div className="w-10 h-10 rounded-full border-2 animate-spin"
-                                     style={{ borderColor:'rgba(8,145,178,0.2)', borderTopColor:'#0891b2' }} />
-                                <p className="text-sm font-semibold text-slate-500">{t('dashboard_stats_loading')}</p>
-                            </div>
-                        )
-                    }
+                {/* Analitika Hub — kengaytirilgan (eski Shaxsiy Analitika o‘rnida) */}
+                <div className="lg:col-span-4 flex min-h-0">
+                    <div className="w-full flex flex-col min-h-0">
+                        <AnalyticsHubPanel stats={stats} allAnalyses={allAnalyses} />
+                    </div>
                 </div>
 
                 {/* Recent Analyses - span 8 */}
@@ -301,62 +293,17 @@ const Dashboard: React.FC<DashboardProps> = ({
                     </div>
                 </div>
 
-                {/* Secondary analytics - span 4 */}
-                <div className="lg:col-span-4 flex flex-col gap-3">
-                    <div className="flex items-center gap-2.5 px-1">
+                {/* UTT / CME — o‘ng ustun */}
+                <div className="lg:col-span-4 flex flex-col gap-3 min-h-0">
+                    <div className="flex items-center gap-2.5 px-1 shrink-0">
                         <div className="w-1 h-5 rounded-full"
-                             style={{ background:'linear-gradient(180deg,#6366f1,#0891b2)' }} />
+                             style={{ background:'linear-gradient(180deg,#7c3aed,#0891b2)' }} />
                         <h2 className="text-base font-bold text-slate-700 tracking-wide">
-                            {t('dashboard_analytics_title') || 'Analitika va trendlar'}
+                            {t('dashboard_cme_title')}
                         </h2>
                     </div>
-                    <div className="rounded-[20px] p-4 flex flex-col gap-3" style={glass}>
-                        {(() => {
-                            const now = new Date();
-                            const msInDay = 1000 * 60 * 60 * 24;
-                            const inLast = (days: number) =>
-                                allAnalyses.filter(a => {
-                                    const dt = new Date(a.date);
-                                    if (Number.isNaN(dt.getTime())) return false;
-                                    return (now.getTime() - dt.getTime()) / msInDay <= days;
-                                }).length;
-                            const today = inLast(1);
-                            const week = inLast(7);
-                            const month = inLast(30);
-                            const total = stats?.totalAnalyses ?? allAnalyses.length;
-                            return (
-                                <div className="grid grid-cols-2 gap-3 text-xs">
-                                    <div className="rounded-xl px-3 py-2.5 bg-sky-50 border border-sky-100">
-                                        <p className="text-[10px] font-semibold text-sky-700 uppercase tracking-widest">
-                                            {t('stats_range_day') || 'Bugun'}
-                                        </p>
-                                        <p className="mt-1 text-2xl font-black text-sky-700">{today}</p>
-                                        <p className="text-[10px] text-slate-500">{t('stats_total_analyses')}</p>
-                                    </div>
-                                    <div className="rounded-xl px-3 py-2.5 bg-emerald-50 border border-emerald-100">
-                                        <p className="text-[10px] font-semibold text-emerald-700 uppercase tracking-widest">
-                                            {t('stats_range_week') || '7 kun'}
-                                        </p>
-                                        <p className="mt-1 text-2xl font-black text-emerald-700">{week}</p>
-                                        <p className="text-[10px] text-slate-500">{t('stats_total_analyses')}</p>
-                                    </div>
-                                    <div className="rounded-xl px-3 py-2.5 bg-indigo-50 border border-indigo-100">
-                                        <p className="text-[10px] font-semibold text-indigo-700 uppercase tracking-widest">
-                                            {t('stats_range_month') || '30 kun'}
-                                        </p>
-                                        <p className="mt-1 text-2xl font-black text-indigo-700">{month}</p>
-                                        <p className="text-[10px] text-slate-500">{t('stats_total_analyses')}</p>
-                                    </div>
-                                    <div className="rounded-xl px-3 py-2.5 bg-slate-900 text-white border border-slate-800">
-                                        <p className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest">
-                                            {t('stats_range_all') || 'Umumiy'}
-                                        </p>
-                                        <p className="mt-1 text-2xl font-black">{total}</p>
-                                        <p className="text-[10px] text-slate-400">{t('stats_total_analyses')}</p>
-                                    </div>
-                                </div>
-                            );
-                        })()}
+                    <div className="flex-1 min-h-[200px] flex flex-col">
+                        <CmeSuggestions topics={cmeTopics} />
                     </div>
                 </div>
             </div>

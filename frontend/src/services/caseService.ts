@@ -1,4 +1,4 @@
-import type { AnalysisRecord, AnonymizedCase, UserStats } from '../types';
+import type { AnalysisRecord, AnonymizedCase, UserStats, AnalysisStatsPayload } from '../types';
 import { normalizeConsensusDiagnosis } from '../types';
 
 const ANONYMIZED_CASES_KEY = 'konsilium_anonymized_cases_v1';
@@ -87,6 +87,44 @@ export const getDashboardStats = (history: AnalysisRecord[]): UserStats => {
         commonDiagnoses,
         feedbackAccuracy: feedbackTotal > 0 ? (feedbackMatches / feedbackTotal) : 0,
     };
+};
+
+/** Ro'yxatdan hisoblangan statistikani server `stats` bilan birlashtiradi (jami va vaqt oralig'i) */
+export const mergeDashboardStatsWithApi = (
+    fromList: UserStats,
+    api: AnalysisStatsPayload
+): UserStats => {
+    const hasAnyRange =
+        api.count_last_24h != null || api.count_last_7d != null || api.count_last_30d != null;
+    const serverCounts = hasAnyRange
+        ? {
+              last24h: api.count_last_24h ?? 0,
+              last7d: api.count_last_7d ?? 0,
+              last30d: api.count_last_30d ?? 0,
+          }
+        : undefined;
+    return {
+        totalAnalyses: typeof api.total_analyses === 'number' ? api.total_analyses : fromList.totalAnalyses,
+        commonDiagnoses:
+            Array.isArray(api.common_diagnoses) && api.common_diagnoses.length > 0
+                ? api.common_diagnoses
+                : fromList.commonDiagnoses,
+        feedbackAccuracy:
+            typeof api.feedback_accuracy === 'number' ? api.feedback_accuracy : fromList.feedbackAccuracy,
+        serverCounts,
+    };
+};
+
+/** Ro'yxat + server stats (sahifa cheklovi tufayli noto'g'ri jami bo'lmasligi uchun) */
+export const loadDashboardStatsFromApi = async (): Promise<{ list: AnalysisRecord[]; stats: UserStats } | null> => {
+    const { getAnalyses, getAnalysisStats } = await import('./apiAnalysisService');
+    const [listRes, statsRes] = await Promise.all([getAnalyses(), getAnalysisStats()]);
+    if (!listRes.success || !listRes.data) return null;
+    const base = getDashboardStats(listRes.data);
+    if (statsRes.success && statsRes.data) {
+        return { list: listRes.data, stats: mergeDashboardStatsWithApi(base, statsRes.data) };
+    }
+    return { list: listRes.data, stats: base };
 };
 
 export { getAnonymizedCases };

@@ -221,22 +221,15 @@ const AppContent: React.FC = () => {
             setDashboardStats(null);
             return;
         }
-        import('./services/apiAnalysisService').then(({ getAnalyses }) => {
-            getAnalyses().then(response => {
-                if (response.success && response.data) {
-                    setUserHistory(response.data);
-                    setDashboardStats(caseService.getDashboardStats(response.data));
-                    aiService.suggestCmeTopics(response.data, language).then(setCmeTopics);
-                } else {
-                    // Server javobi yo'q yoki muvaffaqiyatsiz — lokal arxivdan foydalanmaymiz
-                    setUserHistory([]);
-                    setDashboardStats(null);
-                }
-            }).catch(() => {
-                // API xatosida ham lokal fallback ishlatilmaydi
+        caseService.loadDashboardStatsFromApi().then(result => {
+            if (result) {
+                setUserHistory(result.list);
+                setDashboardStats(result.stats);
+                aiService.suggestCmeTopics(result.list, language).then(setCmeTopics);
+            } else {
                 setUserHistory([]);
                 setDashboardStats(null);
-            });
+            }
         }).catch(() => {
             setUserHistory([]);
             setDashboardStats(null);
@@ -318,7 +311,18 @@ const AppContent: React.FC = () => {
                     const applyHistoryAndRecord = (historyList: AnalysisRecord[], savedRecord: AnalysisRecord) => {
                         const list = Array.isArray(historyList) ? historyList : [];
                         setUserHistory(list);
-                        setDashboardStats(caseService.getDashboardStats(list));
+                        const base = caseService.getDashboardStats(list);
+                        import('./services/apiAnalysisService').then(({ getAnalysisStats }) => {
+                            getAnalysisStats()
+                                .then(sr => {
+                                    if (sr.success && sr.data) {
+                                        setDashboardStats(caseService.mergeDashboardStatsWithApi(base, sr.data));
+                                    } else {
+                                        setDashboardStats(base);
+                                    }
+                                })
+                                .catch(() => setDashboardStats(base));
+                        });
                         setCurrentAnalysisRecord(savedRecord);
                         aiService.suggestCmeTopics(list, language).then(setCmeTopics);
                     };
@@ -427,22 +431,16 @@ const AppContent: React.FC = () => {
         setCurrentUser(user);
         setShowLanding(false); // Hide landing after successful login
         // Barcha rollar uchun tahlillarni faqat bazadan (API) yuklash; lokal fallback ishlatilmaydi
-        import('./services/apiAnalysisService').then(({ getAnalyses }) => {
-            getAnalyses().then(response => {
-                if (response.success && response.data) {
-                    setUserHistory(response.data);
-                    setDashboardStats(caseService.getDashboardStats(response.data));
-                    aiService.suggestCmeTopics(response.data, language).then(setCmeTopics);
-                } else {
-                    setUserHistory([]);
-                    setDashboardStats(null);
-                }
-                setAppView('dashboard');
-            }).catch(() => {
+        caseService.loadDashboardStatsFromApi().then(result => {
+            if (result) {
+                setUserHistory(result.list);
+                setDashboardStats(result.stats);
+                aiService.suggestCmeTopics(result.list, language).then(setCmeTopics);
+            } else {
                 setUserHistory([]);
                 setDashboardStats(null);
-                setAppView('dashboard');
-            });
+            }
+            setAppView('dashboard');
         }).catch(() => {
             setUserHistory([]);
             setDashboardStats(null);
