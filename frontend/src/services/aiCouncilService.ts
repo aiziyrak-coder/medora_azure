@@ -1203,28 +1203,37 @@ ${longitudinalLine}
 
 QOIDA: Ob'ektiv ko'rik va (agar bor bo'lsa) yuklangan laboratoriya/diagnostika hujjatlari berilgan; shifokordan ularni so'ramang. Barcha ma'lumotlardan to'liq foydalaning va mutaxassislarga aniq yetkazing.`;
 
-    // Konsiliumda hech qanday oldindan kiritilgan yozuv yo'q — hammasi AI suhbat va kasallikni o'qib o'zidan yozadi. Hujjatlar bo'lsa Professor ularni ko'radi va tahlil qiladi.
-    const introContentPrompt = `Siz Konsilium Professori. QOIDA: Konsiliumda hech bir matn oldindan kiritilmaydi — barcha yozuv faqat siz quyidagi bemor va kasallik ma'lumotlarini (va agar ilovada bo'lsa — laboratoriya/diagnostika hujjatlarini) O'QIB, TUSHUNIB, umumlashtirib o'zingiz yozasiz. Tayyor ibora yoki shablon ISHLATMANG. "Hurmatli hamkasblar" kabi rasmiy ochilish SHART EMAS — to'g'ridan-to'g'ri bemor va kasallik haqida mazmunli ochilish (3-5 jumla). Ob'ektiv ko'rik (vital) va yuklangan hujjatlar allaqachon berilgan — ularni qayta so'ramang. Agar bemor hujjat yuklagan bo'lsa — asosiy topilmalarni qisqacha yetkazing. Maqsad: aniq tashxis va davolash; e'tibor kasallikga. Javobni oxirigacha yozing. TIL: ${langMap[language]}.
+    // Bitta Professor xabari: takrorlanmasin, ikki marta shu bemor haqida kirish yozilmasin. To'liq yakuniy gaplar (token limiti katta).
+    const professorOpeningPrompt = `Siz Konsilium Professori. Bitta uzluksiz matn yozing (bir nechta paragraf bo'lishi mumkin).
+
+QAT'IY:
+- Bemor ism-familiyasi va yoshni FAQAT bir marta, matning boshida qisqa eslatib o'ting; keyin takrorlamang.
+- Rasmiy mulozamat ("Hurmatli hamkasblar") yozmang.
+- Avval: klinik holat va shikoyatlar bo'yicha qisqa umumlashtirish (3-5 jumla).
+- Keyin: birinchi mavzu — asosiy shubhalar, differensial yo'nalishlar, mutaxassislardan nima kutish kerak; hujjatlar bo'lsa topilmalar (qisqa).
+- Oxirida mutaxassislarga aniq yo'naltirish (qanday baho va xavf belgilari muhim).
+- TIL: ${langMap[language]}.
+- Javobni TO'LIQ yakunlang: oxirgi jumla nuqta bilan tugasin; jumla yarmida, so'z yarmida TO'XTAMANG. Agar joy yetmasa, qisqaroq yozing, lekin har bir jumla to'liq bo'lsin.
 
 ${patientSummaryForRais}`;
-    const introMultimodal = attachmentCount > 0 ? buildMultimodalPrompt(introContentPrompt, patientData, pastCasesForContext) : introContentPrompt;
-    // Tezlikni oshirish uchun intro FAST modelda (keng, lekin ixcham matn)
-    const introContent = await callGemini(introMultimodal, DEPLOY_FAST, undefined, false, systemInstr, true, 1024) as string;
+    const professorMultimodal =
+        attachmentCount > 0 ? buildMultimodalPrompt(professorOpeningPrompt, patientData, pastCasesForContext) : professorOpeningPrompt;
+    // 4096 token — kesilishning oldini olish; bitta chaqiruv (oldingi 1024+1024 takrori olib tashlandi)
+    let currentTopic = (await callGemini(professorMultimodal, DEPLOY_FAST, undefined, false, systemInstr, true, 4096)) as string;
+    currentTopic = (currentTopic || '').trim();
 
-    const orchestratorIntro: ChatMessage = { id: `sys-intro-${Date.now()}`, author: AIModel.SYSTEM, content: (introContent || '').trim(), isSystemMessage: true };
+    const orchestratorIntro: ChatMessage = {
+        id: `sys-intro-${Date.now()}`,
+        author: AIModel.SYSTEM,
+        content: currentTopic,
+        isSystemMessage: true,
+    };
     onProgress({ type: 'message', message: orchestratorIntro });
     debateHistory.push(orchestratorIntro);
 
     // Raundlar tushunchasini UI dan olib tashlaymiz: ichki hisob-kitob uchun 1 marta aylanish
     const DEBATE_ROUNDS = 1;
     let lastLivePrognosis: PrognosisReport | null = null;
-    // Birinchi mavzu — bemor, kasallik va (agar bor bo'lsa) hujjatlar asosida; Professor hujjatlarni ko'radi
-    const currentTopicPrompt = `Siz Konsilium professori. QOIDA: Hech qanday oldindan kiritilgan matn bo'lmasin — faqat quyidagi bemor va kasallik ma'lumotlarini (va ilovadagi hujjatlarini) o'qib, o'zingiz birinchi mavzuni yozing. Rasmiy salomlashuv ("Hurmatli hamkasblar" va h.k.) yozmang — to'g'ridan-to'g'ri mavzu va kasallikga e'tibor. Ob'ektiv ko'rik va yuklangan hujjatlar berilgan — shifokordan qayta so'ramang. Mutaxassislardan dastlabki baho va xavf belgilari so'ring; hujjatlar bo'lsa topilmalarni qisqacha yetkazing. Bitta to'liq paragraf, mazmunli. TIL: ${langMap[language]}.
-
-${patientSummaryForRais}`;
-    const topicMultimodal = attachmentCount > 0 ? buildMultimodalPrompt(currentTopicPrompt, patientData, pastCasesForContext) : currentTopicPrompt;
-    // Birinchi mavzu ham FAST modelda — tezkor, ammo to'liq paragraf
-    let currentTopic = await callGemini(topicMultimodal, DEPLOY_FAST, undefined, false, systemInstr, true, 1024) as string;
 
     for (let round = 1; round <= DEBATE_ROUNDS; round++) {
         // Raund raqamini ko'rsatmaymiz, faqat umumiy holat xabari
@@ -1255,11 +1264,7 @@ ${patientSummaryForRais}`;
              onProgress({ type: 'message', message: userMessage });
              debateHistory.push(userMessage);
         } else {
-             const raisContent = (currentTopic || '').trim();
-            const fallbackRais = language === 'ru' ? 'Следующий вопрос: состояние пациента и диагноз. Ваши выводы?' : language === 'en' ? 'Next: patient state and diagnosis. Your view?' : 'Keyingi mavzu: bemor holati va tashxis. Fikrlar?';
-             const orchestratorMessage: ChatMessage = { id: `sys-${Date.now()}-${round}`, author: AIModel.SYSTEM, content: raisContent || fallbackRais, isSystemMessage: true };
-             onProgress({ type: 'message', message: orchestratorMessage });
-             debateHistory.push(orchestratorMessage);
+            // Professorning to'liq matni allaqachon yuqorida bitta xabar sifatida yuborilgan — shu yerda qayta yubormaymiz (takror va yarim gaplar oldini olish).
         }
 
         // Specialists Turn (faqat eng muhim 2 ta mutaxassis – maksimal tezlik uchun)
@@ -1275,7 +1280,7 @@ ${patientSummaryForRais}`;
                 .map(m => {
                     const author = m.author === AIModel.SYSTEM ? 'Konsilium Professori' : String(m.author);
                     const content = (m.content || '').trim();
-                    return `[${author}]: ${content.length > 500 ? content.slice(0, 500) + '...' : content}`;
+                    return `[${author}]: ${content.length > 2000 ? content.slice(0, 2000) + '…' : content}`;
                 })
                 .join('\n\n');
 
@@ -1308,13 +1313,14 @@ QOIDALAR:
 5. Laboratoriya va diagnostika hujjatlari (agar yuklangan bo'lsa) quyida/ilovada — ularni tahlil qiling, xulosangizda ishlating. Bu ma'lumotlarni shifokordan SO'RAMANG — allaqachon berilgan.
 6. Javobingiz aniq strukturada bo'lsin, lekin faqat matn ko'rinishida (bullet yoki yulduzcha ishlatmang): avval "Asosiy tashxis va dalillar" (asosiy tashxis va 2–3 asosiy dalil), keyin "Differensial tashxislar" (kamida 2 ta muqobil tashxis va nima uchun kamroq ehtimol), oxirida "Tavsiya va keyingi qadamlar" (asosiy tekshiruvlar va davolashning qisqa rejasi).
 
-Javob 6–10 juda mazmunli jumla bo'lsin: qisqa, lekin CHUQUR va batafsil tahlil qiling, gap o'rtada uzilib qolmasin. Keraksiz tantana yo'q. TIL: ${langMap[language]}.`;
+Javob 6–10 juda mazmunli jumla bo'lsin: qisqa, lekin CHUQUR va batafsil tahlil qiling, gap o'rtada uzilib qolmasin. Keraksiz tantana yo'q. TIL: ${langMap[language]}.
+OXIRGI QOIDA: javobni to'liq yakunlang — oxirgi jumla nuqta bilan tugasin; jumla yarmida to'xtamang. Agar cheklov bo'lsa, qisqaroq yozing, lekin har bir fikr to'liq bo'lsin.`;
 
             
             const specialistMultimodalPrompt = buildMultimodalPrompt(textPrompt, patientData, pastCasesForContext);
             
             try {
-                const responseText = await callGemini(specialistMultimodalPrompt, DEPLOY_FAST, undefined, false, systemInstr, true, 4096) as string;
+                const responseText = await callGemini(specialistMultimodalPrompt, DEPLOY_FAST, undefined, false, systemInstr, true, 8192) as string;
                 const trimmed = (responseText || '').trim();
                 const specialistMessage: ChatMessage = { id: `${spec.role}-${Date.now()}`, author: spec.role, content: trimmed };
                 onProgress({ type: 'message', message: specialistMessage });
