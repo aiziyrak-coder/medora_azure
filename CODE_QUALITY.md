@@ -18,7 +18,7 @@
 - `ALLOWED_UPLOAD_TYPES` - ruxsat etilgan fayl turlari
 
 ✅ **Gemini:**
-- Model fallback tizimi (3 Flash → 2.5 Flash → 2.0 Flash → 1.5 Flash)
+- Model fallback tizimi (3 Flash  ->  2.5 Flash  ->  2.0 Flash  ->  1.5 Flash)
 - Docstring'lar qo'shildi
 - JSON parsing xatolariga bardoshli
 - Telefon normalizatsiya (yordamchi qo'shishda)
@@ -69,7 +69,7 @@
 - Barcha til fayllarida (en, uzL, uzC, ru, kaa) qo'shildi
 
 ✅ **Komponentlar (t() ishlatish):**
-- DoctorDashboard, StaffDashboard, AuthPage, TeamRecommendationView, SubscriptionPage, SocraticModeView, DrugInteractionChecker, DrugIdentifier — alert/confirm endi `t(...)` orqali
+- DoctorDashboard, StaffDashboard, AuthPage, TeamRecommendationView, SubscriptionPage, SocraticModeView, DrugInteractionChecker, DrugIdentifier  -  alert/confirm endi `t(...)` orqali
 
 ✅ **Mobil UX:**
 - AuthPage: form konteynerida `overflow-y-auto`, `mobile-keyboard-pad`, `custom-scrollbar`
@@ -125,3 +125,4 @@
 5. **Internationalization**: Barcha matn i18n orqali
 6. **Accessibility**: WCAG 2.1 AA standartlari
 7. **Mobile**: Progressive Web App (PWA) to'liq qo'llab-quvvatlash
+-NoNewline

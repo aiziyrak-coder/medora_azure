@@ -1,4 +1,5 @@
-# MEDORA AI - Tibbiy Konsilium Tizimi
+# AiDoktor - Tibbiy Konsilium Tizimi
+## Farg'ona Jamoat Salomatligi Tibbiyot Instituti
 
 Professional tibbiy yordam ko'rsatishda AI texnologiyalaridan foydalanishga qaratilgan tizim.
 
@@ -31,9 +32,9 @@ npm run dev
 
 ## 🌐 Production URLs
 
-- **Frontend**: https://medora.cdcgroup.uz
-- **Backend API**: https://medoraapi.cdcgroup.uz
-- **Admin Panel**: https://medoraapi.cdcgroup.uz/admin/
+- **Frontend**: https://aidoktor.fargana.uz
+- **Backend API**: https://api.aidoktor.fargana.uz
+- **Admin Panel**: https://api.aidoktor.fargana.uz/admin/
 
 ## 📚 Qo'llanmalar
 
@@ -51,4 +52,5 @@ npm run dev
 
 ## 📝 License
 
-Proprietary - CDC Group
+Proprietary - Farg'ona Jamoat Salomatligi Tibbiyot Instituti
+-NoNewline

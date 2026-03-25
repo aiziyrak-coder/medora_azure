@@ -8,9 +8,11 @@ import CheckCircleIcon from './icons/CheckCircleIcon';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
 import XIcon from './icons/XIcon';
 import { AIModel } from '../constants/specialists';
+import { INSTITUTE_NAME_SHORT, INSTITUTE_LOGO_SRC } from '../constants/brand';
 import { AI_SPECIALISTS } from '../constants';
 import LanguageSwitcher from './LanguageSwitcher';
 import { Language } from '../i18n/LanguageContext';
+import { PhoneInputWith998 } from './PhoneInputWith998';
 
 interface AuthPageProps {
     onLoginSuccess: (user: User) => void;
@@ -144,7 +146,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
         setMessage('');
 
         try {
-            const result = await authService.requestPasswordReset(phone);
+            let digits = phone.replace(/\D/g, '');
+            if (digits.startsWith('998')) digits = digits.slice(3);
+            const fullPhone = digits.length >= 9 ? `+998${digits.slice(0, 9)}` : phone;
+            const result = await authService.requestPasswordReset(fullPhone);
             if (result.success) {
                 setMessage(result.message);
             } else {
@@ -164,14 +169,17 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
         setMessage('');
 
         try {
+            let digits = phone.replace(/\D/g, '');
+            if (digits.startsWith('998')) digits = digits.slice(3);
+            const fullPhone = digits.length >= 9 ? `+998${digits.slice(0, 9)}` : phone;
             if (mode === 'login') {
-                // Try API first, fallback to local
-                const result = await authService.login({ phone, password });
+                const result = await authService.login({ phone: fullPhone, password });
                 if (result.success) {
                     const user = authService.getCurrentUser();
                     // Validation for correct role login
                     if (user && user.role !== role) {
-                        setError(`Siz noto'g'ri bo'limdasiz. Sizning rolingiz: ${user.role === 'clinic' ? 'Klinika' : user.role === 'doctor' ? 'Shifokor' : 'Registrator'}`);
+                        const roleLabel = user.role === 'clinic' ? 'Klinika' : user.role === 'doctor' ? 'Shifokor' : user.role === 'staff' ? 'Registrator' : user.role;
+                        setError(`Siz noto'g'ri bo'limdasiz. Sizning rolingiz: ${roleLabel}`);
                         authService.logout();
                     } else if (user) {
                         onLoginSuccess(user);
@@ -185,14 +193,18 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
                     setIsLoading(false);
                     return;
                 }
-                // Try API first, fallback to local
+                if (fullPhone.length < 12) {
+                    setError("Telefon raqam 9 ta raqamdan iborat bo'lishi kerak (90 123 45 67).");
+                    setIsLoading(false);
+                    return;
+                }
                 const result = await authService.register({ 
-                    phone, 
+                    phone: fullPhone, 
                     password, 
                     password_confirm: password,
                     name, 
                     role,
-                    specialties: role === 'doctor' ? selectedSpecialties : undefined
+                    specialties: role === 'doctor' ? selectedSpecialties : []
                 });
                  if (result.success) {
                     setMessage(result.message + " Endi tizimga kirishingiz mumkin.");
@@ -314,13 +326,18 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
                 {/* LEFT SIDE: Information */}
                 <div className="hidden lg:flex w-1/2 flex-col justify-between p-8 xl:p-12 h-full">
                     <div className="animate-fade-in-up">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 backdrop-blur-md mb-4">
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shadow-[0_0_8px_#60a5fa]"></span>
-                            <span className="text-[10px] font-bold text-blue-100 tracking-wide uppercase">MedoraAi Tizimi v1.0</span>
+                        <div className="flex items-center gap-3 mb-4">
+                            <img src={INSTITUTE_LOGO_SRC} alt="" className="w-14 h-14 rounded-full object-contain ring-2 ring-white/20" />
+                            <div>
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 backdrop-blur-md mb-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shadow-[0_0_8px_#60a5fa]"></span>
+                                    <span className="text-[10px] font-bold text-blue-100 tracking-wide uppercase">{INSTITUTE_NAME_SHORT} Tizimi v1.0</span>
+                                </div>
+                                <h1 className="text-4xl xl:text-6xl font-black text-white tracking-tighter drop-shadow-xl uppercase">
+                                    {INSTITUTE_NAME_SHORT}
+                                </h1>
+                            </div>
                         </div>
-                        <h1 className="text-4xl xl:text-6xl font-black text-white tracking-tighter mb-3 drop-shadow-xl uppercase">
-                            MEDORA AI
-                        </h1>
                         <p className="text-xl text-blue-100 font-light border-l-4 border-blue-500 pl-4">
                             {t('auth_marketing_title')}
                         </p>
@@ -337,9 +354,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
                                 {t('auth_mode_select')}
                             </h4>
                             <ul className="text-slate-300 text-xs space-y-0.5">
-                                <li>• <strong>{t('auth_mode_clinic')}:</strong> {t('auth_mode_clinic_desc')}</li>
-                                <li>• <strong>{t('auth_mode_doctor')}:</strong> {t('auth_mode_doctor_desc')}</li>
-                                <li>• <strong>{t('auth_mode_staff')}:</strong> {t('auth_mode_staff_desc')}</li>
+                                <li>· <strong>{t('auth_mode_clinic')}:</strong> {t('auth_mode_clinic_desc')}</li>
+                                <li>· <strong>{t('auth_mode_doctor')}:</strong> {t('auth_mode_doctor_desc')}</li>
+                                <li>· <strong>{t('auth_mode_staff')}:</strong> {t('auth_mode_staff_desc')}</li>
                             </ul>
                         </div>
 
@@ -367,22 +384,22 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
                     <div className="max-w-sm w-full mx-auto space-y-4 animate-fade-in-up min-h-0">
                         
                         {/* Role Switcher */}
-                        <div className="bg-slate-800 p-1 rounded-xl flex mb-4 border border-slate-700">
+                        <div className="bg-slate-800 p-1 rounded-xl flex flex-wrap gap-1 mb-4 border border-slate-700">
                             <button
                                 onClick={() => handleRoleSelect('clinic')}
-                                className={`flex-1 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-300 ${role === 'clinic' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                                className={`flex-1 min-w-0 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-300 ${role === 'clinic' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
                             >
                                 {t('auth_mode_clinic')}
                             </button>
                             <button
                                 onClick={() => handleRoleSelect('doctor')}
-                                className={`flex-1 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-300 ${role === 'doctor' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                                className={`flex-1 min-w-0 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-300 ${role === 'doctor' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
                             >
                                 {t('auth_mode_doctor')}
                             </button>
                             <button
                                 onClick={() => handleRoleSelect('staff')}
-                                className={`flex-1 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-300 ${role === 'staff' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                                className={`flex-1 min-w-0 py-1.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-300 ${role === 'staff' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
                             >
                                 {t('auth_mode_staff')}
                             </button>
@@ -449,16 +466,12 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
                                 <label htmlFor="auth-phone" className="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1">
                                     {t('auth_phone_label')}
                                 </label>
-                                <input
+                                <PhoneInputWith998
                                     id="auth-phone"
-                                    name="phone"
-                                    type="tel"
                                     value={phone}
-                                    onChange={(e) => setPhone(e.target.value)}
-                                    className="block w-full px-4 py-2.5 bg-white/10 border border-white/10 rounded-xl text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none font-medium backdrop-blur-sm text-sm"
-                                    required
-                                    placeholder={t('auth_phone_placeholder')}
-                                    autoComplete="tel"
+                                    onChange={setPhone}
+                                    placeholder="90 123 45 67"
+                                    showHint={true}
                                 />
                             </div>
                             

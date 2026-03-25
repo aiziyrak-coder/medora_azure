@@ -24,7 +24,7 @@ class Command(BaseCommand):
                 'price_currency': 'USD',
                 'duration_days': 30,
                 'features': [
-                    'Konsilium – shartnoma asosida',
+                    'Konsilium  -  shartnoma asosida',
                     'Cheksiz foydalanuvchilar',
                     'Barcha AI imkoniyatlar',
                 ],

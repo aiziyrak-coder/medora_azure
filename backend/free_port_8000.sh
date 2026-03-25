@@ -1,5 +1,5 @@
 #!/bin/bash
-# 8000-portni band qilgan protsessni topib to'xtatadi (medora/gunicorn qoldig'i).
+# 8000-portni band qilgan protsessni topib to'xtatadi (AiDoktor/gunicorn qoldig'i).
 # Keyin gunicorn ni qo'lda ishga tushirishingiz mumkin.
 set -e
 echo "=== Port 8000 da ishlayotgan protsesslar ==="

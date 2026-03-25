@@ -75,17 +75,20 @@ export interface AuthResponse {
  */
 export const register = async (data: RegisterData): Promise<{ success: boolean; message: string }> => {
   try {
-    // Ensure password_confirm is set
     const registerData = {
-      ...data,
-      password_confirm: data.password_confirm || data.password,
+      phone: data.phone,
+      name: data.name,
+      password: data.password,
+      password_confirm: data.password_confirm ?? data.password,
+      role: data.role,
+      specialties: Array.isArray(data.specialties) ? data.specialties : [],
+      linked_doctor: data.linked_doctor ?? undefined,
     };
-    
     const response = await apiPost<AuthResponse>('/auth/register/', registerData);
     
     if (response.success && response.data) {
       saveTokens(response.data.tokens.access, response.data.tokens.refresh);
-      saveUserData(normalizeUser(response.data.user as Record<string, unknown>));
+      saveUserData(normalizeUser(response.data.user as unknown as Record<string, unknown>));
       return {
         success: true,
         message: "Ro'yxatdan o'tish muvaffaqiyatli yakunlandi.",
@@ -93,39 +96,21 @@ export const register = async (data: RegisterData): Promise<{ success: boolean; 
     }
 
     if (response.error) {
-      const detailsMsg = formatErrorDetails((response.error as { details?: unknown }).details);
-      const message = detailsMsg || response.error.message || "Ma'lumotlar noto'g'ri.";
+      const err = response.error as { message?: string; details?: unknown };
+      const detailsMsg = formatErrorDetails(err.details);
+      const message = err.message || detailsMsg || "Ma'lumotlar noto'g'ri. Telefon va parolni tekshiring.";
       return { success: false, message };
     }
     
-    // Fallback to local storage if API fails
-    const { register: localRegister } = await import('./authService');
-    const localResult = localRegister({
-      phone: data.phone,
-      name: data.name,
-      password: data.password,
-      role: data.role,
-      specialties: data.specialties,
-    });
-    
-    return localResult;
+    return {
+      success: false,
+      message: "Serverga ulanib bo'lmadi. Iltimos, internetni tekshiring.",
+    };
   } catch (error) {
-    // Fallback to local storage
-    try {
-      const { register: localRegister } = await import('./authService');
-      return localRegister({
-        phone: data.phone,
-        name: data.name,
-        password: data.password,
-        role: data.role,
-        specialties: data.specialties,
-      });
-    } catch {
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : "Ro'yxatdan o'tishda xatolik yuz berdi.",
-      };
-    }
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Ro'yxatdan o'tishda xatolik yuz berdi.",
+    };
   }
 };
 
@@ -133,12 +118,20 @@ export const register = async (data: RegisterData): Promise<{ success: boolean; 
  * Login user
  */
 export const login = async (credentials: LoginCredentials): Promise<{ success: boolean; message: string }> => {
+  const phone = credentials.phone != null ? String(credentials.phone).trim() : '';
+  const password = credentials.password != null ? String(credentials.password) : '';
+  if (!phone) {
+    return { success: false, message: "Telefon raqami kiritilishi shart." };
+  }
+  if (!password) {
+    return { success: false, message: "Parol kiritilishi shart." };
+  }
   try {
-    const response = await apiPost<AuthResponse>('/auth/login/', credentials);
+    const response = await apiPost<AuthResponse>('/auth/login/', { phone, password });
     
     if (response.success && response.data) {
       saveTokens(response.data.tokens.access, response.data.tokens.refresh);
-      saveUserData(normalizeUser(response.data.user as Record<string, unknown>));
+      saveUserData(normalizeUser(response.data.user as unknown as Record<string, unknown>));
       return {
         success: true,
         message: "Tizimga muvaffaqiyatli kirdingiz.",
@@ -151,36 +144,15 @@ export const login = async (credentials: LoginCredentials): Promise<{ success: b
       return { success: false, message };
     }
     
-    // Fallback to local storage if API fails
-    const { login: localLogin } = await import('./authService');
-    const localResult = localLogin(credentials);
-    
-    if (localResult.success) {
-      const user = getCurrentUser();
-      if (user) {
-        saveUserData(user);
-      }
-    }
-    
-    return localResult;
+    return {
+      success: false,
+      message: "Serverga ulanib bo'lmadi. Iltimos, internetni tekshiring.",
+    };
   } catch (error) {
-    // Fallback to local storage
-    try {
-      const { login: localLogin } = await import('./authService');
-      const result = localLogin(credentials);
-      if (result.success) {
-        const user = getCurrentUser();
-        if (user) {
-          saveUserData(user);
-        }
-      }
-      return result;
-    } catch {
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : "Kirishda xatolik yuz berdi.",
-      };
-    }
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Kirishda xatolik yuz berdi.",
+    };
   }
 };
 
@@ -226,7 +198,8 @@ export const updateProfile = async (data: Partial<User>): Promise<{ success: boo
     const response = await apiPatch<User>('/auth/profile/', data);
     
     if (response.success && response.data) {
-      saveUserData(response.data);
+      const user = normalizeUser(response.data as Record<string, unknown>);
+      saveUserData(user);
       return {
         success: true,
         message: 'Profil yangilandi.',
@@ -284,7 +257,7 @@ export const requestPasswordReset = async (phone: string): Promise<{ success: bo
     
     return {
       success: response.success,
-      message: response.error?.message || response.data?.message || 
+      message: response.error?.message || (response.data as { message?: string } | null)?.message || 
         "Agar ushbu raqam uchun hisob mavjud bo'lsa, tiklash yo'riqnomasi yuborildi.",
     };
   } catch (error) {

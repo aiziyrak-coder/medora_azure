@@ -25,7 +25,7 @@ def validate_name(value):
     if not value or len(value.strip()) < 2:
         raise ValidationError(_("Ism kamida 2 belgidan iborat bo'lishi kerak"))
     
-    if not re.match(r'^[a-zA-Zа-яА-ЯёЁўЎқҚғҒҳҲ\s\'-]+$', value):
+    if not re.match(r'^[a-zA-ZР°-СЏРђ-РЇС‘РЃСћРЋТ›ТљТ“Т’ТіТІ\s\'-]+$', value):
         raise ValidationError(_("Ismda faqat harflar, probellar va tire ishlatilishi mumkin"))
     
     return value.strip()

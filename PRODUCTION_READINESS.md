@@ -1,4 +1,4 @@
-# MedoraAI — Bozorga Chiqish va Real Hayotda Ishga Tushirish Qo'llanmasi
+# AiDoktorAI  -  Bozorga Chiqish va Real Hayotda Ishga Tushirish Qo'llanmasi
 
 Ushbu hujjat dasturni **real hayotda** ishga tushirish va **bozorga olib chiqish** uchun qilish kerak bo'lgan qadamlar ro'yxati.
 
@@ -7,21 +7,21 @@ Ushbu hujjat dasturni **real hayotda** ishga tushirish va **bozorga olib chiqish
 ## 1. Xavfsizlik (Muhim)
 
 ### 1.1 Maxfiy ma'lumotlar
-- [ ] **SECRET_KEY** — Production uchun yangi, kuchli kalit yarating (`python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`).
-- [ ] **GEMINI_API_KEY** — Faqat backend `.env` da; frontendda hech qachon saqlamang.
-- [ ] **TELEGRAM_BOT_TOKEN** va **TELEGRAM_PAYMENT_GROUP_ID** — Faqat backend `.env` da (allaqachon backend orqali yuboriladi).
+- [ ] **SECRET_KEY**  -  Production uchun yangi, kuchli kalit yarating (`python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`).
+- [ ] **GEMINI_API_KEY**  -  Faqat backend `.env` da; frontendda hech qachon saqlamang.
+- [ ] **TELEGRAM_BOT_TOKEN** va **TELEGRAM_PAYMENT_GROUP_ID**  -  Faqat backend `.env` da (allaqachon backend orqali yuboriladi).
 - [ ] Barcha kalitlarni `.env` orqali oling; `.env` faylini **hech qachon** Git ga commit qilmang (`.gitignore` da bor).
 
 ### 1.2 Production rejimi
-- [ ] **DEBUG=False** — Serverda `DEBUG=False` qiling.
-- [ ] **ALLOWED_HOSTS** — Faqat o'z domeningizni qo'shing, masalan: `medoraai.uz,api.medoraai.uz`.
+- [ ] **DEBUG=False**  -  Serverda `DEBUG=False` qiling.
+- [ ] **ALLOWED_HOSTS**  -  Faqat o'z domeningizni qo'shing, masalan: `AiDoktorai.uz,api.AiDoktorai.uz`.
 
 ### 1.3 HTTPS va cookie
 - [ ] Domen uchun **SSL sertifikat** (masalan Let's Encrypt) o'rnating.
 - [ ] Backend `DEBUG=False` da allaqachon `SECURE_SSL_REDIRECT`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE` qo'llanadi (settings.py da mavjud).
 
 ### 1.4 CORS
-- [ ] **CORS_ALLOWED_ORIGINS** — Faqat frontend domeningiz, masalan: `https://medoraai.uz,https://www.medoraai.uz`.
+- [ ] **CORS_ALLOWED_ORIGINS**  -  Faqat frontend domeningiz, masalan: `https://AiDoktorai.uz,https://www.AiDoktorai.uz`.
 
 ---
 
@@ -43,11 +43,11 @@ Ushbu hujjat dasturni **real hayotda** ishga tushirish va **bozorga olib chiqish
 
 ### 3.2 WSGI server
 - [ ] **Gunicorn** ishlatish (allaqachon requirements da):  
-  `gunicorn medoraai_backend.wsgi:application --bind 0.0.0.0:8000 --workers 2`.
-- [ ] Reverse proxy (Nginx yoki Caddy) — backend'ni `https://api.medoraai.uz` ga yo'naltirish, SSL ni proxy da hal qilish.
+  `gunicorn AiDoktorai_backend.wsgi:application --bind 0.0.0.0:8000 --workers 2`.
+- [ ] Reverse proxy (Nginx yoki Caddy)  -  backend'ni `https://api.AiDoktorai.uz` ga yo'naltirish, SSL ni proxy da hal qilish.
 
 ### 3.3 Static va media
-- [ ] `python manage.py collectstatic --noinput` — static fayllar `STATIC_ROOT` ga.
+- [ ] `python manage.py collectstatic --noinput`  -  static fayllar `STATIC_ROOT` ga.
 - [ ] Nginx/Caddy da `STATIC_URL` va `MEDIA_URL` uchun alias sozlang; yoki WhiteNoise (static uchun allaqachon qo'shilgan).
 
 ### 3.4 Environment o'zgaruvchilari
@@ -58,8 +58,8 @@ Ushbu hujjat dasturni **real hayotda** ishga tushirish va **bozorga olib chiqish
 ## 4. Frontend deploy
 
 ### 4.1 Build
-- [ ] `VITE_API_BASE_URL` — production API manziliga o'rnating (masalan `https://api.medoraai.uz/api`).
-- [ ] `npm run build` (yoki `pnpm build`) — `dist/` yoki loyiha konfiguratsiyasidagi output papkaga build.
+- [ ] `VITE_API_BASE_URL`  -  production API manziliga o'rnating (masalan `https://api.AiDoktorai.uz/api`).
+- [ ] `npm run build` (yoki `pnpm build`)  -  `dist/` yoki loyiha konfiguratsiyasidagi output papkaga build.
 
 ### 4.2 Hosting
 - [ ] Build natijasini CDN/hosting ga yuklang: Vercel, Netlify, Cloudflare Pages, yoki o'z serveringizda Nginx/Caddy orqali static fayllarni xizmat qilish.
@@ -86,9 +86,9 @@ Ushbu hujjat dasturni **real hayotda** ishga tushirish va **bozorga olib chiqish
 
 ## 6. Tibbiy ma'lumotlar va qonuniy talablar
 
-- [ ] **Shaxsiy ma'lumotlar** — Foydalanuvchi va bemor ma'lumotlari qayd etilishi va saqlanishi bo'yicha mahalliy qonunlar (O'zbekiston) va ichki siyosatni tekshiring.
-- [ ] **Maxfiylik va foydalanish shartlari** — Saytda "Maxfiylik siyosati" va "Foydalanish shartlari" sahifalari bo'lsin; ro'yxatdan o'tishda rozilik oling (allaqachon AuthPage da bor).
-- [ ] **Tibbiy maslahat disclaimer** — Tizim "tibbiy maslahat o'rniga bormaydi" degan ogohlantirish allaqachon hisobotlarda; buni bosh sahifada ham ko'rsatish mumkin.
+- [ ] **Shaxsiy ma'lumotlar**  -  Foydalanuvchi va bemor ma'lumotlari qayd etilishi va saqlanishi bo'yicha mahalliy qonunlar (O'zbekiston) va ichki siyosatni tekshiring.
+- [ ] **Maxfiylik va foydalanish shartlari**  -  Saytda "Maxfiylik siyosati" va "Foydalanish shartlari" sahifalari bo'lsin; ro'yxatdan o'tishda rozilik oling (allaqachon AuthPage da bor).
+- [ ] **Tibbiy maslahat disclaimer**  -  Tizim "tibbiy maslahat o'rniga bormaydi" degan ogohlantirish allaqachon hisobotlarda; buni bosh sahifada ham ko'rsatish mumkin.
 
 ---
 
@@ -116,7 +116,7 @@ Ushbu hujjat dasturni **real hayotda** ishga tushirish va **bozorga olib chiqish
    - `.env` da: `SECRET_KEY`, `DEBUG=False`, `ALLOWED_HOSTS`, `DB_*`, `GEMINI_API_KEY`, `CORS_ALLOWED_ORIGINS`, `TELEGRAM_*` (agar kerak bo'lsa).  
    - `migrate`, `collectstatic`, Gunicorn ishga tushiring.
 3. **Frontend:**  
-   - `VITE_API_BASE_URL=https://api.medoraai.uz/api` bilan build qiling.  
+   - `VITE_API_BASE_URL=https://api.AiDoktorai.uz/api` bilan build qiling.  
    - Build ni Nginx da static sifatida xizmat qiling yoki Vercel/Netlify ga yuklang.
 4. **Domen:** DNS da A/CNAME record, SSL (Let's Encrypt).
 5. **Monitoring:** Kamida server va app loglarini kuzatish; ixtiyoriy Sentry.
@@ -130,3 +130,4 @@ Ushbu hujjat dasturni **real hayotda** ishga tushirish va **bozorga olib chiqish
 - **API ulanish:** `API_CONNECTION.md`, `INTEGRATION.md`
 
 Xulosa: xavfsizlik (maxfiy ma'lumotlar, HTTPS, CORS), production DB va backup, parol tiklash va monitoring qo'shilsa, dasturni bozorga chiqarish uchun asos tayyor.
+-NoNewline

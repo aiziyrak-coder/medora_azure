@@ -2,6 +2,7 @@
 Authentication URLs
 """
 from django.urls import path
+from django.views.decorators.csrf import csrf_exempt
 from .views import (
     CustomTokenObtainPairView,
     CustomTokenRefreshView,
@@ -21,8 +22,8 @@ from .queue_views import queue_list, queue_add, queue_item_detail
 app_name = 'accounts'
 
 urlpatterns = [
-    # Authentication
-    path('login/', CustomTokenObtainPairView.as_view(), name='login'),
+    # Authentication (CSRF exempt  -  SPA/JWT, body o'qilishi uchun)
+    path('login/', csrf_exempt(CustomTokenObtainPairView.as_view()), name='login'),
     path('register/', register, name='register'),
     path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
     

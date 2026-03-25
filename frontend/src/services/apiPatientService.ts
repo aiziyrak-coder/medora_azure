@@ -87,7 +87,7 @@ const apiToPatientData = (patient: Patient): PatientData => {
     currentMedications: patient.current_medications,
     familyHistory: patient.family_history,
     additionalInfo: patient.additional_info,
-    structuredLabResults: patient.structured_lab_results,
+    structuredLabResults: patient.structured_lab_results as Record<string, { value: string; unit: string; trend?: 'up' | 'down' | 'stable'; }[]>,
     pharmacogenomicsReport: patient.pharmacogenomics_report,
     symptomTimeline: patient.symptom_timeline as PatientData['symptomTimeline'],
     mentalHealthScores: patient.mental_health_scores as PatientData['mentalHealthScores'],
@@ -111,7 +111,14 @@ export const getPatients = async (params?: PatientListParams): Promise<ApiRespon
   if (params?.gender) queryParams.gender = params.gender;
   if (params?.ordering) queryParams.ordering = params.ordering;
   
-  return apiGet<Patient[]>('/patients/', queryParams);
+  const res = await apiGet<Patient[] | { results?: Patient[] }>('/patients/', queryParams);
+  if (!res.success || res.data == null) return res as ApiResponse<Patient[]>;
+  const d = res.data;
+  if (Array.isArray(d)) return { ...res, data: d };
+  if (typeof d === 'object' && d && 'results' in d && Array.isArray((d as { results: Patient[] }).results)) {
+    return { ...res, data: (d as { results: Patient[] }).results };
+  }
+  return { ...res, data: [] };
 };
 
 /**

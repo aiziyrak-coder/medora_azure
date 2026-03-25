@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { AnonymizedCase } from '../types';
+import type { AnalysisRecord, AnonymizedCase } from '../types';
 import * as caseService from '../services/caseService';
 import SearchIcon from './icons/SearchIcon';
 import { useTranslation } from '../hooks/useTranslation';
@@ -7,18 +7,26 @@ import { useTranslation } from '../hooks/useTranslation';
 interface CaseLibraryViewProps {
     onBack: () => void;
     currentPatientComplaints?: string;
+    /** Serverdan yuklangan tahlillar — berilsa holatlar shu ro'yxatdan olinadi (barcha ma'lumot serverda) */
+    analyses?: AnalysisRecord[];
 }
 
 const CaseLibraryView: React.FC<CaseLibraryViewProps> = ({ onBack, currentPatientComplaints }) => {
     const { t } = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
-    const [cases, setCases] = useState<AnonymizedCase[]>(() => caseService.getAnonymizedCases());
+    const cases: AnonymizedCase[] = useMemo(() => {
+        if (analyses && analyses.length > 0) {
+            return caseService.analysesToAnonymizedCases(analyses);
+        }
+        return caseService.getAnonymizedCases();
+    }, [analyses]);
     
     const filteredCases = useMemo(() => {
         if (!searchTerm) return cases;
+        const term = (searchTerm ?? '').toLowerCase();
         return cases.filter(c => 
-            c.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            c.finalDiagnosis.toLowerCase().includes(searchTerm.toLowerCase())
+            (c.tags || []).some(tag => (tag ?? '').toLowerCase().includes(term)) ||
+            (c.finalDiagnosis ?? '').toLowerCase().includes(term)
         );
     }, [searchTerm, cases]);
 

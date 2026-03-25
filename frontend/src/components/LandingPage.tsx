@@ -1,8 +1,21 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import LanguageSwitcher from './LanguageSwitcher';
 import { Language } from '../i18n/LanguageContext';
+import {
+    INSTITUTE_NAME_FULL,
+    INSTITUTE_NAME_SHORT,
+    INSTITUTE_LOGO_TEXT,
+    INSTITUTE_LOGO_SRC,
+    INSTITUTE_PHONE_1,
+    INSTITUTE_PHONE_2,
+    INSTITUTE_EMAIL_1,
+    INSTITUTE_EMAIL_2,
+    INSTITUTE_ADDRESS,
+    FOOTER_COPYRIGHT,
+    PLATFORM_NAME,
+} from '../constants/brand';
 import BrainCircuitIcon from './icons/BrainCircuitIcon';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
 import GlobeIcon from './icons/GlobeIcon';
@@ -23,17 +36,12 @@ import {
 interface LandingPageProps {
     onLogin: () => void;
     onOpenGuide: () => void;
+    onOpenAbout?: () => void;
 }
 
 const PhoneCallIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-    </svg>
-);
-
-const TelegramIcon = ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.62-.2-1.12-.31-1.08-.65.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .24z" />
     </svg>
 );
 
@@ -43,33 +51,86 @@ const MenuIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide }) => {
+const ChevronDownIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+    </svg>
+);
+
+const ChevronLeftIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+    </svg>
+);
+
+const SLIDE_COUNT = 4;
+
+const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide, onOpenAbout }) => {
     const { t, language, setLanguage } = useTranslation();
-    const [scrolled, setScrolled] = useState(false);
+    const [currentSlide, setCurrentSlide] = useState(0);
     const [showContactModal, setShowContactModal] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isTransitioning, setIsTransitioning] = useState(false);
+    const [transitionDirection, setTransitionDirection] = useState<'next' | 'prev'>('next');
+    const viewportRef = useRef<HTMLDivElement>(null);
+
+    const goNext = useCallback(() => {
+        if (isTransitioning) return;
+        setTransitionDirection('next');
+        setIsTransitioning(true);
+        setCurrentSlide((prev) => (prev + 1) % SLIDE_COUNT);
+        setTimeout(() => setIsTransitioning(false), 900);
+    }, [isTransitioning]);
+    const goPrev = useCallback(() => {
+        if (isTransitioning) return;
+        setTransitionDirection('prev');
+        setIsTransitioning(true);
+        setCurrentSlide((prev) => (prev - 1 + SLIDE_COUNT) % SLIDE_COUNT);
+        setTimeout(() => setIsTransitioning(false), 900);
+    }, [isTransitioning]);
+    const goToSlide = useCallback((index: number) => {
+        if (isTransitioning || index === currentSlide) return;
+        setTransitionDirection(index > currentSlide ? 'next' : 'prev');
+        setIsTransitioning(true);
+        setCurrentSlide(index);
+        setTimeout(() => setIsTransitioning(false), 900);
+    }, [currentSlide, isTransitioning]);
 
     useEffect(() => {
-        const handleScroll = () => setScrolled(window.scrollY > 50);
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+        const handleKey = (e: KeyboardEvent) => {
+            if (mobileMenuOpen || showContactModal) return;
+            switch (e.key) {
+                case 'ArrowRight':
+                case 'ArrowDown':
+                    e.preventDefault();
+                    goNext();
+                    break;
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                    e.preventDefault();
+                    goPrev();
+                    break;
+                default:
+                    break;
+            }
+        };
+        window.addEventListener('keydown', handleKey);
+        return () => window.removeEventListener('keydown', handleKey);
+    }, [goNext, goPrev, mobileMenuOpen, showContactModal]);
 
-    // Smooth scroll function to replace anchor tags
-    const scrollToSection = (id: string) => {
-        const element = document.getElementById(id);
-        if (element) {
-            const headerOffset = 80;
-            const elementPosition = element.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-        
-            window.scrollTo({
-                top: offsetPosition,
-                behavior: "smooth"
-            });
-        }
-        setMobileMenuOpen(false); // Close mobile menu if open
-    };
+    /** Scroll qilsa ham boshqa slaydga o'tadi: pastga = keyingi, yuqoriga = oldingi */
+    useEffect(() => {
+        const handleWheel = (e: WheelEvent) => {
+            if (mobileMenuOpen || showContactModal) return;
+            e.preventDefault();
+            if (e.deltaY > 0) goNext();
+            else if (e.deltaY < 0) goPrev();
+        };
+        const el = viewportRef.current;
+        if (!el) return;
+        el.addEventListener('wheel', handleWheel, { passive: false });
+        return () => el.removeEventListener('wheel', handleWheel);
+    }, [goNext, goPrev, mobileMenuOpen, showContactModal]);
 
     return (
         <div className="relative min-h-screen text-slate-900 font-sans overflow-x-hidden selection:bg-blue-200 selection:text-slate-900">
@@ -89,7 +150,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide }) => {
                         >
                             <XIcon className="w-5 h-5" />
                         </button>
-
                         <div className="text-center">
                             <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-200 shadow-lg shadow-emerald-200/60">
                                 <PhoneCallIcon className="w-10 h-10 text-emerald-600 animate-pulse" />
@@ -107,16 +167,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide }) => {
                                 <PhoneCallIcon className="w-6 h-6" />
                                 {LANDING_CONTACT_PHONE_DISPLAY}
                             </a>
-
-                            <p className="text-xs text-slate-500">
-                                {t('landing_contact_modal_call')}
+                            <a href="tel:+998950482345" className="block w-full py-4 bg-green-600/80 hover:bg-green-500/90 text-white font-bold rounded-2xl text-lg mb-4 flex items-center justify-center gap-3">
+                                <PhoneCallIcon className="w-6 h-6" /> {INSTITUTE_PHONE_2}
+                            </a>
+                            <p className="text-slate-400 text-xs mb-1">
+                                <a href={`mailto:${INSTITUTE_EMAIL_1}`} className="hover:text-white">{INSTITUTE_EMAIL_1}</a>
+                                {' · '}
+                                <a href={`mailto:${INSTITUTE_EMAIL_2}`} className="hover:text-white">{INSTITUTE_EMAIL_2}</a>
                             </p>
+                            <p className="text-slate-500 text-xs">{INSTITUTE_ADDRESS}</p>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* --- MOBILE MENU OVERLAY --- */}
+            {/* --- MOBILE MENU --- */}
             {mobileMenuOpen && (
                 <div className="fixed inset-0 z-[60] bg-white/95 backdrop-blur-xl flex flex-col justify-center items-center lg:hidden animate-fade-in-up border-b border-slate-100">
                     <button 
@@ -354,9 +419,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onLogin, onOpenGuide }) => {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
                 </div>
-            </section>
+            </div>
 
             {/* --- TESTIMONIALS --- */}
             <section id="testimonials" className="py-24 md:py-32 relative">

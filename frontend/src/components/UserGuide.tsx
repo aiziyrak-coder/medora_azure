@@ -7,6 +7,7 @@ import PlusCircleIcon from './icons/PlusCircleIcon';
 import LightBulbIcon from './icons/LightBulbIcon';
 import UsersIcon from './icons/UsersIcon';
 import { useTranslation } from '../hooks/useTranslation';
+import { INSTITUTE_NAME_FULL, INSTITUTE_NAME_SHORT, INSTITUTE_LOGO_SRC } from '../constants/brand';
 
 interface UserGuideProps {
     onBack: () => void;
@@ -22,6 +23,7 @@ const UserGuide: React.FC<UserGuideProps> = ({ onBack }) => {
         { id: 'results', title: 'Xulosa va Hujjatlar', icon: <DocumentTextIcon className="w-5 h-5"/> },
         { id: 'research', title: 'Tadqiqot va Ta\'lim', icon: <LightBulbIcon className="w-5 h-5"/> },
         { id: 'staff', title: 'Navbat Tizimi (Registrator)', icon: <UsersIcon className="w-5 h-5"/> },
+        { id: 'faq', title: t('help_faq_title' as never), icon: <LightBulbIcon className="w-5 h-5"/> },
     ];
 
     const renderContent = () => {
@@ -29,9 +31,9 @@ const UserGuide: React.FC<UserGuideProps> = ({ onBack }) => {
             case 'getting-started':
                 return (
                     <div className="space-y-6 animate-fade-in-up">
-                        <h2 className="text-3xl font-bold text-white mb-4">MedoraAi Tizimiga Xush Kelibsiz</h2>
+                        <h2 className="text-3xl font-bold text-white mb-4">{INSTITUTE_NAME_SHORT} Tizimiga Xush Kelibsiz</h2>
                         <p className="text-slate-300 leading-relaxed">
-                            MedoraAi - bu tibbiyot xodimlari uchun yaratilgan ilg'or klinik qarorlarni qo'llab-quvvatlash tizimi. 
+                            <strong className="text-white">{INSTITUTE_NAME_FULL}</strong> ({INSTITUTE_NAME_SHORT}) tibbiyot xodimlari uchun yaratilgan ilg'or klinik qarorlarni qo'llab-quvvatlash tizimi. 
                             U sun'iy intellekt kuchidan foydalanib, tashxis qo'yish aniqligini oshirish, davolash rejalarini optimallashtirish va so'nggi tibbiy bilimlarni taqdim etishga xizmat qiladi.
                         </p>
                         
@@ -119,6 +121,26 @@ const UserGuide: React.FC<UserGuideProps> = ({ onBack }) => {
                         </div>
                     </div>
                 );
+            case 'faq':
+                return (
+                    <div className="space-y-6 animate-fade-in-up">
+                        <h2 className="text-3xl font-bold text-white mb-4">{t('help_faq_title' as never)}</h2>
+                        <div className="space-y-4">
+                            <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                                <h3 className="font-bold text-blue-300 mb-2">{t('help_faq_1_q' as never)}</h3>
+                                <p className="text-slate-400 text-sm">{t('help_faq_1_a' as never)}</p>
+                            </div>
+                            <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                                <h3 className="font-bold text-blue-300 mb-2">{t('help_faq_2_q' as never)}</h3>
+                                <p className="text-slate-400 text-sm">{t('help_faq_2_a' as never)}</p>
+                            </div>
+                            <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                                <h3 className="font-bold text-blue-300 mb-2">{t('help_faq_3_q' as never)}</h3>
+                                <p className="text-slate-400 text-sm">{t('help_faq_3_a' as never)}</p>
+                            </div>
+                        </div>
+                    </div>
+                );
             case 'staff':
                 return (
                     <div className="space-y-6 animate-fade-in-up">
@@ -166,8 +188,8 @@ const UserGuide: React.FC<UserGuideProps> = ({ onBack }) => {
             <div className="border-b border-white/10 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold">M</div>
-                        <span className="font-bold text-lg">MedoraAi Dokumentatsiya</span>
+                        <img src={INSTITUTE_LOGO_SRC} alt={INSTITUTE_NAME_SHORT} className="w-8 h-8 rounded-lg object-contain bg-white/5" />
+                        <span className="font-bold text-lg">{INSTITUTE_NAME_SHORT} Dokumentatsiya</span>
                     </div>
                     <button onClick={onBack} className="flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors">
                         <HomeIcon className="w-4 h-4" /> Asosiy Sahifa

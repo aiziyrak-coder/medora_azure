@@ -3,8 +3,8 @@ User Serializers
 """
 from datetime import timedelta
 from rest_framework import serializers
-from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
 from .models import User, SubscriptionPlan, SubscriptionPayment, QueueItem
 
@@ -35,11 +35,23 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'date_joined', 'last_login']
 
 
+def _validate_password_length(value):
+    """Ro'yxatdan o'tishda faqat uzunlik (Django validate_password 400 kamroq)."""
+    if len(value) < 8:
+        raise serializers.ValidationError("Parol kamida 8 ta belgidan iborat bo'lishi kerak.")
+
+
 class UserCreateSerializer(serializers.ModelSerializer):
-    """Serializer for user registration"""
-    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    """Serializer for user registration (clinic, doctor, staff, monitoring)."""
+    password = serializers.CharField(write_only=True, required=True, validators=[_validate_password_length])
     password_confirm = serializers.CharField(write_only=True, required=True)
     linked_doctor = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    specialties = serializers.ListField(
+        child=serializers.CharField(allow_blank=True),
+        required=False,
+        allow_empty=True,
+        default=list,
+    )
 
     class Meta:
         model = User
@@ -54,18 +66,24 @@ class UserCreateSerializer(serializers.ModelSerializer):
         if len(attrs['password']) < 8:
             raise serializers.ValidationError({"password": "Parol kamida 8 ta belgidan iborat bo'lishi kerak"})
         return attrs
-    
+
+    def validate_role(self, value):
+        allowed = [c[0] for c in User.ROLE_CHOICES]
+        if value not in allowed:
+            raise serializers.ValidationError(f"Rol quyidagilardan biri bo'lishi kerak: {', '.join(allowed)}")
+        return value
+
     def validate_phone(self, value):
-        # Basic phone validation - allow any format for flexibility
         if not value or len(value) < 9:
             raise serializers.ValidationError("Telefon raqami to'liq kiritilishi kerak")
-        # Normalize phone number
         cleaned = value.replace(' ', '').replace('-', '').replace('(', '').replace(')', '')
         if not cleaned.startswith('+'):
             if cleaned.startswith('998'):
                 cleaned = '+' + cleaned
             else:
                 cleaned = '+998' + cleaned
+        if User.objects.filter(phone=cleaned).exists():
+            raise serializers.ValidationError("Bu telefon raqami allaqachon ro'yxatdan o'tgan.")
         return cleaned
     
     def create(self, validated_data):
@@ -96,6 +114,11 @@ class UserCreateSerializer(serializers.ModelSerializer):
             user.subscription_status = 'active'
             user.trial_ends_at = timezone.now() + timedelta(days=trial_days)
             user.save(update_fields=['subscription_status', 'trial_ends_at'])
+        # Monitoring roli: darhol faol, ro'yxatdan o'tganidan keyin kirish mumkin
+        if user.role == 'monitoring':
+            user.subscription_status = 'active'
+            user.is_active = True
+            user.save(update_fields=['subscription_status', 'is_active'])
         return user
 
 

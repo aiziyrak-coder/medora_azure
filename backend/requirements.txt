@@ -27,6 +27,9 @@ whitenoise==6.6.0
 # ── Production Server ────────────────────────────────────────────
 gunicorn==21.2.0
 
+# ── AI: Google Gemini (Mukammal integratsiya) ─────────────────────
+google-genai>=1.0.0
+
 # ── HTTP ─────────────────────────────────────────────────────────
 requests==2.31.0
 
@@ -38,10 +41,8 @@ celery==5.3.4
 # ── Utilities ────────────────────────────────────────────────────
 setuptools>=69.0.0
 
-# ── Azure AI Foundry (ASOSIY — Gemini o'rniga) ───────────────────
+# ── AI: faqat Gemini (yangilangan SDK) ────────────────────────────
+google-genai>=1.0.0
+openpyxl>=3.1.0
+reportlab>=4.0.0
 openai>=1.55.0
-
-# ── Azure Speech Services (Jarvis STT/TTS — REST API orqali) ────
-# requests allaqachon mavjud — qo'shimcha kutubxona kerak emas.
-# Ixtiyoriy: to'liq Azure Speech SDK (native binaries talab qiladi)
-# azure-cognitiveservices-speech>=1.37.0

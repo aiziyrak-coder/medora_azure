@@ -5,19 +5,26 @@ import { useState, useEffect, useCallback } from 'react';
 import { checkApiHealth } from '../services/api';
 import { isApiConfigured } from '../config/api';
 
-const POLL_INTERVAL_MS = 60_000; // 1 minute
-const INITIAL_DELAY_MS = 3000;   // First check after 3s
+const POLL_INTERVAL_MS = 60_000;
+const INITIAL_DELAY_MS = 2000;
 
-export function useApiHealth(): { apiHealthy: boolean; checkNow: () => void } {
+export function useApiHealth(): {
+  apiHealthy: boolean;
+  healthStatus: number | null;
+  checkNow: () => void;
+} {
   const [apiHealthy, setApiHealthy] = useState<boolean>(true);
+  const [healthStatus, setHealthStatus] = useState<number | null>(null);
 
   const checkNow = useCallback(async () => {
     if (!isApiConfigured()) {
       setApiHealthy(true);
+      setHealthStatus(null);
       return;
     }
-    const ok = await checkApiHealth();
-    setApiHealthy(ok);
+    const result = await checkApiHealth();
+    setApiHealthy(result.ok);
+    setHealthStatus(result.status ?? null);
   }, []);
 
   useEffect(() => {
@@ -35,5 +42,5 @@ export function useApiHealth(): { apiHealthy: boolean; checkNow: () => void } {
     };
   }, [checkNow]);
 
-  return { apiHealthy, checkNow };
+  return { apiHealthy, healthStatus, checkNow };
 }

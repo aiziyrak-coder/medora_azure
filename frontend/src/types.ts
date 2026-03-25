@@ -4,7 +4,7 @@ import { AIModel } from './constants/specialists';
 // Original types - some modified for new features
 export { AIModel };
 
-export type AppView = 'dashboard' | 'new_analysis' | 'clarification' | 'team_recommendation' | 'live_analysis' | 'history' | 'view_history_item' | 'case_library' | 'research' | 'live_consultation' | 'prescription' | 'patient_education' | 'tumor_board' | 'longitudinal_view' | 'staff_dashboard' | 'tv_display' | 'subscription';
+export type AppView = 'dashboard' | 'new_analysis' | 'clarification' | 'team_recommendation' | 'live_analysis' | 'history' | 'view_history_item' | 'case_library' | 'research' | 'live_consultation' | 'prescription' | 'tumor_board' | 'longitudinal_view' | 'staff_dashboard' | 'tv_display' | 'subscription';
 
 export type UserRole = 'clinic' | 'doctor' | 'staff';
 
@@ -95,6 +95,8 @@ export interface PatientData {
   // --- Basic Info ---
   firstName: string;
   lastName: string;
+  /** Otasining ismi (patronimik) */
+  fatherName?: string;
   age: string;
   gender: 'male' | 'female' | 'other' | '';
   // --- Clinical Info ---
@@ -120,6 +122,8 @@ export interface PatientData {
     mimeType: string;
   }[];
   userDiagnosisFeedback?: Record<string, DiagnosisFeedback>;
+  /** Avvalgi tahlillar bo'yicha AI uchun qisqa dinamika (ichki, konsilium promptiga qo'shiladi) */
+  longitudinalClinicalNotes?: string;
 }
 
 export interface ChatMessage {
@@ -236,6 +240,97 @@ export interface FinalReport {
   uzbekistanLegislativeNote?: string; // Specific legal context
 }
 
+/** Returns reasoningChain as a string array (handles API returning string or non-array). */
+export function getReasoningChainArray(d: { reasoningChain?: unknown }): string[] {
+  const rc = d?.reasoningChain;
+  if (Array.isArray(rc)) return rc.filter((s): s is string => typeof s === 'string');
+  if (typeof rc === 'string' && rc.trim()) return [rc.trim()];
+  return [];
+}
+
+/** Ensures consensusDiagnosis is always an array of Diagnosis; normalizes API/Gemini shape.
+ *  Probability kelayotgan qiymat ba'zan 0–1 oralig'ida (0.85) yoki 0–100 oralig'ida (85) bo'lishi mumkin.
+ *  Foydalanuvchiga har doim FOIZ ko'rinishida ko'rsatish uchun:
+ *    - agar 0 <= p <= 1 bo'lsa, 100 ga ko'paytiramiz (0.85 -> 85);
+ *    - aks holda p ni o'zini qoldiramiz.
+ *  Bir nechta tashxisda barcha foizlar > 0 bo'lsa va yig'indi 100% dan sezilarli farq qilsa,
+ *  nisbatlar saqlangan holda 100% ga normallashtiriladi (shablon 60/25 emas, matematik muvozanat).
+ */
+export function normalizeConsensusDiagnosis(raw: unknown): Diagnosis[] {
+  if (!Array.isArray(raw)) return [];
+
+  const mapped = raw.map((item: Record<string, unknown>) => {
+    const pRaw = Number(item?.probability ?? 0);
+    const pNorm = Number.isFinite(pRaw)
+      ? (pRaw >= 0 && pRaw <= 1 ? pRaw * 100 : pRaw)
+      : 0;
+    return {
+      name: String(item?.name ?? item?.diagnosis ?? ''),
+      probability: Math.max(0, Math.round(pNorm)),
+      justification: String(item?.justification ?? item?.reasoningChain ?? ''),
+      evidenceLevel: String(item?.evidenceLevel ?? 'Moderate'),
+      reasoningChain: Array.isArray(item?.reasoningChain) ? (item.reasoningChain as string[]) : (typeof item?.reasoningChain === 'string' ? [item.reasoningChain] : []),
+      uzbekProtocolMatch: String(item?.uzbekProtocolMatch ?? ''),
+    } as Diagnosis;
+  });
+
+  reconcileConsensusProbabilities(mapped);
+
+  return mapped;
+}
+
+/**
+ * Bir nechta differensial tashxis uchun: model bergan nisbiy foizlarni 100% ga moslashtiradi.
+ * Bitta tashxis: faqat 0–100 oralig'ida qisqartiradi.
+ * Foiz kiritilmagan (0) qiymatlar shablon bilan to'ldirilmaydi.
+ */
+function reconcileConsensusProbabilities(diagnoses: Diagnosis[]): void {
+  if (diagnoses.length === 0) return;
+
+  if (diagnoses.length === 1) {
+    const p = diagnoses[0].probability;
+    if (!Number.isFinite(p) || p <= 0) {
+      diagnoses[0].probability = 0;
+    } else {
+      diagnoses[0].probability = Math.min(100, Math.max(0, Math.round(p)));
+    }
+    return;
+  }
+
+  const allPositive = diagnoses.every(d => d.probability > 0);
+  if (!allPositive) {
+    diagnoses.forEach(d => {
+      if (Number.isFinite(d.probability) && d.probability > 0) {
+        d.probability = Math.min(100, Math.max(0, Math.round(d.probability)));
+      } else {
+        d.probability = 0;
+      }
+    });
+    return;
+  }
+
+  const sum = diagnoses.reduce((s, d) => s + d.probability, 0);
+  if (sum <= 0) return;
+
+  if (Math.abs(sum - 100) <= 1) {
+    diagnoses.forEach(d => {
+      d.probability = Math.min(100, Math.max(0, Math.round(d.probability)));
+    });
+    return;
+  }
+
+  const raw = diagnoses.map(d => d.probability);
+  const scaled = raw.map(p => (100 * p) / sum);
+  const rounded = scaled.map(x => Math.round(x));
+  let drift = 100 - rounded.reduce((a, b) => a + b, 0);
+  if (drift !== 0) {
+    const idx = rounded.reduce((bestIdx, val, i, arr) => (val >= arr[bestIdx] ? i : bestIdx), 0);
+    rounded[idx] = Math.min(100, Math.max(0, rounded[idx] + drift));
+  }
+  rounded.forEach((p, i) => {
+    diagnoses[i].probability = p;
+  });
+}
 
 export type ProgressUpdate =
   | { type: 'status'; message: string }
@@ -339,6 +434,16 @@ export interface CMETopic {
 }
 
 // --- DASHBOARD & HISTORY ---
+
+/** GET /analyses/stats/ javobi (barcha tahlillar bo'yicha agregatsiya) */
+export interface AnalysisStatsPayload {
+  total_analyses: number;
+  common_diagnoses: { name: string; count: number }[];
+  feedback_accuracy: number;
+  count_last_24h?: number;
+  count_last_7d?: number;
+  count_last_30d?: number;
+}
 
 export interface UserStats {
   totalAnalyses: number;

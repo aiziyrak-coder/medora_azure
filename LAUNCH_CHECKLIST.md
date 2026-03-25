@@ -11,22 +11,23 @@
 - [ ] `python manage.py migrate`
 - [ ] `python manage.py createsuperuser` yoki `python create_superuser.py`
 - [ ] SQLite: `chown www-data:www-data backend/db.sqlite3` va backend papkasi
-- [ ] `systemctl restart medoraai-backend`
-- [ ] Health: `curl https://medoraapi.cdcgroup.uz/health/`
+- [ ] `systemctl restart AiDoktorai-backend`
+- [ ] Health: `curl https://AiDoktorapi.fargana.uz/health/`
 
 ## Frontend (server)
-- [ ] `/var/www/medoraai/.env.production` da GEMINI_API_KEY va VITE_API_BASE_URL
+- [ ] `/var/www/AiDoktorai/.env.production` da GEMINI_API_KEY va VITE_API_BASE_URL
 - [ ] `cd frontend && npm install && npm run build`
-- [ ] Brauzerda: https://medora.cdcgroup.uz ochilishi, login/register ishlashi
+- [ ] Brauzerda: https://AiDoktor.fargana.uz ochilishi, login/register ishlashi
 
 ## Foydalanuvchi tajribasi
-- [x] Brauzer orqaga – SPA ichida qoladi
-- [x] Parol maydoni – ko‘rsatish/yashirish tugmasi
-- [x] Label va ogohlantirish matnlari – kontrast (o‘qilishi oson)
+- [x] Brauzer orqaga  -  SPA ichida qoladi
+- [x] Parol maydoni  -  ko‘rsatish/yashirish tugmasi
+- [x] Label va ogohlantirish matnlari  -  kontrast (o‘qilishi oson)
 - [x] Tailwind: text-primary / text-secondary (ranglar ishlashi)
-- [x] Gemini xato – foydalanuvchiga tushunarli xabar (server yo‘li yashirin)
+- [x] Gemini xato  -  foydalanuvchiga tushunarli xabar (server yo‘li yashirin)
 
 ## Ixtiyoriy (keyingi qadamlar)
 - [ ] Error tracking (masalan Sentry)
 - [ ] Backup: db.sqlite3 va .env nusxalari
 - [ ] Monitoring: uptime, loglar
+-NoNewline

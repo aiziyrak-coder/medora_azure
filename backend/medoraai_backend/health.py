@@ -42,7 +42,7 @@ def health_check(request):
         return _add_cors(r, request)
     r = JsonResponse({
         'status': 'healthy',
-        'service': 'medoraai-backend',
+        'service': 'Farg\'ona JSTI backend',
     })
     return _add_cors(r, request)
 
@@ -56,7 +56,7 @@ def health_detailed(request):
         return _add_cors(r, request)
     checks = {
         'status': 'healthy',
-        'service': 'medoraai-backend',
+        'service': 'Farg\'ona JSTI backend',
         'checks': {}
     }
     
@@ -83,11 +83,18 @@ def health_detailed(request):
         checks['checks']['cache'] = 'error'
         checks['status'] = 'unhealthy'
     
+    # AI configured (only whether key is set, no value)
+    try:
+        key = (getattr(settings, 'GEMINI_API_KEY', None) or '').strip()
+        checks['checks']['ai_configured'] = bool(key)
+    except Exception:
+        checks['checks']['ai_configured'] = False
+
     # Settings check (avoid leaking config in production)
     if getattr(settings, 'DEBUG', False):
         checks['checks']['debug'] = settings.DEBUG
         checks['checks']['allowed_hosts'] = len(settings.ALLOWED_HOSTS) > 0
-    
+
     status_code = 200 if checks['status'] == 'healthy' else 503
     r = JsonResponse(checks, status=status_code)
     return _add_cors(r, request)

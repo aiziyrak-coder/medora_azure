@@ -2,17 +2,17 @@
 Doctor Support Mode
 ====================
 Konsiliumdan butunlay farqli:
-  - Bahs yo'q – faqat eng aqlli model (GPT-4o)
+  - Bahs yo'q  -  faqat eng aqlli model (GPT-4o)
   - O'zbekiston RSM/SSV protokollari MAJBURIY
   - Faqat O'zbekistonda ro'yxatdan o'tgan dorilar
   - Tez javob (max 3000 token)
   - Streaming uchun alohida usul
 
 Prompt Engineering qatlamlari:
-  1. System prompt  – O'zbekiston qonunchilik + SSV + farmatsevtik cheklovlar
-  2. Context block  – bemor profili
-  3. Task block     – doktor so'rovi turi (tashxis/davolash/dori/tekshiruv)
-  4. Output schema  – har doim JSON
+  1. System prompt   -  O'zbekiston qonunchilik + SSV + farmatsevtik cheklovlar
+  2. Context block   -  bemor profili
+  3. Task block      -  doktor so'rovi turi (tashxis/davolash/dori/tekshiruv)
+  4. Output schema   -  har doim JSON
 """
 
 from __future__ import annotations
@@ -27,6 +27,7 @@ from .azure_utils import (
     patient_text,
     Deployments,
     gpt4o_client,
+    USE_GEMINI,
 )
 from .uzbekistan_knowledge_base import get_uz_context, get_drug_context
 
@@ -99,7 +100,7 @@ def _doctor_system_prompt(task_type: str, language_hint: str,
             "Maksimal 5 qadam."
         ),
         TASK_DIAGNOSIS: (
-            "3–5 ta differensial tashxis bering. "
+            "3 - 5 ta differensial tashxis bering. "
             "Har biri uchun: ehtimollik (%), asoslash va SSV protokol havolasi. "
             "Eng kuchli dalil asosida asosiy tashxisni ajratib ko'rsating."
         ),
@@ -129,7 +130,7 @@ def _doctor_system_prompt(task_type: str, language_hint: str,
     kb_context = get_uz_context(complaints_text=complaints, include_protocols=True)
     drug_ctx   = get_drug_context()
 
-    return f"""Siz Medora AI tibbiy yordamchisiz – yuqori malakali klinik mutaxassis.
+    return f"""Siz Farg'ona JSTI tibbiy yordamchisiz  -  yuqori malakali klinik mutaxassis.
 
 VAZIFA: {task_instr}
 
@@ -214,7 +215,7 @@ _SCHEMA_FOLLOW_UP = (
     '"monitoring_at_home": ["Uyda kuzatish"],'
     '"repeat_tests": ["Takror tahlillar"],'
     '"lifestyle_advice": ["Turmush tarzi"],'
-    '"emergency_contact": "103 – Tez tibbiy yordam"'
+    '"emergency_contact": "103  -  Tez tibbiy yordam"'
     '}}'
 )
 
@@ -308,19 +309,30 @@ def doctor_consult_stream(
     msgs = build_messages(system, user, want_json=True)
 
     try:
-        client = gpt4o_client()
-        stream = client.chat.completions.create(
-            model=Deployments.gpt4o(),
-            messages=msgs,
-            temperature=0.1,
-            max_tokens=3000,
-            response_format={"type": "json_object"},
-            stream=True,
-        )
-        for chunk in stream:
-            delta = chunk.choices[0].delta.content or ""
-            if delta:
-                yield delta
+        if USE_GEMINI:
+            full = call_model(
+                Deployments.gpt4o(),
+                msgs,
+                response_json=True,
+                temperature=0.1,
+                max_tokens=3000,
+            )
+            if full:
+                yield full
+        else:
+            client = gpt4o_client()
+            stream = client.chat.completions.create(
+                model=Deployments.gpt4o(),
+                messages=msgs,
+                temperature=0.1,
+                max_tokens=3000,
+                response_format={"type": "json_object"},
+                stream=True,
+            )
+            for chunk in stream:
+                delta = chunk.choices[0].delta.content or ""
+                if delta:
+                    yield delta
     except Exception as exc:
         logger.error("DoctorSupport stream failed: %s", exc)
         yield f'{{"error": "{exc}"}}'

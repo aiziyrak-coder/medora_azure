@@ -1,10 +1,8 @@
-const CACHE_NAME = 'konsilium-cache-v7';
+const CACHE_NAME = 'konsilium-cache-v8';
 const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/icon.svg',
-  '/icon-192x192.png',
 ];
 
 self.addEventListener('install', event => {
@@ -43,7 +41,7 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   const sameOrigin = url.origin === self.location.origin;
 
-  // Cross-origin (e.g. API at medoraapi.ziyrak.org): do not intercept — let browser handle (CORS works normally)
+  // Cross-origin (e.g. API): do not intercept - let browser handle (CORS works normally)
   if (!sameOrigin) {
     return;
   }

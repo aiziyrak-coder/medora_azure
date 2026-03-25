@@ -5,33 +5,32 @@
 
 const isDevelopment = import.meta.env.DEV;
 
+const LOG_PREFIX = "[Farg'ona JSTI]";
+
 export const logger = {
   log: (...args: unknown[]) => {
     if (isDevelopment) {
-      console.log('[MEDORA AI]', ...args);
+      console.log(LOG_PREFIX, ...args);
     }
   },
-  
+
   error: (...args: unknown[]) => {
-    // Always log errors, but format them properly
     if (isDevelopment) {
-      console.error('[MEDORA AI ERROR]', ...args);
+      console.error(LOG_PREFIX + " ERROR", ...args);
     } else {
-      // In production, you might want to send to error tracking service
-      // For now, we'll still log but in a more controlled way
-      console.error('[ERROR]', ...args);
+      console.error("[ERROR]", ...args);
     }
   },
-  
+
   warn: (...args: unknown[]) => {
     if (isDevelopment) {
-      console.warn('[MEDORA AI WARN]', ...args);
+      console.warn(LOG_PREFIX + " WARN", ...args);
     }
   },
-  
+
   info: (...args: unknown[]) => {
     if (isDevelopment) {
-      console.info('[MEDORA AI INFO]', ...args);
+      console.info(LOG_PREFIX + " INFO", ...args);
     }
   }
 };

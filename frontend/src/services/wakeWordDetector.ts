@@ -5,8 +5,8 @@
  * Faqat "Salom Ziyrak" so'zi aytilganda tizim faollashadi.
  *
  * Arxitektura:
- *   BackgroundListener (doim ishlaydi, past kuch) →
- *   "salom ziyrak" topilsa → onWakeWord() callback →
+ *   BackgroundListener (doim ishlaydi, past kuch)  -> 
+ *   "salom ziyrak" topilsa  ->  onWakeWord() callback  -> 
  *   Ziyrak to'liq interaktiv rejimga o'tadi
  *
  * Noise suppression va mobile keep-alive ham shu yerda.
@@ -21,8 +21,8 @@ const WAKE_WORD_VARIANTS: string[] = [
   "salom ziyrak",
   "salom zyrak",
   "salom zirak",
-  "sало зийрак",       // kiril
-  "привет зийрак",
+  "salom ziyrak",
+  "salom ziyrak",
   "hello ziyrak",
   "hey ziyrak",
   "ziyrak",           // qisqa: faqat ism ham qabul qilinadi
@@ -33,9 +33,9 @@ function _matchesWakeWord(text: string): boolean {
   return WAKE_WORD_VARIANTS.some(variant => lower.includes(variant));
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ---
 // BackgroundListener class
-// ─────────────────────────────────────────────────────────────────────────────
+// ---
 
 export class WakeWordDetector {
   private recognition: SpeechRecognition | null = null;
@@ -200,9 +200,9 @@ export class WakeWordDetector {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ---
 // Mobile Keep-Alive (telefon uxlashini oldini olish)
-// ─────────────────────────────────────────────────────────────────────────────
+// ---
 
 let _wakeLock: WakeLockSentinel | null = null;
 
@@ -239,9 +239,9 @@ if (typeof document !== "undefined") {
   });
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ---
 // Audio Noise Suppression Helper
-// ─────────────────────────────────────────────────────────────────────────────
+// ---
 
 export interface NoiseFilteredStream {
   stream:       MediaStream;

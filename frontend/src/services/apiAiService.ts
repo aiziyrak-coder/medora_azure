@@ -1,15 +1,15 @@
 /**
- * AI Services API — Azure AI Foundry
+ * AI Services API - Azure AI Foundry
  *
  * Ikki asosiy rejim:
- *   1. Consilium Mode  → /api/ai/consilium/     (5 professor, 3 faza)
- *   2. Doctor Support  → /api/ai/doctor-support/ (GPT-4o, tezkor)
- *   3. Doctor Stream   → /api/ai/doctor-stream/  (SSE)
+ *   1. Consilium Mode   ->  /api/ai/consilium/     (5 professor, 3 faza)
+ *   2. Doctor Support   ->  /api/ai/doctor-support/ (GPT-4o, tezkor)
+ *   3. Doctor Stream    ->  /api/ai/doctor-stream/  (SSE)
  */
 import { apiPost, API_BASE_URL, type ApiResponse } from './api';
 import type { PatientData, Diagnosis, AIModel } from '../types';
 
-// ─── Task type constants ──────────────────────────────────────────────────
+// ---
 export const TASK_QUICK_CONSULT  = 'quick_consult';
 export const TASK_DIAGNOSIS      = 'diagnosis';
 export const TASK_TREATMENT      = 'treatment_plan';
@@ -25,7 +25,7 @@ export type DoctorTaskType =
   | typeof TASK_LAB_INTERPRET
   | typeof TASK_FOLLOW_UP;
 
-// ─── Consilium types ──────────────────────────────────────────────────────
+// ---
 export interface DebateMessage {
   id:          string;
   author:      string;
@@ -73,7 +73,7 @@ export interface ConsiliumResult {
   completed_at: string;
 }
 
-// ─── Doctor Support types ────────────────────────────────────────────────
+// ---
 export interface DoctorSupportResult {
   _task_type:   string;
   _language:    string;
@@ -109,16 +109,16 @@ export interface DoctorSupportResult {
   error?:                string;
 }
 
-// ─── Filter error type ───────────────────────────────────────────────────
+// ---
 export interface FilteredError {
   filtered:      boolean;
   filter_level:  string;
   message:       string;
 }
 
-// ─── API calls ───────────────────────────────────────────────────────────
+// ---
 
-/** Multi-Agent Medical Consilium (3 faza: Independent → Debate → Consensus) */
+/** Multi-Agent Medical Consilium (3 faza: Independent  ->  Debate  ->  Consensus) */
 export const runConsilium = async (
   patientData: PatientData,
   language: string = 'uz-L',
@@ -129,7 +129,7 @@ export const runConsilium = async (
   });
 };
 
-/** Doctor Support Mode – synchronous (GPT-4o) */
+/** Doctor Support Mode - synchronous (GPT-4o) */
 export const runDoctorSupport = async (
   patientData: PatientData,
   options: {
@@ -147,7 +147,7 @@ export const runDoctorSupport = async (
 };
 
 /**
- * Doctor Support Mode – SSE streaming.
+ * Doctor Support Mode - SSE streaming.
  * onChunk(text) har token kelganda chaqiriladi.
  * onDone() stream tugaganda chaqiriladi.
  */
@@ -220,7 +220,7 @@ export const runDoctorSupportStream = (
   return () => { aborted = true; };
 };
 
-// ─── Legacy endpoints (backwards-compat) ────────────────────────────────
+// ---
 
 export const generateClarifyingQuestions = async (
   patientData: PatientData,
@@ -240,12 +240,13 @@ export const recommendSpecialists = async (
     },
   );
   if (response.success && response.data) {
+    const recs = Array.isArray(response.data.recommendations) ? response.data.recommendations : [];
     return {
       ...response,
       data: {
-        recommendations: response.data.recommendations.map((rec) => ({
-          model:  rec.model as AIModel,
-          reason: rec.reason,
+        recommendations: recs.map((rec: { model?: string; reason?: string }) => ({
+          model:  (rec?.model ?? 'Gemini') as AIModel,
+          reason: typeof rec?.reason === 'string' ? rec.reason : '',
         })),
       },
     };
@@ -256,10 +257,18 @@ export const recommendSpecialists = async (
 export const generateInitialDiagnoses = async (
   patientData: PatientData,
 ): Promise<ApiResponse<Diagnosis[]>> => {
-  return apiPost<Diagnosis[]>('/ai/generate-diagnoses/', { patient_data: patientData });
+  const response = await apiPost<Diagnosis[]>('/ai/generate-diagnoses/', { patient_data: patientData });
+  if (!response.success && response.error?.code === 503) {
+    return {
+      success: true,
+      data: [],
+      warning: "AI xizmati vaqtincha band. Bo'sh ro'yxat bilan davom eting yoki keyinroq qayta urinib ko'ring.",
+    };
+  }
+  return response;
 };
 
-/** Backwards-compat – now calls consilium */
+/** Backwards-compat - now calls consilium */
 export const runCouncilDebate = async (
   patientData: PatientData,
   _diagnoses: Diagnosis[],

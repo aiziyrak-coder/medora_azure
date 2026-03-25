@@ -35,7 +35,7 @@ python manage.py collectstatic --noinput
 ```powershell
 # Backend ishga tushirilgan bo'lishi kerak (port 8000)
 curl http://localhost:8000/health/
-# Javob: {"status":"healthy","service":"medoraai-backend"}
+# Javob: {"status":"healthy","service":"AiDoktorai-backend"}
 
 curl http://localhost:8000/health/detailed/
 # Javob: {"status":"healthy","checks":{"database":"ok","cache":"ok",...}}
@@ -134,12 +134,12 @@ npm run dev
 ## 3. Integration Test
 
 ### 3.1 Full Flow Test
-1. **Register** → Token oling
-2. **Login** → Token yangilanishi
-3. **Patient yaratish** → Backend'ga saqlanishi
-4. **Analysis yaratish** → Backend'ga saqlanishi
-5. **Report ko'rish** → Backend'dan olinishi
-6. **Logout** → Token tozalanishi
+1. **Register**  ->  Token oling
+2. **Login**  ->  Token yangilanishi
+3. **Patient yaratish**  ->  Backend'ga saqlanishi
+4. **Analysis yaratish**  ->  Backend'ga saqlanishi
+5. **Report ko'rish**  ->  Backend'dan olinishi
+6. **Logout**  ->  Token tozalanishi
 
 ### 3.2 Error Handling Test
 - [ ] Network xatolik (backend o'chirilganda) - fallback ishlaydi
@@ -298,3 +298,4 @@ Write-Host "`n✅ Barcha testlar muvaffaqiyatli!" -ForegroundColor Green
 Barcha testlar muvaffaqiyatli bo'lsa, dastur **deploy qilishga tayyor**!
 
 Keyingi qadam: `DEPLOYMENT_CHECKLIST.md` ni ko'ring.
+-NoNewline

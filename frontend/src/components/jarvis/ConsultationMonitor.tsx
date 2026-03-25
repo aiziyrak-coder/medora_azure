@@ -1,11 +1,11 @@
 /**
- * ConsultationMonitor — Passiv Tinglash Rejimi
+ * ConsultationMonitor  -  Passiv Tinglash Rejimi
  * ================================================
  * Doktor va bemor suhbatini yozib oladi va real-vaqtda transkript yaratadi.
  *
  * Flow:
- *  "Tinglashni Boshlash" → mic yoqiladi → STT ishlaydi →
- *  transkript to'planadi → "Yakunlash" → auto-diagnosis
+ *  "Tinglashni Boshlash"  ->  mic yoqiladi  ->  STT ishlaydi  -> 
+ *  transkript to'planadi  ->  "Yakunlash"  ->  auto-diagnosis
  */
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import type { PatientData } from '../../types';
@@ -38,9 +38,9 @@ interface TranscriptLine {
 }
 
 const SPEAKER_LABELS: Record<string, Record<string, string>> = {
-  'uz-L': { doctor: '👨‍⚕️ Shifokor', patient: '🧑‍🦯 Bemor', system: '🤖 Tizim' },
-  ru:     { doctor: '👨‍⚕️ Врач',     patient: '🧑 Пациент', system: '🤖 Система' },
-  en:     { doctor: '👨‍⚕️ Doctor',   patient: '🧑 Patient', system: '🤖 System' },
+  'uz-L': { doctor: 'Shifokor', patient: 'Bemor', system: 'Tizim' },
+  ru:     { doctor: 'Врач',  patient: 'Пациент', system: 'Система' },
+  en:     { doctor: 'Doctor',   patient: 'Patient', system: 'System' },
 };
 
 export const ConsultationMonitor: React.FC<Props> = ({
@@ -179,15 +179,14 @@ export const ConsultationMonitor: React.FC<Props> = ({
           </p>
         </div>
         <span className="text-sky-400 font-mono text-sm">
-          {isListening ? `🔴 ${formatDuration(duration)}` : formatDuration(duration)}
+          {isListening ? formatDuration(duration) : formatDuration(duration)}
         </span>
       </div>
 
       {/* Critical Alert */}
       {alertMsg && (
         <div className="rounded-2xl bg-red-950/60 border border-red-500 p-3 flex items-center gap-2 animate-pulse">
-          <span className="text-2xl">🚨</span>
-          <p className="text-red-200 text-sm font-medium">{alertMsg}</p>
+          <span className="text-2xl"><p className="text-red-200 text-sm font-medium">{alertMsg}</p>
         </div>
       )}
 
@@ -230,14 +229,14 @@ export const ConsultationMonitor: React.FC<Props> = ({
               : 'bg-sky-600 hover:bg-sky-500 text-white'
           }`}
         >
-          {isListening ? '⏹ Tinglashni To\'xtatish' : '🎙 Tinglashni Boshlash'}
+          {isListening ? 'Tinglashni To\'xtatish' : 'Tinglashni Boshlash'}
         </button>
         {!isListening && transcript.length > 0 && (
           <button
             onClick={clearTranscript}
             className="px-4 py-3 rounded-2xl bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm"
           >
-            🗑
+            '
           </button>
         )}
       </div>
@@ -250,7 +249,7 @@ export const ConsultationMonitor: React.FC<Props> = ({
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs text-slate-500 font-mono">
-              {wordCount} so'z · {transcript.length} gap
+              {wordCount} so'z | {transcript.length} gap
             </span>
           </div>
           {transcript.map(line => (
@@ -273,8 +272,7 @@ export const ConsultationMonitor: React.FC<Props> = ({
               }`}>
                 {labels[currentSpeaker]}
               </span>
-              <span className="text-slate-400 italic">{interim}▋</span>
-            </div>
+              <span className="text-slate-400 italic">{interim}</div>
           )}
         </div>
       )}
@@ -288,7 +286,7 @@ export const ConsultationMonitor: React.FC<Props> = ({
                      text-white font-semibold hover:opacity-90 active:scale-95
                      transition-all disabled:opacity-50"
         >
-          {diagnosing ? '⟳ Tashxis yaratilmoqda...' : '🧠 Tashxis Qo\'yish (AI Tahlil)'}
+          {diagnosing ? 'Tashxis yaratilmoqda...' : 'Tashxis Qo\'yish (AI Tahlil)'}
         </button>
       )}
     </div>

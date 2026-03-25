@@ -20,13 +20,19 @@ class DiagnosisFeedbackSerializer(serializers.ModelSerializer):
 class AnalysisRecordSerializer(serializers.ModelSerializer):
     """Analysis record serializer"""
     patient = PatientSerializer(read_only=True)
+    patient_id = serializers.SerializerMethodField(read_only=True)
     created_by = UserSerializer(read_only=True)
     diagnosis_feedbacks = DiagnosisFeedbackSerializer(many=True, read_only=True)
-    
+
+    @staticmethod
+    def get_patient_id(obj):
+        pid = getattr(obj, 'patient_id', None) or (getattr(obj.patient, 'id', None) if getattr(obj, 'patient', None) else None)
+        return str(pid) if pid is not None else ''
+
     class Meta:
         model = AnalysisRecord
         fields = [
-            'id', 'patient', 'external_patient_id', 'patient_data',
+            'id', 'patient', 'patient_id', 'external_patient_id', 'patient_data',
             'debate_history', 'final_report', 'follow_up_history',
             'selected_specialists', 'detected_medications',
             'diagnosis_feedbacks', 'created_by', 'created_at', 'updated_at'
@@ -35,37 +41,23 @@ class AnalysisRecordSerializer(serializers.ModelSerializer):
 
 
 class AnalysisRecordCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating analysis record"""
+    """Serializer for creating analysis record. id is read_only so create response includes it."""
     
     class Meta:
         model = AnalysisRecord
         fields = [
+            'id',
             'patient', 'external_patient_id', 'patient_data',
             'debate_history', 'final_report', 'follow_up_history',
             'selected_specialists', 'detected_medications'
         ]
+        read_only_fields = ['id']
     
     def create(self, validated_data):
-        from accounts.utils import check_usage_limit, increment_usage
-        
         user = self.context['request'].user
-        
-        # Check usage limit
-        can_proceed, remaining = check_usage_limit(user, 'analyses')
-        if not can_proceed:
-            raise serializers.ValidationError({
-                'non_field_errors': [
-                    "Oylik tahlil limitiga yetdingiz. Keyingi oyda qayta urinib ko'ring."
-                ]
-            })
-        
         validated_data['created_by'] = user
-        instance = super().create(validated_data)
-        
-        # Increment usage counter
-        increment_usage(user, 'analyses')
-        
-        return instance
+        # Tahlillar har doim bazaga saqlansin — bu yerda limit tekshiruvi o‘chirildi
+        return super().create(validated_data)
 
 
 class AnalysisRecordUpdateSerializer(serializers.ModelSerializer):

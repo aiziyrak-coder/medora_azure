@@ -24,13 +24,15 @@ const TeamRecommendationView: React.FC<TeamRecommendationViewProps> = ({ recomme
     const [selectedSpecialists, setSelectedSpecialists] = useState<Set<AIModel>>(new Set());
     const [searchTerm, setSearchTerm] = useState("");
 
-    // Initialize state when recommendations load
+    // Initialize state when recommendations load - with null safety
     useEffect(() => {
-        if (recommendations) {
+        if (recommendations && Array.isArray(recommendations) && recommendations.length > 0) {
             const initialSelection = new Set<AIModel>();
             // Pre-select top 6 recommended (max 10, min 4)
             recommendations.slice(0, Math.min(6, recommendations.length)).forEach(r => {
-                initialSelection.add(r.model);
+                if (r?.model) {
+                    initialSelection.add(r.model);
+                }
             });
             setSelectedSpecialists(initialSelection);
         }
@@ -63,18 +65,20 @@ const TeamRecommendationView: React.FC<TeamRecommendationViewProps> = ({ recomme
         onConfirm(teamPayload, INTERNAL_BEST_MODEL);
     };
 
-    // Filter and Sort Specialists
+    // Filter and Sort Specialists - with null safety
     const filteredSpecialists = useMemo(() => {
         const allSpecialists = Object.values(AIModel).filter(m => m !== AIModel.SYSTEM);
+        const safeRecommendations = recommendations && Array.isArray(recommendations) ? recommendations : [];
+        
         return allSpecialists.filter(model => {
             const specInfo = AI_SPECIALISTS[model];
-            const searchLower = searchTerm.toLowerCase();
-            // Type assertion is safe here - translation function has fallback to return key if not found
+            if (!specInfo) return false;
+            const searchLower = (searchTerm ?? '').toLowerCase();
             const specialtyTranslation = t(`specialty_${model.toLowerCase()}` as TranslationKey);
             return (
-                specInfo.name.toLowerCase().includes(searchLower) ||
-                specInfo.specialty.toLowerCase().includes(searchLower) ||
-                specialtyTranslation.toLowerCase().includes(searchLower)
+                (specInfo.name ?? '').toLowerCase().includes(searchLower) ||
+                (specInfo.specialty ?? '').toLowerCase().includes(searchLower) ||
+                (specialtyTranslation ?? '').toLowerCase().includes(searchLower)
             );
         }).sort((a, b) => {
             // Sort: Selected first, then Recommended, then Alphabetical
@@ -82,8 +86,8 @@ const TeamRecommendationView: React.FC<TeamRecommendationViewProps> = ({ recomme
             const isSelB = selectedSpecialists.has(b);
             if (isSelA !== isSelB) return isSelA ? -1 : 1;
 
-            const isRecA = recommendations?.some(r => r.model === a);
-            const isRecB = recommendations?.some(r => r.model === b);
+            const isRecA = safeRecommendations.some(r => r?.model === a);
+            const isRecB = safeRecommendations.some(r => r?.model === b);
             if (isRecA !== isRecB) return isRecA ? -1 : 1;
 
             return AI_SPECIALISTS[a].name.localeCompare(AI_SPECIALISTS[b].name);
@@ -119,7 +123,7 @@ const TeamRecommendationView: React.FC<TeamRecommendationViewProps> = ({ recomme
             <div className="flex-shrink-0 mb-4 p-2 bg-indigo-50 border border-indigo-200 rounded-lg flex items-center gap-2">
                 <UsersIcon className="w-5 h-5 text-indigo-600" />
                 <div>
-                    <p className="font-bold text-xs text-indigo-900">Konsilium Raisi (Orkestrator)</p>
+                    <p className="font-bold text-xs text-indigo-900">Konsilium Professori (Orkestrator)</p>
                     <p className="text-[9px] text-indigo-600">Munozarani boshqaradi</p>
                 </div>
             </div>
@@ -141,7 +145,8 @@ const TeamRecommendationView: React.FC<TeamRecommendationViewProps> = ({ recomme
                     <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-50 rounded-lg border border-slate-200">
                         {filteredSpecialists.map((model) => {
                             const specialistInfo = AI_SPECIALISTS[model];
-                            const recommendation = recommendations.find(r => r.model === model);
+                            const safeRecommendations = recommendations && Array.isArray(recommendations) ? recommendations : [];
+                            const recommendation = safeRecommendations.find(r => r?.model === model);
                             const isSelected = selectedSpecialists.has(model);
                             return (
                                 <div 
@@ -155,9 +160,11 @@ const TeamRecommendationView: React.FC<TeamRecommendationViewProps> = ({ recomme
                                     <AIAvatar model={model} size="xs" />
                                     <div className="flex-1 min-w-0">
                                         <p className={`text-xs font-bold truncate ${isSelected ? 'text-blue-800' : 'text-slate-700'}`}>
-                                            {specialistInfo.name.split('(')[0].trim()}
+                                            {t(`specialist_name_${model.toLowerCase()}` as TranslationKey) || specialistInfo.name.split('(')[0].trim()}
                                         </p>
-                                        <p className="text-[10px] text-slate-500 truncate">{specialistInfo.specialty}</p>
+                                        <p className="text-[10px] text-slate-500 truncate">
+                                            {t(`specialty_${model.toLowerCase()}` as TranslationKey) || specialistInfo.specialty}
+                                        </p>
                                     </div>
                                     {recommendation && (
                                         <span className="px-1 py-0.5 bg-green-100 text-green-700 text-[8px] font-bold uppercase rounded">AI</span>
@@ -181,13 +188,13 @@ const TeamRecommendationView: React.FC<TeamRecommendationViewProps> = ({ recomme
                         <p className="text-xs text-slate-500 text-center mt-8">Hali mutaxassis tanlanmagan</p>
                     ) : (
                         <div className="space-y-1 overflow-y-auto custom-scrollbar">
-                            {Array.from(selectedSpecialists).map(model => {
+                            {Array.from(selectedSpecialists).map((model: AIModel) => {
                                 const spec = AI_SPECIALISTS[model];
                                 return (
                                     <div key={model} className="flex items-center gap-2 p-1.5 bg-white rounded border border-blue-100">
                                         <AIAvatar model={model} size="xs" />
-                                        <p className="text-xs font-semibold text-blue-900 flex-1 truncate">{spec.name.split('(')[0].trim()}</p>
-                                        <button onClick={() => toggleSpecialist(model)} className="text-red-500 hover:text-red-700 text-xs">✕</button>
+                                        <p className="text-xs font-semibold text-blue-900 flex-1 truncate">{t(`specialist_name_${model.toLowerCase()}` as TranslationKey) || spec.name.split('(')[0].trim()}</p>
+                                        <button type="button" onClick={(e) => { e.stopPropagation(); toggleSpecialist(model); }} className="text-red-500 hover:text-red-700 text-xs font-bold" aria-label="O'chirish">x</button>
                                     </div>
                                 );
                             })}

@@ -1,4 +1,4 @@
-# Frontend ishlamasa — Node.js o'rnatish
+# Frontend ishlamasa  -  Node.js o'rnatish
 
 Frontend **npm** va **Node.js** talab qiladi. Agar `npm run dev` ishlamasa yoki "npm topilmadi" xabari chiqsa, quyidagilarni bajarishingiz kerak.
 
@@ -10,7 +10,7 @@ Frontend **npm** va **Node.js** talab qiladi. Agar `npm run dev` ishlamasa yoki 
    - **LTS** versiyasini tanlang (masalan, 20.x yoki 22.x).
 
 2. **O'rnatish** paytida quyidagilarni belgilang:
-   - **"Add to PATH"** — belgilangan bo'lsin (Node va npm global PATH ga qo'shiladi).
+   - **"Add to PATH"**  -  belgilangan bo'lsin (Node va npm global PATH ga qo'shiladi).
 
 3. O'rnatish tugagach **kompyuterni qayta ishga tushiring** yoki yangi terminal/PowerShell oching.
 
@@ -32,7 +32,7 @@ Ikkalasi ham versiya ko'rsatsa (masalan `v20.10.0` va `10.2.0`), Node.js to'g'ri
 ## 3. Frontend uchun paketlar va ishga tushirish
 
 ```powershell
-cd E:\medoraai\frontend
+cd E:\AiDoktorai\frontend
 npm install
 npm run dev
 ```
@@ -49,7 +49,7 @@ Bundan keyin frontend **http://localhost:3000** da ochiladi.
 
 ### "EACCES" / "Permission denied"
 - PowerShell yoki CMD ni **Administrator** sifatida ochib, `npm install` ni qayta ishlating.
-- Yoki loyihani boshqa papkaga (masalan, `C:\medoraai`) ko'chirib sinab ko'ring.
+- Yoki loyihani boshqa papkaga (masalan, `C:\AiDoktorai`) ko'chirib sinab ko'ring.
 
 ### "node_modules topilmadi"
 - Avval `npm install` ni ishlating, keyin `npm run dev`.
@@ -61,8 +61,9 @@ Bundan keyin frontend **http://localhost:3000** da ochiladi.
 | Qadam | Buyruq |
 |-------|--------|
 | 1 | Node.js o'rnating (nodejs.org), PATH ga qo'shing |
-| 2 | `cd E:\medoraai\frontend` |
+| 2 | `cd E:\AiDoktorai\frontend` |
 | 3 | `npm install` |
 | 4 | `npm run dev` |
 
 Frontend **3000** portda ishlaydi: http://localhost:3000
+-NoNewline

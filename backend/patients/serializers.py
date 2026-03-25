@@ -35,11 +35,12 @@ class PatientSerializer(serializers.ModelSerializer):
 
 
 class PatientCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating patient"""
+    """Serializer for creating patient. id is read_only so it appears in create response."""
     
     class Meta:
         model = Patient
         fields = [
+            'id',
             'first_name', 'last_name', 'age', 'gender',
             'phone', 'address', 'complaints', 'history',
             'objective_data', 'lab_results', 'allergies',
@@ -47,6 +48,7 @@ class PatientCreateSerializer(serializers.ModelSerializer):
             'structured_lab_results', 'pharmacogenomics_report',
             'symptom_timeline', 'mental_health_scores',
         ]
+        read_only_fields = ['id']
     
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user

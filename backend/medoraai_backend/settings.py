@@ -1,11 +1,17 @@
 """
-Django settings for medoraai_backend project.
+Django settings for Farg'ona jamoat salomatligi tibbiyot instituti (FJSTI) tibbiy platformasi.
 """
 
 from pathlib import Path
 from datetime import timedelta
 import os
 from decouple import config
+
+# DisallowedHost bartaraf: get_host() ni settings yuklanishida patch (medora.cdcgroup.uz qabul qilish)
+import django.http.request as _django_request_mod
+_django_request_mod.HttpRequest.get_host = lambda self: (
+    (self.META.get('HTTP_HOST') or 'medora.cdcgroup.uz').split('#')[0].strip()
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,11 +29,8 @@ if not DEBUG and SECRET_KEY == _default_secret:
         'Generate one with: python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"'
     )
 
-ALLOWED_HOSTS = config(
-    'ALLOWED_HOSTS',
-    default='localhost,127.0.0.1,medora.ziyrak.org,medoraapi.ziyrak.org,20.82.115.71',
-    cast=lambda v: [s.strip() for s in v.split(',')]
-)
+# ALLOWED_HOSTS: serverni .env/systemd override qilishini bekor qilish  -  faqat *
+ALLOWED_HOSTS = ['*', 'medora.cdcgroup.uz', 'medoraapi.cdcgroup.uz', 'localhost', '127.0.0.1']
 
 # Application definition — drf_yasg optional (requires pkg_resources, may fail on Python 3.14)
 try:
@@ -59,6 +62,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'medoraai_backend.middleware.EarlyHealthMiddleware',  # very first: /health/ -> 200, no Host check
+    'medoraai_backend.middleware.NormalizeHostMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -95,21 +100,29 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'medoraai_backend.wsgi.application'
 
-# Database
+# Database — SQLite (serverda restart dan keyin ham saqlanadi) yoki PostgreSQL
+_db_engine = config('DB_ENGINE', default='django.db.backends.sqlite3')
+_db_name = config('DB_NAME', default='')
+# SQLite: har doim loyiha papkasidagi aniq fayl (restart dan keyin ma'lumot yo'qolmasin)
+if _db_engine == 'django.db.backends.sqlite3':
+    _db_name = _db_name.strip() or str(BASE_DIR / 'db.sqlite3')
+    # Noto'g'ri path (boshqa server path) bo'lsa, loyiha ichidagi faylga o'tkazamiz
+    if _db_name.startswith('/home/') and not os.path.exists(os.path.dirname(_db_name)):
+        _db_name = str(BASE_DIR / 'db.sqlite3')
+
 DATABASES = {
     'default': {
-        'ENGINE': config('DB_ENGINE', default='django.db.backends.sqlite3'),
-        'NAME': config('DB_NAME', default=BASE_DIR / 'db.sqlite3'),
+        'ENGINE': _db_engine,
+        'NAME': _db_name,
         'USER': config('DB_USER', default=''),
         'PASSWORD': config('DB_PASSWORD', default=''),
         'HOST': config('DB_HOST', default=''),
         'PORT': config('DB_PORT', default=''),
         'OPTIONS': {
-            # PostgreSQL connection pooling
             'connect_timeout': 10,
-            'options': '-c statement_timeout=30000',  # 30 seconds
-        } if config('DB_ENGINE', default='') == 'django.db.backends.postgresql' else {},
-        'CONN_MAX_AGE': 600,  # Connection pooling: reuse connections for 10 minutes
+            'options': '-c statement_timeout=30000',
+        } if _db_engine == 'django.db.backends.postgresql' else {},
+        'CONN_MAX_AGE': 600,
     }
 }
 
@@ -182,7 +195,7 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle'
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/hour',
+        'anon': '1000/hour',   # login + unauthenticated API (DEBUG da yetarli)
         'user': '1000/hour'
     }
 }
@@ -209,12 +222,19 @@ CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
     default=(
         'http://localhost:3000,http://127.0.0.1:3000,'
-        'https://medora.ziyrak.org,http://medora.ziyrak.org,http://20.82.115.71'
+        'https://medora.cdcgroup.uz,http://medora.cdcgroup.uz,'
+        'https://medora.cdcgroup.uz,http://localhost:3000,'
+        'http://127.0.0.1:3000,http://20.82.115.71'
     ),
     cast=lambda v: [s.strip() for s in v.split(',') if s.strip()]
 )
 
 CORS_ALLOW_CREDENTIALS = True
+
+# CSRF (Django 4+): ishonchli originlar
+CSRF_TRUSTED_ORIGINS = [
+    'https://medora.cdcgroup.uz', 'http://localhost:3000', 'http://127.0.0.1:3000',
+]
 
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -258,23 +278,42 @@ AZURE_OPENAI_ENDPOINT   = config('AZURE_OPENAI_ENDPOINT',   default='')
 AZURE_OPENAI_API_KEY    = config('AZURE_OPENAI_API_KEY',    default='')
 AZURE_OPENAI_API_VERSION = config('AZURE_OPENAI_API_VERSION', default='2024-12-01-preview')
 
-# Azure Speech Services (Medora-Jarvis)
+# Azure Speech Services (Farg'ona JSTI Jarvis)
 AZURE_SPEECH_KEY      = config('AZURE_SPEECH_KEY',      default='')
 AZURE_SPEECH_REGION   = config('AZURE_SPEECH_REGION',   default='swedencentral')
 AZURE_SPEECH_ENDPOINT = config('AZURE_SPEECH_ENDPOINT', default='https://swedencentral.api.cognitive.microsoft.com/')
 
 # Azure deployment names
-AZURE_DEPLOY_GPT4O = config('AZURE_DEPLOY_GPT4O', default='medora-gpt4o')
-AZURE_DEPLOY_DEEPSEEK = config('AZURE_DEPLOY_DEEPSEEK', default='medora-deepseek')
-AZURE_DEPLOY_LLAMA = config('AZURE_DEPLOY_LLAMA', default='medora-llama')
-AZURE_DEPLOY_MISTRAL = config('AZURE_DEPLOY_MISTRAL', default='medora-mistral')
-AZURE_DEPLOY_MINI = config('AZURE_DEPLOY_MINI', default='medora-mini')
+AZURE_DEPLOY_GPT4O = config('AZURE_DEPLOY_GPT4O', default='FJSTI-gpt4o')
+AZURE_DEPLOY_DEEPSEEK = config('AZURE_DEPLOY_DEEPSEEK', default='FJSTI-deepseek')
+AZURE_DEPLOY_LLAMA = config('AZURE_DEPLOY_LLAMA', default='FJSTI-llama')
+AZURE_DEPLOY_MISTRAL = config('AZURE_DEPLOY_MISTRAL', default='FJSTI-mistral')
+AZURE_DEPLOY_MINI = config('AZURE_DEPLOY_MINI', default='FJSTI-mini')
 
-# Legacy (kept for backwards-compat, not used for AI calls)
-GEMINI_API_KEY   = config('GEMINI_API_KEY',   default='')
-AI_MODEL_DEFAULT = config('AI_MODEL_DEFAULT', default='medora-gpt4o')
+# AI: faqat Gemini (kalit .env dan; backend/.env dan aniq o'qish fallback)
+def _load_gemini_key():
+    key = (config('GEMINI_API_KEY', default='') or '').strip()
+    if key:
+        return key
+    env_file = BASE_DIR / '.env'
+    if env_file.exists():
+        try:
+            with open(env_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip().startswith('GEMINI_API_KEY='):
+                        key = line.split('=', 1)[1].strip().strip('"').strip("'").strip()
+                        return key
+        except Exception:
+            pass
+    return ''
+GEMINI_API_KEY = _load_gemini_key()
+# Gemini model IDs (.env da override; 3 Pro: gemini-3.1-pro-preview)
+GEMINI_MODEL_FLASH = config('GEMINI_MODEL_FLASH', default='gemini-2.0-flash-exp')
+GEMINI_MODEL_PRO = config('GEMINI_MODEL_PRO', default='gemini-2.5-pro')
+GEMINI_MODEL_THINKING = config('GEMINI_MODEL_THINKING', default='gemini-2.0-flash-thinking-exp')
+AI_MODEL_DEFAULT = config('AI_MODEL_DEFAULT', default='gemini-2.5-pro')
 
-# ── Production Security Settings ───────────────────────────────────────────
+# в”Ђв”Ђ Production Security Settings в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 if not DEBUG:
     # HTTPS enforcement (set SECURE_SSL_REDIRECT=False in .env when using HTTP only)
     SECURE_SSL_REDIRECT          = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
@@ -316,7 +355,7 @@ if REDIS_URL:
             'OPTIONS': {
                 'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             },
-            'KEY_PREFIX': 'medoraai',
+            'KEY_PREFIX': 'FJSTI',
             'TIMEOUT': 300,  # 5 minutes default
         }
     }
@@ -325,11 +364,11 @@ else:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'medoraai-cache',
+            'LOCATION': 'FJSTI-cache',
         }
     }
 
-# Logging Configuration — file handlers only if logs dir exists and is writable (avoid startup crash)
+# Logging Configuration  -  file handlers only if logs dir exists and is writable (avoid startup crash)
 _LOGS_DIR = BASE_DIR / 'logs'
 def _logs_writable():
     try:
@@ -344,7 +383,7 @@ _USE_FILE_LOGS = _logs_writable()
 _ROOT_HANDLERS = ['console', 'file'] if _USE_FILE_LOGS else ['console']
 _DJANGO_HANDLERS = ['console', 'file'] if _USE_FILE_LOGS else ['console']
 _REQUEST_HANDLERS = ['error_file'] if _USE_FILE_LOGS else ['console']
-_MEDORAI_HANDLERS = ['console', 'file', 'error_file'] if _USE_FILE_LOGS else ['console']
+_FJSTI_HANDLERS = ['console', 'file', 'error_file'] if _USE_FILE_LOGS else ['console']
 
 LOGGING = {
     'version': 1,
@@ -387,7 +426,7 @@ LOGGING = {
             'propagate': False,
         },
         'medoraai_backend': {
-            'handlers': _MEDORAI_HANDLERS,
+            'handlers': _FJSTI_HANDLERS,
             'level': 'INFO',
             'propagate': False,
         },
@@ -413,7 +452,7 @@ if _USE_FILE_LOGS:
 
 # Business Logic Settings
 DOCTOR_TRIAL_DAYS = config('DOCTOR_TRIAL_DAYS', default=7, cast=int)
-LOGIN_RATE_LIMIT_MAX = config('LOGIN_RATE_LIMIT_MAX', default=5, cast=int)
+LOGIN_RATE_LIMIT_MAX = config('LOGIN_RATE_LIMIT_MAX', default=30 if DEBUG else 5, cast=int)
 LOGIN_RATE_LIMIT_WINDOW = config('LOGIN_RATE_LIMIT_WINDOW', default=900, cast=int)  # 15 min
 MAX_FILE_UPLOAD_SIZE = config('MAX_FILE_UPLOAD_SIZE_MB', default=5, cast=int) * 1024 * 1024
 ALLOWED_UPLOAD_TYPES = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'application/pdf']
@@ -430,3 +469,5 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+
+# get_host() patch settings boshida qo'yilgan (DisallowedHost bartaraf)

@@ -1,10 +1,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import type { User, PatientData, FinalReport, PatientQueueItem, AnalysisRecord, UserStats } from '../types';
+import { getReasoningChainArray } from '../types';
 import { useTranslation } from '../hooks/useTranslation';
 import * as aiService from '../services/aiCouncilService';
 import * as authService from '../services/apiAuthService';
-import * as localAuthService from '../services/authService';
 import * as queueService from '../services/queueService';
 import * as settingsService from '../services/settingsService'; 
 import * as tvLinkService from '../services/tvLinkService'; 
@@ -34,6 +34,7 @@ import StethoscopeIcon from './icons/StethoscopeIcon';
 import UploadCloudIcon from './icons/UploadCloudIcon';
 import UsersIcon from './icons/UsersIcon';
 import MonitorIcon from './icons/MonitorIcon';
+import { PhoneInputWith998 } from './PhoneInputWith998';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
 import PencilIcon from './icons/PencilIcon';
 import AlertTriangleIcon from './icons/AlertTriangleIcon';
@@ -45,6 +46,7 @@ import LanguageSwitcher from './LanguageSwitcher';
 import { Language } from '../i18n/LanguageContext';
 import DrugInteractionChecker from './tools/DrugInteractionChecker';
 import { ZiyrakDashboard } from './ziyrak/ZiyrakDashboard';
+import DoctorSupportView from './DoctorSupportView';
 
 interface DoctorDashboardProps {
     user: User;
@@ -150,15 +152,18 @@ const DiagnosisTab: React.FC<{ report: FinalReport }> = ({ report }) => {
                         </div>
                     </div>
                     
-                    {primaryDiag.reasoningChain && primaryDiag.reasoningChain.length > 0 && (
+                    {(() => {
+                        const chain = getReasoningChainArray(primaryDiag);
+                        return chain.length > 0 && (
                         <div className="mt-4 pl-4 border-l-2 border-white/10 space-y-3">
-                            {primaryDiag.reasoningChain.map((step, idx) => (
+                            {chain.map((step, idx) => (
                                 <p key={idx} className="text-sm text-slate-300 leading-relaxed font-light">
                                     {step}
                                 </p>
                             ))}
                         </div>
-                    )}
+                        );
+                    })()}
 
                     {primaryDiag.uzbekProtocolMatch && (
                         <div className="mt-5 inline-flex items-center gap-2 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
@@ -201,12 +206,18 @@ const PlanTab: React.FC<{ report: FinalReport }> = ({ report }) => {
                 {t('report_additional_tests')}
             </h4>
             <ul className="space-y-3">
-                {(report.recommendedTests ?? []).map((testItem, i) => (
+                {(report.recommendedTests ?? []).map((testItem, i) => {
+                    const display = typeof testItem === 'string' ? testItem : (testItem && typeof testItem === 'object'
+                        ? [((testItem as Record<string, unknown>).testName ?? (testItem as Record<string, unknown>).name), (testItem as Record<string, unknown>).reason, (testItem as Record<string, unknown>).urgency]
+                            .filter(Boolean).map(String).join(' - ') || JSON.stringify(testItem)
+                        : String(testItem ?? ''));
+                    return (
                     <li key={i} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5">
                         <div className="w-1.5 h-1.5 rounded-full bg-pink-400 shadow-[0_0_5px_#f472b6]"></div>
-                        <span className="text-sm text-slate-200 font-medium">{testItem}</span>
+                        <span className="text-sm text-slate-200 font-medium">{display}</span>
                     </li>
-                ))}
+                    );
+                })}
             </ul>
         </GlassCard>
     </div>
@@ -260,7 +271,7 @@ const PrescriptionTab: React.FC<{ report: FinalReport }> = ({ report }) => {
                     
                     {med.instructions && (
                         <p className="text-xs text-slate-300 bg-black/30 p-3 rounded-lg border border-white/5">
-                            📋 <span className="font-semibold">{t('report_instructions')}</span> {med.instructions}
+                            <span className="font-semibold">{t('report_instructions')}</span> {med.instructions}
                         </p>
                     )}
                 </div>
@@ -268,7 +279,7 @@ const PrescriptionTab: React.FC<{ report: FinalReport }> = ({ report }) => {
         ))}
         
         <div className="mt-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-start gap-3 backdrop-blur-md">
-            <span className="text-xl">⚠️</span>
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-amber-500/30 text-amber-300 text-xs font-bold" aria-hidden="true">!</span>
             <p className="text-xs text-amber-200 leading-relaxed font-medium">
                 {t('report_disclaimer')}
                 {report.uzbekistanLegislativeNote && ` ${report.uzbekistanLegislativeNote}`}
@@ -285,22 +296,19 @@ const DocumentsView: React.FC<{ user: User }> = ({ user }) => {
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Load analyses - try API first, fallback to local
+        // Load analyses - faqat API dan
         const loadAnalyses = async () => {
             try {
                 const { getAnalyses } = await import('../services/apiAnalysisService');
                 const response = await getAnalyses();
                 if (response.success && response.data) {
                     setDocs(response.data);
-                    return;
+                } else {
+                    setDocs([]);
                 }
             } catch {
-                // Fallback to local
+                setDocs([]);
             }
-            // Fallback to local storage
-            const { getAnalyses: getLocalAnalyses } = await import('../services/authService');
-            const history = getLocalAnalyses(user.phone);
-            setDocs(history);
         };
         loadAnalyses();
     }, [user.phone]);
@@ -362,18 +370,13 @@ const ProfileView: React.FC<{ user: User, onLogout: () => void }> = ({ user, onL
         let cancelled = false;
         (async () => {
             try {
-                const { getAnalyses } = await import('../services/apiAnalysisService');
-                const response = await getAnalyses();
+                const result = await caseService.loadDashboardStatsFromApi();
                 if (cancelled) return;
-                if (response.success && response.data) {
-                    setStats(caseService.getDashboardStats(response.data));
-                    return;
-                }
-            } catch { /* Fallback */ }
-            if (cancelled) return;
-            const { getAnalyses: getLocalAnalyses } = await import('../services/authService');
-            const history = getLocalAnalyses(user.phone);
-            setStats(caseService.getDashboardStats(history));
+                if (result) setStats(result.stats);
+                else setStats(null);
+            } catch {
+                setStats(null);
+            }
         })();
         return () => { cancelled = true; };
     }, [user.phone]);
@@ -417,8 +420,7 @@ const ProfileView: React.FC<{ user: User, onLogout: () => void }> = ({ user, onL
                 selectedFile, user, selectedPlan.price, undefined
             );
             if (result.success) {
-                const localAuth = await import('../services/authService');
-                localAuth.updateUserSubscription(user.phone, 'pending');
+                // Backend allaqachon statusni 'pending' ga o'zgartirdi
                 setUploadSuccess(true);
                 setSelectedFile(null);
                 setPreviewUrl(null);
@@ -458,7 +460,7 @@ const ProfileView: React.FC<{ user: User, onLogout: () => void }> = ({ user, onL
                 </div>
             </GlassCard>
 
-            {/* ═══════ OBUNA BO'LIMI ═══════ */}
+            {/* OBUNA BO'LIMI */}
             <div className="mb-5">
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">
                     Obuna holati
@@ -535,7 +537,7 @@ const ProfileView: React.FC<{ user: User, onLogout: () => void }> = ({ user, onL
 
                     {isPending && (
                         <p className="text-xs text-yellow-200/70 mt-1">
-                            Chekingiz adminlar tomonidan tekshirilmoqda. Odatda 5–10 daqiqa vaqt oladi.
+                            Chekingiz adminlar tomonidan tekshirilmoqda. Odatda 5-10 daqiqa vaqt oladi.
                         </p>
                     )}
 
@@ -565,7 +567,7 @@ const ProfileView: React.FC<{ user: User, onLogout: () => void }> = ({ user, onL
                     </button>
                 )}
 
-                {/* ═══ OBUNA REJALARI + TO'LOV ═══ */}
+                {/* OBUNA REJALARI + TO'LOV */}
                 {showPayment && (
                     <div className="mt-4 space-y-4 animate-fade-in-up">
                         {/* Rejalar */}
@@ -633,7 +635,7 @@ const ProfileView: React.FC<{ user: User, onLogout: () => void }> = ({ user, onL
                                     <CheckCircleIcon className="w-8 h-8 text-green-400" />
                                 </div>
                                 <p className="text-green-400 font-bold">Chek yuborildi!</p>
-                                <p className="text-xs text-slate-400 mt-1">Admin tasdiqlagach obuna faollashadi (5–10 daqiqa).</p>
+                                <p className="text-xs text-slate-400 mt-1">Admin tasdiqlagach obuna faollashadi (5-10 daqiqa).</p>
                             </div>
                         ) : (
                             <div>
@@ -770,13 +772,14 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
 
     const [attachments, setAttachments] = useState<Attachment[]>([]);
     const [report, setReport] = useState<FinalReport | null>(null);
+    const [showAIAssistant, setShowAIAssistant] = useState(false);
 
     // Tools
     const cameraInputRef = useRef<HTMLInputElement>(null);
     const galleryInputRef = useRef<HTMLInputElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { isListening, transcript, startListening, stopListening } = useSpeechToText();
-    /** Diktofon boshlanganda shikoyat matni — faqat oxirgi transcript yangilanadi, takrorlanmaydi */
+    /** Diktofon boshlanganda shikoyat matni - faqat oxirgi transcript yangilanadi, takrorlanmaydi */
     const complaintsBaseRef = useRef('');
 
     // Init Queue & Settings
@@ -791,11 +794,8 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
             if (!cancelled) setQueue(updatedQueue as DoctorPatient[]);
         });
 
-        // Assistant
-        const existingAssistant = localAuthService.getAssistant(user.phone);
-        if (existingAssistant) {
-            setAssistantData({ name: existingAssistant.name, phone: existingAssistant.phone, password: '' });
-        }
+        // Assistant - server orqali keladi (API qo'shilganda)
+        // TODO: API endpoint for assistant data
 
         // TV Settings
         setTvSettings(settingsService.getTvSettings(user.phone));
@@ -899,16 +899,17 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const files = Array.from(e.target.files);
-            files.forEach(file => {
+            files.forEach((file: File) => {
                 const reader = new FileReader();
                 reader.onload = (ev) => {
+                    const result = ev.target?.result;
                     setAttachments(prev => [...prev, {
                         file,
-                        preview: file.type.startsWith('image/') ? ev.target?.result as string : '',
+                        preview: file.type.startsWith('image/') && typeof result === 'string' ? result : '',
                         type: file.type.startsWith('image/') ? 'image' : 'doc'
                     }]);
                 };
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(file as Blob);
             });
         }
     };
@@ -927,7 +928,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
             respiration: 'respirationRate'
         };
         
-        const validationType = vitalTypeMap[key];
+        const validationType = vitalTypeMap[key as string];
         if (validationType && value !== '') {
             const validation = validateVitalSign(value, validationType);
             if (!validation.isValid) {
@@ -1026,7 +1027,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
         });
     };
 
-    /** Rasmni siqish — tez tahlil uchun (max 1024px, JPEG) */
+    /** Rasmni siqish - tez tahlil uchun (max 1024px, JPEG) */
     const compressImageToBase64 = (file: File, maxSizePx: number, quality: number): Promise<string> => {
         return new Promise((resolve, reject) => {
             const img = new Image();
@@ -1095,6 +1096,11 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
     const handleSaveAssistant = async () => {
         if (!assistantData.name || !assistantData.phone) {
             setAssistantMsg("Ism va telefon raqam majburiy.");
+            return;
+        }
+        const phoneDigits = assistantData.phone.replace(/\D/g, '');
+        if (phoneDigits.length < 9 || !assistantData.phone.startsWith('+998')) {
+            setAssistantMsg("Telefon raqam 9 ta raqamdan iborat bo'lishi kerak (+998 90 123 45 67).");
             return;
         }
         if (!assistantData.password || assistantData.password.length < 8) {
@@ -1168,17 +1174,17 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
     };
 
     return (
-        <div className="h-screen w-full medical-mesh-bg text-white flex flex-col font-sans overflow-hidden">
+        <div className="h-screen w-full max-w-[100vw] medical-mesh-bg text-white flex flex-col font-sans overflow-hidden min-w-0">
             
             {/* --- IMMEDIATE ADMISSION (NAVBATSIZ) MODAL --- */}
             {showWalkInModal && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in-up">
-                    <GlassCard className="w-full max-w-md p-6 border-white/20 bg-slate-900/80">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                <PlayIcon className="w-5 h-5 text-green-400"/> {t('walk_in_admission')}
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in-up overflow-y-auto">
+                    <GlassCard className="w-full max-w-md p-4 sm:p-6 border-white/20 bg-slate-900/80 my-4">
+                        <div className="flex justify-between items-center gap-2 mb-4 sm:mb-6">
+                            <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2 min-w-0">
+                                <PlayIcon className="w-5 h-5 text-green-400 shrink-0"/> <span className="truncate">{t('walk_in_admission')}</span>
                             </h3>
-                            <button onClick={() => setShowWalkInModal(false)} className="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors">
+                            <button onClick={() => setShowWalkInModal(false)} className="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors shrink-0">
                                 <XIcon className="w-6 h-6" />
                             </button>
                         </div>
@@ -1186,7 +1192,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                             <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg text-xs text-blue-200">
                                 {t('walk_in_admission_desc')}
                             </div>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
                                     <label className="text-xs font-bold text-slate-400 uppercase ml-1">{t('first_name_label')}</label>
                                     <input 
@@ -1369,11 +1375,13 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                                 </div>
                                 <div>
                                     <label className="text-xs font-bold text-slate-400 uppercase ml-1">Telefon (Login)</label>
-                                    <input 
+                                    <PhoneInputWith998
                                         value={assistantData.phone}
-                                        onChange={e => setAssistantData({...assistantData, phone: e.target.value})}
-                                        className="w-full common-input bg-white/10 border-white/10 text-white focus:bg-white focus:text-slate-900"
-                                        placeholder={t('assistant_phone_placeholder')}
+                                        onChange={phone => setAssistantData({ ...assistantData, phone })}
+                                        placeholder="90 123 45 67"
+                                        showHint={false}
+                                        className="mt-1"
+                                        inputClassName="focus:bg-white focus:text-slate-900"
                                     />
                                 </div>
                                 <div>
@@ -1490,7 +1498,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                 </div>
             )}
 
-            {/* Top Bar (Fixed Header) — mobil: ixcham, ustma-ust kelmasin */}
+            {/* Top Bar (Fixed Header) - mobil: ixcham, ustma-ust kelmasin */}
             <div className="flex-none px-3 py-2 sm:px-5 sm:py-4 z-50 safe-top">
                 <GlassCard className="flex justify-between items-center gap-2 p-2 sm:p-3 rounded-2xl sm:rounded-full bg-white/5 border-white/10 shadow-lg backdrop-blur-md">
                     <div className="flex items-center gap-2 sm:gap-4 pl-1 sm:pl-2 flex-1 min-w-0 overflow-hidden">
@@ -1604,7 +1612,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                                                         patient.status === 'in-progress' ? 'bg-blue-400 animate-pulse' : 'bg-slate-500'
                                                     }`} />
                                                     <p className="text-[10px] sm:text-xs text-slate-300 font-medium uppercase tracking-wider">
-                                                        {patient.age} yosh{typeof patient.arrivalTime === 'string' ? ` · ${patient.arrivalTime}` : ''}
+                                                        {patient.age} yosh{typeof patient.arrivalTime === 'string' ? ` - ${patient.arrivalTime}` : ''}
                                                     </p>
                                                 </div>
                                             </div>
@@ -1649,7 +1657,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                     </div>
                 )}
 
-                {/* VIEW: ZIYRAK — Raqamli Tibbiy Yordamchi */}
+                {/* VIEW: ZIYRAK - Raqamli Tibbiy Yordamchi */}
                 {view === 'ziyrak' && (
                     <div className="h-full overflow-y-auto custom-scrollbar">
                         <div className="max-w-2xl mx-auto p-4 pb-28">
@@ -1665,7 +1673,54 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                 {/* VIEW: CONSULTATION (FULLSCREEN LOGIC) */}
                 {view === 'consultation' && currentPatient && (
                     <div className="flex flex-col h-full relative overflow-hidden">
-                        
+                        {/* Consultation header: bemor + AI Yordamchi */}
+                        <div className="flex-none flex items-center justify-between gap-3 px-4 py-2 bg-black/30 border-b border-white/10">
+                            <button type="button" onClick={() => setView('queue')} className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-colors" aria-label={t('back')}>
+                                <ChevronRightIcon className="w-5 h-5 rotate-180" />
+                            </button>
+                            <h2 className="font-bold text-white truncate flex-1 text-center">{currentPatient.lastName} {currentPatient.firstName} · {currentPatient.age} yosh</h2>
+                            <button
+                                type="button"
+                                onClick={() => setShowAIAssistant(v => !v)}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-xl font-semibold text-sm transition-all ${showAIAssistant ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/30' : 'bg-white/10 hover:bg-white/20 text-white'}`}
+                            >
+                                <span className="text-xs font-black bg-white/20 rounded px-1.5 py-0.5">AI</span>
+                                <span>AI Yordamchi</span>
+                            </button>
+                        </div>
+
+                        {/* AI Yordamchi panel (slide-up) */}
+                        {showAIAssistant && (
+                            <div className="absolute inset-0 z-50 flex flex-col bg-slate-900/98 backdrop-blur-xl border-t border-sky-500/30 rounded-t-3xl overflow-hidden animate-fade-in-up">
+                                <div className="flex-none flex items-center justify-between px-4 py-3 border-b border-white/10">
+                                    <h3 className="font-bold text-white">Doktor Yordamchi · Tezkor maslahat, tashxis, dori</h3>
+                                    <button type="button" onClick={() => setShowAIAssistant(false)} className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white">
+                                        <XIcon className="w-5 h-5" />
+                                    </button>
+                                </div>
+                                <div className="flex-1 overflow-y-auto p-4">
+                                    <DoctorSupportView
+                                        patientData={{
+                                            firstName: currentPatient.firstName,
+                                            lastName: currentPatient.lastName,
+                                            age: currentPatient.age,
+                                            gender: '',
+                                            complaints: complaints || currentPatient.complaints || '',
+                                            objectiveData: `${t('vitals_bp')}: ${vitals.bpSys || '-'}/${vitals.bpDia || '-'} · ${t('vitals_pulse')}: ${vitals.heartRate || '-'} · Temp: ${vitals.temp || '-'} · SpO2: ${vitals.spO2 || '-'}`,
+                                            history: '',
+                                            labResults: '',
+                                            allergies: '',
+                                            currentMedications: '',
+                                            familyHistory: '',
+                                            additionalInfo: report ? `Yakuniy tashxis: ${(report.consensusDiagnosis ?? [])[0]?.name ?? ''}. Reja: ${(report.treatmentPlan ?? []).slice(0, 2).join('; ')}` : '',
+                                        }}
+                                        language={language as string}
+                                        onError={(msg) => { setShowAIAssistant(false); alert(msg); }}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
                         {/* Floating Listening Indicator (Optional, can be subtle) */}
                         {isListening && (
                             <div className="absolute top-2 left-1/2 -translate-x-1/2 z-40 pointer-events-none">
@@ -1676,7 +1731,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                             </div>
                         )}
 
-                        {/* INPUT MODE — mobil: scroll qilish mumkin, klaviatura orqasida qolmasin */}
+                        {/* INPUT MODE - mobil: scroll qilish mumkin, klaviatura orqasida qolmasin */}
                         {mode === 'input' && (
                             <div className="flex-grow flex flex-col min-h-0 p-4 flex flex-col h-full">
                                 <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar consultation-scroll mobile-keyboard-pad pb-safe">
@@ -1686,13 +1741,13 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                                             <VitalInputCompact label={t('vitals_label_sys')} unit="mm" value={vitals.bpSys} onChange={val => handleVitalChange('bpSys', val)} icon={<span className="text-[10px] font-black">BP</span>} color="red" error={vitalErrors.bpSys} />
                                             <VitalInputCompact label={t('vitals_label_dia')} unit="mm" value={vitals.bpDia} onChange={val => handleVitalChange('bpDia', val)} icon={<span className="text-[10px] font-black">BP</span>} color="red" error={vitalErrors.bpDia} />
                                             <VitalInputCompact label={t('vitals_label_puls')} unit="bpm" value={vitals.heartRate} onChange={val => handleVitalChange('heartRate', val)} icon={<HeartRateIcon className="w-3 h-3"/>} color="pink" error={vitalErrors.heartRate} />
-                                            <VitalInputCompact label={t('vitals_label_temp')} unit="°C" value={vitals.temp} onChange={val => handleVitalChange('temp', val)} icon={<span className="text-xs">🌡</span>} color="orange" error={vitalErrors.temp} />
+                                            <VitalInputCompact label={t('vitals_label_temp')} unit="°C" value={vitals.temp} onChange={val => handleVitalChange('temp', val)} icon={<span className="text-[10px] font-black">T</span>} color="orange" error={vitalErrors.temp} />
                                             <VitalInputCompact label={t('vitals_label_spo2')} unit="%" value={vitals.spO2} onChange={val => handleVitalChange('spO2', val)} icon={<OxygenIcon className="w-3 h-3"/>} color="cyan" error={vitalErrors.spO2} />
-                                            <VitalInputCompact label={t('vitals_label_resp')} unit="/min" value={vitals.respiration} onChange={val => handleVitalChange('respiration', val)} icon={<span className="text-xs">🫁</span>} color="blue" error={vitalErrors.respiration} />
+                                            <VitalInputCompact label={t('vitals_label_resp')} unit="/min" value={vitals.respiration} onChange={val => handleVitalChange('respiration', val)} icon={<span className="text-[10px] font-black">R</span>} color="blue" error={vitalErrors.respiration} />
                                         </div>
                                     </div>
 
-                                    {/* Middle: Shikoyatlar (mobil uchun min-height — klaviatura uchun joy) */}
+                                    {/* Middle: Shikoyatlar (mobil uchun min-height - klaviatura uchun joy) */}
                                     <div className="flex-none min-h-[220px] mb-3">
                                         <GlassCard className="flex flex-col min-h-[200px] bg-white/5 border border-white/10 overflow-hidden relative">
                                             {isListening && (
@@ -1792,21 +1847,31 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                             </div>
                         )}
 
-                        {/* RESULT VIEW: darhol natija sahifasi, loading — ingichka qator */}
+                        {/* RESULT VIEW: darhol natija sahifasi, loading - ingichka qator */}
                         {mode === 'result' && (
                             <div className="flex-grow flex flex-col overflow-hidden bg-black/20 backdrop-blur-xl h-full">
-                                {/* Ingichka loading — "Ma'lumotlar qayta ishlanmoqda" o'rniga */}
+                                {/* Ingichka loading - "Ma'lumotlar qayta ishlanmoqda" o'rniga */}
                                 {isAnalyzing && (
                                     <div className="flex-none flex flex-col gap-0.5 px-4 py-2 bg-blue-500/20 border-b border-blue-500/30">
                                         <div className="flex items-center gap-3">
                                             <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin shrink-0" />
                                             <span className="text-sm font-bold text-blue-200">Tahlil qilinmoqda...</span>
                                         </div>
-                                        <p className="text-[11px] text-white/50">Iltimos, kuting. Sahifani yopmang (10–20 soniya)</p>
+                                        <p className="text-[11px] text-white/50">Iltimos, kuting. Sahifani yopmang (10-20 soniya)</p>
                                     </div>
                                 )}
 
-                                {/* Bitta sahifa — 3 bo'lim (Tashxis, Reja, Retsept) */}
+                                {/* Bitta sahifa - 3 bo'lim (Tashxis, Reja, Retsept) */}
+                                {report?.criticalFinding && (
+                                    <div className="flex-none mx-4 mt-2 p-4 rounded-2xl bg-red-500/20 border-2 border-red-500/50 shadow-lg">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                                            <span className="text-red-300 font-black text-xs uppercase tracking-widest">Shoshilinch</span>
+                                        </div>
+                                        <p className="text-white font-bold text-lg">{report.criticalFinding.finding}</p>
+                                        <p className="text-red-200/90 text-sm mt-1">{report.criticalFinding.implication}</p>
+                                    </div>
+                                )}
                                 <div className="flex-grow overflow-y-auto p-5 custom-scrollbar">
                                     {!report && isAnalyzing && (
                                         <>
@@ -1842,7 +1907,16 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                                     )}
                                 </div>
 
-                                <div className="flex-none p-5 bg-gradient-to-t from-black via-black/80 to-transparent z-30">
+                                <div className="flex-none p-5 bg-gradient-to-t from-black via-black/80 to-transparent z-30 flex flex-col gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => { setReport(null); setMode('input'); }}
+                                        disabled={isAnalyzing}
+                                        className="w-full bg-white/15 hover:bg-white/25 text-white font-bold py-3 rounded-2xl border border-white/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                    >
+                                        <span className="text-sm font-bold">Qayta</span>
+                                        <span>Qayta tahlil</span>
+                                    </button>
                                     <button 
                                         onClick={handleFinish}
                                         disabled={isAnalyzing}
@@ -1857,7 +1931,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                 )}
             </div>
 
-            {/* Bottom Dock — mobil: ixcham, barcha tugmalar sig'sin */}
+            {/* Bottom Dock - mobil: ixcham, barcha tugmalar sig'sin */}
             {(view !== 'consultation') && (
                 <div className="absolute bottom-3 left-3 right-3 sm:bottom-5 sm:left-5 sm:right-5 z-50">
                     <GlassCard className="flex justify-between sm:justify-around items-center py-2 px-1 sm:py-3 sm:px-2 rounded-2xl sm:rounded-[32px] bg-white/10 border-white/10 backdrop-blur-2xl shadow-2xl">
@@ -1881,7 +1955,7 @@ const DoctorDashboard: React.FC<DoctorDashboardProps> = ({ user, onLogout }) => 
                             {view !== 'ziyrak' && (
                                 <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
                             )}
-                            <span className={`text-base sm:text-lg flex-shrink-0 ${view === 'ziyrak' ? 'drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]' : ''}`}>🤖</span>
+                            <span className={`text-base sm:text-lg flex-shrink-0 ${view === 'ziyrak' ? 'drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]' : ''}`}>Z</span>
                             <span className="text-[8px] sm:text-[9px] font-bold mt-0.5 sm:mt-1 tracking-wider truncate w-full text-center">Ziyrak</span>
                         </button>
                         <button type="button" onClick={() => setView('profile')} className={`flex flex-col items-center justify-center p-1 sm:p-2 transition-colors min-w-0 flex-1 ${view === 'profile' ? 'text-white' : 'text-white/50 hover:text-white'}`}>

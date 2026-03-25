@@ -64,7 +64,7 @@ const DrugIdentifier: React.FC = () => {
                 <div className="bg-slate-900/90 backdrop-blur-xl rounded-2xl p-4 md:p-6 border border-white/10 shadow-xl">
                 <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-                        <span className="text-2xl">🔍</span>
+                        <span className="text-2xl font-bold">i</span>
                     </div>
                     <div>
                         <h2 className="text-xl font-bold text-white">{t('drug_identifier_title')}</h2>
@@ -79,13 +79,13 @@ const DrugIdentifier: React.FC = () => {
                         onClick={() => setMode('text')}
                         className={`flex-1 py-2.5 rounded-lg font-semibold text-sm transition ${mode === 'text' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-300 hover:text-white'}`}
                     >
-                        ✍️ Nom
+                        Nom
                     </button>
                     <button
                         onClick={() => setMode('image')}
                         className={`flex-1 py-2.5 rounded-lg font-semibold text-sm transition ${mode === 'image' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-300 hover:text-white'}`}
                     >
-                        📸 Rasm
+                        Rasm
                     </button>
                 </div>
 
@@ -151,22 +151,22 @@ const DrugIdentifier: React.FC = () => {
                     <div className="grid md:grid-cols-2 gap-3">
                         <div className="bg-blue-900/20 p-3 rounded-lg border border-blue-500/20">
                             <h4 className="font-bold text-blue-300 mb-2 text-sm flex items-center gap-1">
-                                <span>📌</span> Ko'rsatmalar
+                                <span className="opacity-90">I</span> Ko'rsatmalar
                             </h4>
                             <ul className="space-y-1 text-slate-300 text-xs">
                                 {(result.indications || []).slice(0, 5).map((ind, i) => (
-                                    <li key={i} className="flex gap-1"><span className="text-blue-400">•</span> {ind}</li>
+                                    <li key={i} className="flex gap-1"><span className="text-blue-400">·</span> {ind}</li>
                                 ))}
                             </ul>
                         </div>
 
                         <div className="bg-red-900/20 p-3 rounded-lg border border-red-500/20">
                             <h4 className="font-bold text-red-300 mb-2 text-sm flex items-center gap-1">
-                                <span>⚠️</span> Kontrendikatsiyalar
+                                <span className="opacity-90">!</span> Kontrendikatsiyalar
                             </h4>
                             <ul className="space-y-1 text-slate-300 text-xs">
                                 {(result.contraindications || []).slice(0, 5).map((con, i) => (
-                                    <li key={i} className="flex gap-1"><span className="text-red-400">•</span> {con}</li>
+                                    <li key={i} className="flex gap-1"><span className="text-red-400">·</span> {con}</li>
                                 ))}
                             </ul>
                         </div>
@@ -174,7 +174,7 @@ const DrugIdentifier: React.FC = () => {
 
                     <div className="bg-orange-900/20 p-3 rounded-lg border border-orange-500/20">
                         <h4 className="font-bold text-orange-300 mb-2 text-sm flex items-center gap-1">
-                            <span>🔴</span> Yon ta'sirlar
+                            <span className="opacity-90">Y</span> Yon ta'sirlar
                         </h4>
                         <div className="flex flex-wrap gap-2">
                             {(result.sideEffects || []).slice(0, 8).map((side, i) => (
@@ -185,18 +185,18 @@ const DrugIdentifier: React.FC = () => {
 
                     <div className="bg-gradient-to-r from-blue-900/30 to-cyan-900/30 p-4 rounded-xl border border-blue-400/20">
                         <h4 className="font-bold text-blue-200 mb-2 text-sm flex items-center gap-1">
-                            <span>📋</span> Qabul qilish yo'riqnomasi
+                            <span className="opacity-90">Q</span> Qabul qilish yo'riqnomasi
                         </h4>
                         <p className="text-blue-100 text-sm leading-relaxed">{result.dosageInstructions}</p>
                     </div>
 
                     <div className="bg-gradient-to-r from-green-900/30 to-emerald-900/30 p-4 rounded-xl border border-green-400/20">
                         <h4 className="font-bold text-green-200 mb-2 text-sm flex items-center gap-1">
-                            <span>🇺🇿</span> O'zbekistonda
+                            <span className="opacity-90">UZ</span> O'zbekistonda
                         </h4>
                         <p className="text-green-100 text-sm">{result.availabilityInUzbekistan}</p>
                         {result.priceRange && (
-                            <p className="text-green-300 text-sm font-bold mt-2">💰 Narx: {result.priceRange}</p>
+                            <p className="text-green-300 text-sm font-bold mt-2">Narx: {result.priceRange}</p>
                         )}
                     </div>
                 </div>

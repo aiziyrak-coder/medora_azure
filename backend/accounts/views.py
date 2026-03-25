@@ -1,8 +1,13 @@
 """
 Authentication and User Management Views
 """
+import json
 import logging
 from datetime import datetime, timedelta
+from django.db import IntegrityError
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 import requests
 from django.conf import settings
 from django.core.cache import cache
@@ -64,12 +69,26 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
     def post(self, request, *args, **kwargs):
-        phone = (request.data.get('phone') or '').strip()
+        data = {}
+        try:
+            raw = getattr(request, 'data', None)
+            if raw and (isinstance(raw, dict) or hasattr(raw, 'keys')):
+                data = dict(raw) if not isinstance(raw, dict) else raw.copy()
+            if not data and getattr(request, 'body', None):
+                try:
+                    body = request.body.decode('utf-8') if isinstance(request.body, bytes) else str(request.body)
+                    if body.strip():
+                        data = json.loads(body)
+                except Exception:
+                    pass
+            phone = (data.get('phone') or '').strip() if isinstance(data, dict) else ''
+        except Exception:
+            phone = ''
         if not phone:
             return Response({
                 'success': False,
                 'error': {'code': 400, 'message': 'Telefon raqami kiritilishi shart'}
-            }, status=400)
+            }, status=400, content_type='application/json')
 
         # Login rate limit: bir xil telefon uchun juda ko'p urinish
         cache_key = LOGIN_RATE_LIMIT_KEY.format(phone=phone)
@@ -81,9 +100,9 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                     'code': 429,
                     'message': "Juda ko'p noto'g'ri urinishlar. Iltimos, 15 daqiqadan keyin qayta urinib ko'ring.",
                 }
-            }, status=429)
+            }, status=429, content_type='application/json')
 
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=data)
         try:
             serializer.is_valid(raise_exception=True)
         except drf_serializers.ValidationError as e:
@@ -93,14 +112,14 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             return Response({
                 'success': False,
                 'error': {'code': 400, 'message': error_message},
-            }, status=400)
+            }, status=400, content_type='application/json')
         except (ValueError, TypeError) as e:
             cache.set(cache_key, attempts + 1, LOGIN_RATE_LIMIT_WINDOW)
             logger.error("Login error for %s: %s", _redact_phone(phone), e)
             return Response({
                 'success': False,
                 'error': {'code': 400, 'message': 'Telefon raqami yoki parol noto\'g\'ri'},
-            }, status=400)
+            }, status=400, content_type='application/json')
 
         user = serializer.validated_data['user']
         refresh = RefreshToken.for_user(user)
@@ -140,7 +159,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                     'refresh': str(refresh),
                 }
             }
-        })
+        }, content_type='application/json')
 
 
 def _register_session_for_tokens(user, refresh):
@@ -219,49 +238,96 @@ class CustomTokenRefreshView(TokenRefreshView):
         return response
 
 
-@api_view(['POST'])
-@permission_classes([permissions.AllowAny])
-def register(request):
-    """User registration endpoint"""
-    data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
-    logger.info(f"Register attempt: role={data.get('role')}, phone={data.get('phone')}, linked_doctor={data.get('linked_doctor')}")
-    if data.get('linked_doctor') in ('', None):
-        data.pop('linked_doctor', None)
-    serializer = UserCreateSerializer(data=data)
-    if serializer.is_valid():
+def _parse_register_body(request):
+    """Parse POST body manually to avoid DRF parser 400 with empty body. Always returns dict."""
+    raw = getattr(request, 'body', None) or b''
+    if isinstance(raw, bytes):
         try:
-            user = serializer.save()
+            raw = raw.decode('utf-8')
+        except Exception:
+            return {}
+    text = (raw or '').strip()
+    if not text:
+        return {}
+    try:
+        out = json.loads(text)
+        return dict(out) if isinstance(out, dict) else {}
+    except json.JSONDecodeError:
+        return {}
+
+
+def _json_http_response(payload, status_code, content_type='application/json; charset=utf-8'):
+    """Return HttpResponse with JSON body (anig Content-Length)  -  400/201 body yo'qolishini oldini olish."""
+    body = json.dumps(payload, ensure_ascii=False)
+    r = HttpResponse(body, content_type=content_type, status=status_code)
+    r['Content-Length'] = str(len(body.encode('utf-8')))
+    return r
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def register(request):
+    """User registration  -  body faqat request.body dan, javob har doim HttpResponse (anig JSON body)."""
+    try:
+        data = _parse_register_body(request)
+        if data.get('linked_doctor') in ('', None):
+            data.pop('linked_doctor', None)
+        if data.get('password') and not data.get('password_confirm'):
+            data['password_confirm'] = data['password']
+        if 'specialties' not in data or data.get('specialties') is None:
+            data['specialties'] = []
+        if data.get('phone') is not None:
+            data['phone'] = str(data['phone']).strip()
+        if data.get('role') is not None:
+            data['role'] = str(data['role']).strip().lower()
+        if not data:
+            return _json_http_response({
+                'success': False,
+                'error': {'code': 400, 'message': "So'rov tanasi bo'sh yoki noto'g'ri. JSON (phone, name, password, role) yuborilishi kerak.", 'details': {}}
+            }, 400)
+        logger.info("Register attempt: role=%s, phone=%s, keys=%s", data.get('role'), data.get('phone'), list(data.keys()))
+        serializer = UserCreateSerializer(data=data)
+        if serializer.is_valid():
+            try:
+                user = serializer.save()
+            except IntegrityError as e:
+                if 'phone' in str(e).lower() or 'unique' in str(e).lower():
+                    return _json_http_response({
+                        'success': False,
+                        'error': {'code': 400, 'message': "Bu telefon raqami allaqachon ro'yxatdan o'tgan.", 'details': {'phone': ["Bu telefon raqami allaqachon ro'yxatdan o'tgan."]}}
+                    }, 400)
+                raise
             refresh = RefreshToken.for_user(user)
             _register_session_for_tokens(user, refresh)
-            return Response({
+            user_data = UserSerializer(user).data
+            return _json_http_response({
                 'success': True,
-                'message': 'Ro\'yxatdan o\'tish muvaffaqiyatli',
+                'message': "Ro'yxatdan o'tish muvaffaqiyatli",
                 'data': {
-                    'user': UserSerializer(user).data,
-                    'tokens': {
-                        'access': str(refresh.access_token),
-                        'refresh': str(refresh),
-                    }
+                    'user': user_data,
+                    'tokens': {'access': str(refresh.access_token), 'refresh': str(refresh)}
                 }
-            }, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            logger.exception("Register: error after user save: %s", e)
-            return Response({
-                'success': False,
-                'error': {
-                    'code': status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    'message': 'Ro\'yxatdan o\'tishda server xatoligi. Iltimos, keyinroq urinib ko\'ring.',
-                }
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    logger.warning(f"Register validation failed: {serializer.errors}")
-    return Response({
-        'success': False,
-        'error': {
-            'code': status.HTTP_400_BAD_REQUEST,
-            'message': 'Ma\'lumotlar noto\'g\'ri',
-            'details': serializer.errors
-        }
-    }, status=status.HTTP_400_BAD_REQUEST)
+            }, 201)
+        flat_msg = "Ma'lumotlar noto'g'ri"
+        if serializer.errors:
+            for field, errs in serializer.errors.items():
+                if isinstance(errs, list) and errs:
+                    flat_msg = errs[0] if isinstance(errs[0], str) else str(errs[0])
+                    break
+                if isinstance(errs, str):
+                    flat_msg = errs
+                    break
+        logger.warning("Register validation failed: %s", serializer.errors)
+        return _json_http_response({
+            'success': False,
+            'error': {'code': 400, 'message': flat_msg, 'details': serializer.errors}
+        }, 400)
+    except Exception as e:
+        logger.exception("Register exception: %s", e)
+        return _json_http_response({
+            'success': False,
+            'error': {'code': 500, 'message': "Ro'yxatdan o'tishda server xatoligi. Iltimos, keyinroq urinib ko'ring."}
+        }, 500)
 
 
 @api_view(['GET', 'PUT', 'PATCH'])
@@ -465,12 +531,12 @@ def send_payment_receipt(request):
         amount = 0
 
     caption = (
-        "🚀 <b>YANGI TO'LOV (Pending)</b>\n\n"
-        f"👤 <b>Foydalanuvchi:</b> {user_name}\n"
-        f"📱 <b>Telefon:</b> {user_phone}\n"
-        f"👨‍⚕️ <b>Rol:</b> {user_role}\n"
-        f"💰 <b>Kutilgan summa:</b> {amount} $\n\n"
-        "⚠️ <i>Adminlar, chekni tekshiring va tasdiqlash tugmasini bosing.</i>"
+        "<b>YANGI TO'LOV (Pending)</b>\n\n"
+        f"<b>Foydalanuvchi:</b> {user_name}\n"
+        f"<b>Telefon:</b> {user_phone}\n"
+        f"<b>Rol:</b> {user_role}\n"
+        f"<b>Kutilgan summa:</b> {amount} $\n\n"
+        "<i>Adminlar, chekni tekshiring va tasdiqlash tugmasini bosing.</i>"
     )
 
     try:
@@ -495,8 +561,8 @@ def send_payment_receipt(request):
         reply_markup = _json.dumps({
             'inline_keyboard': [
                 [
-                    {'text': '✅ Tasdiqlash', 'callback_data': f'approve_{payment.id}'},
-                    {'text': '❌ Rad etish', 'callback_data': f'reject_{payment.id}'},
+                    {'text': '+ Tasdiqlash', 'callback_data': f'approve_{payment.id}'},
+                    {'text': '- Rad etish', 'callback_data': f'reject_{payment.id}'},
                 ]
             ]
         })
@@ -538,7 +604,7 @@ def send_payment_receipt(request):
 @permission_classes([permissions.AllowAny])
 def telegram_webhook(request):
     """
-    Telegram bot webhook — inline tugmalar callback'larini qayta ishlaydi.
+    Telegram bot webhook  -  inline tugmalar callback'larini qayta ishlaydi.
     Tasdiqlash: obunani 30 kunga faollashtiradi.
     Rad etish: obunani rad etadi.
     """
@@ -599,12 +665,12 @@ def telegram_webhook(request):
         user.save(update_fields=['subscription_status', 'subscription_expiry', 'subscription_plan'])
 
         result_text = (
-            f"✅ <b>TASDIQLANDI</b>\n\n"
-            f"👤 {user.name} ({user.phone})\n"
-            f"📅 Obuna: 30 kun ({user.subscription_expiry.strftime('%d.%m.%Y')} gacha)\n"
-            f"💰 {payment.amount} $"
+            f"<b>TASDIQLANDI</b>\n\n"
+            f"{user.name} ({user.phone})\n"
+            f"Obuna: 30 kun ({user.subscription_expiry.strftime('%d.%m.%Y')} gacha)\n"
+            f"{payment.amount} $"
         )
-        _answer_callback(token, callback_id, "✅ Tasdiqlandi! Obuna 30 kunga faollashtirildi.")
+        _answer_callback(token, callback_id, "+ Tasdiqlandi! Obuna 30 kunga faollashtirildi.")
         logger.info("Payment %s approved for user %s", payment_id, user.phone)
 
     else:  # reject
@@ -616,19 +682,19 @@ def telegram_webhook(request):
         user.save(update_fields=['subscription_status'])
 
         result_text = (
-            f"❌ <b>RAD ETILDI</b>\n\n"
-            f"👤 {user.name} ({user.phone})\n"
-            f"💰 {payment.amount} $"
+            f"<b>RAD ETILDI</b>\n\n"
+            f"{user.name} ({user.phone})\n"
+            f"{payment.amount} $"
         )
-        _answer_callback(token, callback_id, "❌ Rad etildi.")
+        _answer_callback(token, callback_id, "- Rad etildi.")
         logger.info("Payment %s rejected for user %s", payment_id, user.phone)
 
-    # Update the original message — remove buttons and show result
+    # Update the original message  -  remove buttons and show result
     if chat_id and message_id:
         try:
             edit_url = f"https://api.telegram.org/bot{token}/editMessageCaption"
             old_caption = message.get('caption', '')
-            new_caption = f"{old_caption}\n\n{'─' * 20}\n{result_text}"
+            new_caption = f"{old_caption}\n\n{'в”Ђ' * 20}\n{result_text}"
             requests.post(edit_url, json={
                 'chat_id': chat_id,
                 'message_id': message_id,

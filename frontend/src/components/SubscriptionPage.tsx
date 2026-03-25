@@ -3,7 +3,8 @@ import type { User, SubscriptionPlan } from '../types';
 import { useTranslation } from '../hooks/useTranslation';
 import * as telegramService from '../services/telegramService';
 import * as apiSubscription from '../services/apiSubscriptionService';
-import * as authService from '../services/authService';
+import * as authService from '../services/apiAuthService';
+import { INSTITUTE_NAME_FULL } from '../constants/brand';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
 import CheckCircleIcon from './icons/CheckCircleIcon';
 import UploadCloudIcon from './icons/UploadCloudIcon';
@@ -21,13 +22,13 @@ const CLINIC_PRICE_USD = 500;
 /** Shifokor: 10$/oy, chek */
 const DOCTOR_PRICE_USD = 10;
 
-/** Bank rekvizitlari – klinikalar uchun hisob raqamdan o'tkazma (500$/oy). Haqiqiy ma'lumotlarni qo'ying. */
+/** Bank rekvizitlari  -  klinikalar uchun hisob raqamdan o'tkazma (500$/oy). Haqiqiy ma'lumotlarni qo'ying. */
 const BANK_ACCOUNT = {
     bankName: 'Bank nomi',
     accountNumber: '20214000901234567890',
     mfo: '00447',
     inn: '123456789',
-    receiver: 'MEDORA AI',
+    receiver: INSTITUTE_NAME_FULL,
 };
 
 /** Shifokor uchun default reja (API dan kelmasa) */
@@ -119,9 +120,8 @@ const SubscriptionPage: React.FC<SubscriptionPageProps> = ({ user, onSubscriptio
             );
 
             if (result.success) {
-                // Update localStorage (fallback auth)
-                authService.updateUserSubscription(user.phone, 'pending');
-                // Trigger App.tsx to refresh user from API (backend already set status to 'pending')
+                // Backend allaqachon statusni 'pending' ga o'zgartirdi
+                // App.tsx yangilansin
                 onSubscriptionPending();
             } else {
                 // Foydalanuvchiga tushunarli xabar
@@ -152,7 +152,7 @@ const SubscriptionPage: React.FC<SubscriptionPageProps> = ({ user, onSubscriptio
                     <p className="text-slate-300 mb-6">
                         {user.role === 'clinic'
                             ? "To'lovingiz qabul qilindi. Admin hisob raqamni tekshirgach obunani faollashtiradi."
-                            : "Chekingiz qabul qilindi va adminlar tomonidan tekshirilmoqda. Odatda 5–10 daqiqa vaqt oladi."}
+                            : "Chekingiz qabul qilindi va adminlar tomonidan tekshirilmoqda. Odatda 5 - 10 daqiqa vaqt oladi."}
                     </p>
                     <div className="p-4 bg-white/5 rounded-xl border border-white/10 mb-6 text-sm text-slate-400">
                         Sahifani yangilang yoki birozdan so'ng qayta kiring.
@@ -171,7 +171,7 @@ const SubscriptionPage: React.FC<SubscriptionPageProps> = ({ user, onSubscriptio
             <div className="min-h-screen w-full medical-mesh-bg flex items-center justify-center p-4">
                 <div className="glass-panel max-w-2xl w-full p-8 md:p-12 animate-fade-in-up">
                     <div className="flex justify-between items-center mb-8">
-                        <h1 className="text-3xl font-black text-white">Konsilium – shartnoma asosida</h1>
+                        <h1 className="text-3xl font-black text-white">Konsilium  -  shartnoma asosida</h1>
                         <button onClick={onLogout} className="text-sm text-slate-400 hover:text-white">Chiqish</button>
                     </div>
                     <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-8 text-white shadow-2xl border border-white/10 relative overflow-hidden">
@@ -189,7 +189,7 @@ const SubscriptionPage: React.FC<SubscriptionPageProps> = ({ user, onSubscriptio
                                     Nusxa olish
                                 </button>
                             </div>
-                            <p className="text-xs text-blue-200">{BANK_ACCOUNT.bankName} • MFO: {BANK_ACCOUNT.mfo} • INN: {BANK_ACCOUNT.inn}</p>
+                            <p className="text-xs text-blue-200">{BANK_ACCOUNT.bankName} · MFO: {BANK_ACCOUNT.mfo} · INN: {BANK_ACCOUNT.inn}</p>
                             <p className="text-xs text-blue-200">Qabul qiluvchi: {BANK_ACCOUNT.receiver}</p>
                         </div>
                         <div className="mt-6 p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-xl text-sm text-yellow-100">

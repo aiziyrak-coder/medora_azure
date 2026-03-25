@@ -1,12 +1,6 @@
 """
-Azure AI Foundry – 5 ta mustaqil model klienti.
-
-Har bir deployment o'z AzureOpenAI instance'iga ega:
-  - GPT4O_CLIENT    → medora-gpt4o   (Orchestrator / Rais)
-  - DEEPSEEK_CLIENT → medora-deepseek (Mantiqiy Tahlilchi)
-  - LLAMA_CLIENT    → medora-llama    (Faktik Ma'lumotlar Bazasi)
-  - MISTRAL_CLIENT  → medora-mistral  (Klinik Protokollar Eksperti)
-  - MINI_CLIENT     → medora-mini     (Tezkor Tahlilchi)
+AI backend: Gemini-only (Azure/OpenAI removed).
+All call_model / _call_gemini use Google Gemini when GEMINI_API_KEY is set.
 """
 
 from __future__ import annotations
@@ -18,6 +12,9 @@ from typing import Any
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
+
+# When True, all AI calls use Gemini (gemini_utils). No Azure/OpenAI.
+USE_GEMINI = bool(getattr(settings, "GEMINI_API_KEY", None))
 
 # ---------------------------------------------------------------------------
 # Internal helpers
@@ -39,10 +36,10 @@ def _require_cfg(key: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Client factory – har bir deployment uchun alohida instance
+# Client factory  -  har bir deployment uchun alohida instance
 # ---------------------------------------------------------------------------
 
-_clients: dict[str, Any] = {}   # deployment_key → AzureOpenAI instance
+_clients: dict[str, Any] = {}   # deployment_key в†’ AzureOpenAI instance
 
 
 def _make_client(endpoint: str, api_key: str, api_version: str):
@@ -61,11 +58,9 @@ def _make_client(endpoint: str, api_key: str, api_version: str):
 
 
 def _get_client(deployment_key: str) -> "AzureOpenAI":  # type: ignore[name-defined]
-    """
-    Return a cached AzureOpenAI client for the given deployment key.
-    Each deployment uses the SAME endpoint/apikey but a DIFFERENT deployment name.
-    This design lets us swap endpoints per-model in the future via settings.
-    """
+    """Return a cached AzureOpenAI client. Not used when USE_GEMINI."""
+    if USE_GEMINI:
+        raise RuntimeError("Azure is disabled; only Gemini is used. Set GEMINI_API_KEY in .env")
     if deployment_key not in _clients:
         endpoint   = _require_cfg("AZURE_OPENAI_ENDPOINT")
         api_key    = _require_cfg("AZURE_OPENAI_API_KEY")
@@ -87,15 +82,15 @@ class Deployments:
     """Centralized deployment-name registry."""
 
     @staticmethod
-    def gpt4o()    -> str: return _deploy_name("AZURE_DEPLOY_GPT4O",    "medora-gpt4o")
+    def gpt4o()    -> str: return _deploy_name("AZURE_DEPLOY_GPT4O",    "FJSTI-gpt4o")
     @staticmethod
-    def deepseek() -> str: return _deploy_name("AZURE_DEPLOY_DEEPSEEK", "medora-deepseek")
+    def deepseek() -> str: return _deploy_name("AZURE_DEPLOY_DEEPSEEK", "FJSTI-deepseek")
     @staticmethod
-    def llama()    -> str: return _deploy_name("AZURE_DEPLOY_LLAMA",    "medora-llama")
+    def llama()    -> str: return _deploy_name("AZURE_DEPLOY_LLAMA",    "FJSTI-llama")
     @staticmethod
-    def mistral()  -> str: return _deploy_name("AZURE_DEPLOY_MISTRAL",  "medora-mistral")
+    def mistral()  -> str: return _deploy_name("AZURE_DEPLOY_MISTRAL",  "FJSTI-mistral")
     @staticmethod
-    def mini()     -> str: return _deploy_name("AZURE_DEPLOY_MINI",     "medora-mini")
+    def mini()     -> str: return _deploy_name("AZURE_DEPLOY_MINI",     "FJSTI-mini")
 
 
 # Keep module-level callables for backwards-compat imports
@@ -111,29 +106,38 @@ DEPLOY_MINI     = Deployments.mini
 # ---------------------------------------------------------------------------
 
 def gpt4o_client():
-    """Orchestrator / Rais – GPT-4o"""
+    """Orchestrator / Rais  -  GPT-4o"""
     return _get_client("gpt4o")
 
 def deepseek_client():
-    """Mantiqiy Tahlilchi – DeepSeek"""
+    """Mantiqiy Tahlilchi  -  DeepSeek"""
     return _get_client("deepseek")
 
 def llama_client():
-    """Faktik Ma'lumotlar Bazasi – Llama 3.3"""
+    """Faktik Ma'lumotlar Bazasi  -  Llama 3.3"""
     return _get_client("llama")
 
 def mistral_client():
-    """Klinik Protokollar Eksperti – Mistral"""
+    """Klinik Protokollar Eksperti  -  Mistral"""
     return _get_client("mistral")
 
 def mini_client():
-    """Tezkor Tahlilchi – GPT-4o-mini"""
+    """Tezkor Tahlilchi  -  GPT-4o-mini"""
     return _get_client("mini")
 
 
 # ---------------------------------------------------------------------------
 # Core call helper
 # ---------------------------------------------------------------------------
+
+def _deployment_to_gemini_model(deployment_name: str):
+    """Map Azure deployment name to Gemini model (pro or flash)."""
+    from . import gemini_utils
+    n = (deployment_name or "").lower()
+    if "mini" in n or "flash" in n or "deepseek" in n:
+        return gemini_utils.GEMINI_FLASH
+    return gemini_utils.GEMINI_PRO
+
 
 def call_model(
     deployment_name: str,
@@ -144,20 +148,26 @@ def call_model(
     stream: bool = False,
 ) -> str:
     """
-    Call any Azure deployment by name.
-
-    Args:
-        deployment_name: Azure deployment name (e.g. 'medora-gpt4o').
-        messages:        OpenAI chat messages list.
-        response_json:   If True, forces JSON output mode.
-        temperature:     Sampling temperature (0–1).
-        max_tokens:      Max output tokens.
-        stream:          Not implemented server-side; always False here.
-
-    Returns:
-        Response text (str).
+    Call AI model. When GEMINI_API_KEY is set, uses Gemini; otherwise Azure (legacy).
     """
-    # Map deployment name → client
+    if USE_GEMINI:
+        from . import gemini_utils
+        parts = []
+        for m in messages:
+            role = (m.get("role") or "user").lower()
+            content = (m.get("content") or "").strip()
+            if not content:
+                continue
+            if role == "system":
+                parts.append(f"[Tizim]: {content}")
+            else:
+                parts.append(content)
+        prompt = "\n\n".join(parts)
+        model = _deployment_to_gemini_model(deployment_name)
+        mime = "application/json" if response_json else None
+        return gemini_utils._call_gemini(prompt, model_name=model, response_mime_type=mime)
+
+    # Legacy Azure path
     deploy_to_client = {
         Deployments.gpt4o():    gpt4o_client,
         Deployments.deepseek(): deepseek_client,
@@ -167,7 +177,6 @@ def call_model(
     }
     client_factory = deploy_to_client.get(deployment_name, gpt4o_client)
     client = client_factory()
-
     kwargs: dict[str, Any] = {
         "model": deployment_name,
         "messages": messages,
@@ -176,7 +185,6 @@ def call_model(
     }
     if response_json:
         kwargs["response_format"] = {"type": "json_object"}
-
     try:
         resp = client.chat.completions.create(**kwargs)
         return (resp.choices[0].message.content or "").strip()
@@ -259,7 +267,15 @@ def patient_text(patient_data: dict) -> str:
 
 def _call_gemini(prompt: str, model_name: str | None = None,
                  response_mime_type: str | None = None) -> str:
-    """Shim: replaces old _call_gemini(). Routes to appropriate Azure model."""
+    """Shim: uses Gemini when GEMINI_API_KEY is set, else Azure."""
+    if USE_GEMINI:
+        from . import gemini_utils
+        model = gemini_utils.GEMINI_PRO
+        if model_name:
+            n = model_name.lower()
+            if "flash" in n or "mini" in n:
+                model = gemini_utils.GEMINI_FLASH
+        return gemini_utils._call_gemini(prompt, model_name=model, response_mime_type=response_mime_type)
     is_json = response_mime_type == "application/json"
     deployment = _map_old_model(model_name)
     msgs = build_messages(
@@ -302,10 +318,13 @@ SPECIALIST_NAMES: list[str] = [
 
 
 def generate_clarifying_questions(patient_data: dict) -> list[str]:
+    if USE_GEMINI:
+        from . import gemini_utils
+        return gemini_utils.generate_clarifying_questions(patient_data)
     text = patient_text(patient_data)
     prompt = (
         f"Bemor:\n{text}\n\n"
-        "3–5 ta QISQA, ANIQ aniqlashtiruvchi savol yozing.\n"
+        "3 - 5 ta QISQA, ANIQ aniqlashtiruvchi savol yozing.\n"
         "PRIORITY 1: Allergiya, dori-darmonlar, homiladorlik.\n"
         "PRIORITY 2: Vital belgilar, lab qiymatlari.\n"
         "PRIORITY 3: Simptomlar davomiyligi, oila anamnezi.\n"
@@ -381,10 +400,13 @@ def recommend_specialists(
 
 
 def generate_diagnoses(patient_data: dict) -> list[dict]:
+    if USE_GEMINI:
+        from . import gemini_utils
+        return gemini_utils.generate_diagnoses(patient_data)
     text = patient_text(patient_data)
     prompt = (
         f"Bemor:\n{text}\n\n"
-        "3–5 ta eng ehtimol differensial tashxis. O'ZBEKISTON SSV protokollari.\n"
+        "3 - 5 ta eng ehtimol differensial tashxis. O'ZBEKISTON SSV protokollari.\n"
         '{"diagnoses": [{"name":"...","probability":70,"justification":"...","evidenceLevel":"High","reasoningChain":["..."],"uzbekProtocolMatch":"..."}]}'
     )
     msgs = build_messages(

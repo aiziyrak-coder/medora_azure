@@ -6,7 +6,6 @@ import type { Language } from '../i18n/LanguageContext';
 const languageOptions: { id: Language; label: string; short: string; }[] = [
     { id: 'uz-C', label: "Ўзбекча (Кирилл)", short: "ЎЗБ" },
     { id: 'uz-L', label: "O'zbekcha (Lotin)", short: "O'ZB" },
-    { id: 'kaa', label: "Qaraqalpaq tili", short: "QQP" },
     { id: 'ru', label: "Русский", short: "РУС" },
     { id: 'en', label: "English", short: "ENG" },
 ];
@@ -83,7 +82,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
                                         }`}
                                 >
                                     <span>{option.label}</span>
-                                    {language === option.id && <span className="text-white">✓</span>}
+                                    {language === option.id && <span className="text-white">+</span>}
                                 </button>
                             </li>
                         ))}

@@ -31,8 +31,8 @@
 - Custom exception handler to'g'ri sozlangan va ishlayapti
 - Pagination class `success` va `data` maydonlarini qo'shadi
 - **Fayllar:**
-  - `backend/medoraai_backend/exceptions.py` - Custom exception handler
-  - `backend/medoraai_backend/settings.py` - Exception handler ro'yxatdan o'tgan
+  - `backend/AiDoktorai_backend/exceptions.py` - Custom exception handler
+  - `backend/AiDoktorai_backend/settings.py` - Exception handler ro'yxatdan o'tgan
   - Barcha view fayllar consistent formatni qo'llaydi
 
 ### 4. ✅ Error Handling Yaxshilash
@@ -126,3 +126,4 @@ Dastur professional darajada yozilgan va barcha asosiy best practices qo'llanilg
 - ✅ Fallback mechanisms
 
 Dastur production'ga tayyor!
+-NoNewline

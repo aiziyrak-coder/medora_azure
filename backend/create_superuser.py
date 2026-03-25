@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Django admin uchun superuser yaratish.
-Loyihada USERNAME_FIELD = 'phone' — admin panelda "Username" o'rnida TELEFON raqam kiritiladi.
+Loyihada USERNAME_FIELD = 'phone'  -  admin panelda "Username" o'rnida TELEFON raqam kiritiladi.
 
 Ishlatish:
   ADMIN_PHONE=+998... ADMIN_PASSWORD=... python create_superuser.py

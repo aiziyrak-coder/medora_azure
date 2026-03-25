@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import type { FinalReport, PatientData } from '../types';
+import { normalizeConsensusDiagnosis, getReasoningChainArray } from '../types';
 import ClipboardListIcon from './icons/ClipboardListIcon';
 import BrainCircuitIcon from './icons/BrainCircuitIcon';
 import ShieldWarningIcon from './icons/ShieldWarningIcon';
@@ -21,15 +22,16 @@ import CheckIcon from './icons/CheckIcon';
 import XIcon from './icons/XIcon';
 import ShieldCheckIcon from './icons/ShieldCheckIcon';
 
+/** Hujjat bo'limi — aniq chegaralangan, asosiy matn bilan aralashmasin */
 const Section: React.FC<{ title: string; children: React.ReactNode; icon: React.ReactNode }> = ({ title, children, icon }) => (
-    <div className="animate-fade-in-up mt-8">
-        <div className="flex items-center gap-3">
-            <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-slate-100">
+    <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="px-4 py-3 bg-slate-100 border-b border-slate-200 flex items-center gap-3">
+            <div className="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-lg bg-white border border-slate-200">
                 {icon}
             </div>
-            <h3 className="text-lg font-bold text-text-primary">{title}</h3>
+            <h3 className="text-base font-bold text-slate-800">{title}</h3>
         </div>
-        <div className="mt-3 pl-14 space-y-4 text-sm">
+        <div className="p-4 space-y-4 text-sm">
             {children}
         </div>
     </div>
@@ -37,21 +39,28 @@ const Section: React.FC<{ title: string; children: React.ReactNode; icon: React.
 
 const LifestylePlanCard: React.FC<{plan: FinalReport['lifestylePlan']}> = ({plan}) => {
     if (!plan) return null;
+    const diet = Array.isArray(plan.diet) ? plan.diet : [];
+    const exercise = Array.isArray(plan.exercise) ? plan.exercise : [];
+    if (diet.length === 0 && exercise.length === 0) return null;
     return (
         <Section title="Hayot Tarzi va Ovqatlanish Rejasi" icon={<LightBulbIcon className="text-yellow-500 h-6 w-6"/>}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-3 bg-slate-100/50 rounded-lg border border-border-color">
-                    <h4 className="font-semibold">Ovqatlanish Tavsiyalari:</h4>
-                    <ul className="list-disc list-inside mt-1">
-                        {plan.diet.map((item, i) => <li key={i}>{item}</li>)}
-                    </ul>
-                </div>
-                <div className="p-3 bg-slate-100/50 rounded-lg border border-border-color">
-                    <h4 className="font-semibold">Jismoniy Mashqlar:</h4>
-                    <ul className="list-disc list-inside mt-1">
-                        {plan.exercise.map((item, i) => <li key={i}>{item}</li>)}
-                    </ul>
-                </div>
+                {diet.length > 0 && (
+                    <div className="p-3 bg-slate-100/50 rounded-lg border border-border-color">
+                        <h4 className="font-semibold">Ovqatlanish Tavsiyalari:</h4>
+                        <ul className="list-disc list-inside mt-1">
+                            {diet.map((item, i) => <li key={i}>{item}</li>)}
+                        </ul>
+                    </div>
+                )}
+                {exercise.length > 0 && (
+                    <div className="p-3 bg-slate-100/50 rounded-lg border border-border-color">
+                        <h4 className="font-semibold">Jismoniy Mashqlar:</h4>
+                        <ul className="list-disc list-inside mt-1">
+                            {exercise.map((item, i) => <li key={i}>{item}</li>)}
+                        </ul>
+                    </div>
+                )}
             </div>
         </Section>
     );
@@ -99,12 +108,45 @@ const RelatedResearchCard: React.FC<{research: FinalReport['relatedResearch']}> 
 };
 
 
-const FinalReportCard: React.FC<{ report: FinalReport, patientData: Partial<PatientData>, isScenario?: boolean, onUpdateReport?: (updatedReport: Partial<FinalReport>) => void }> = ({ report, patientData, isScenario = false, onUpdateReport }) => {
+/** Normalize treatmentPlan item: Gemini sometimes returns objects {step,details,urgency} */
+const planItemToString = (item: unknown): string => {
+    if (typeof item === 'string') return item;
+    if (item && typeof item === 'object') {
+        const o = item as Record<string, unknown>;
+        return [o.step, o.details, o.urgency, o.action, o.description, o.text]
+            .filter(v => v && typeof v === 'string')
+            .join(' - ') || JSON.stringify(item);
+    }
+    return String(item ?? '');
+};
+
+/** Normalize recommendedTests item: API/AI may return string or object { testName, reason, urgency } */
+const recommendedTestToDisplay = (item: unknown): string => {
+    if (typeof item === 'string') return item;
+    if (item && typeof item === 'object') {
+        const o = item as Record<string, unknown>;
+        const testName = o.testName ?? o.name ?? o.test;
+        const reason = o.reason ?? o.reasoning;
+        const urgency = o.urgency;
+        const parts = [testName, reason, urgency].filter(v => v != null && String(v).trim());
+        return parts.map(String).join(' - ') || JSON.stringify(item);
+    }
+    return String(item ?? '');
+};
+
+const FinalReportCard: React.FC<{
+  report: FinalReport;
+  patientData: Partial<PatientData>;
+  isScenario?: boolean;
+  onUpdateReport?: (updatedReport: Partial<FinalReport>) => void;
+}> = ({ report, patientData, isScenario = false, onUpdateReport }) => {
+    const safePlan = (Array.isArray(report.treatmentPlan) ? report.treatmentPlan : []).map(planItemToString);
+
     const [isEditingPlan, setIsEditingPlan] = useState(false);
-    const [editedPlan, setEditedPlan] = useState<string[]>(report.treatmentPlan);
+    const [editedPlan, setEditedPlan] = useState<string[]>(safePlan);
 
     useEffect(() => {
-        setEditedPlan(report.treatmentPlan);
+        setEditedPlan((Array.isArray(report.treatmentPlan) ? report.treatmentPlan : []).map(planItemToString));
     }, [report.treatmentPlan]);
     
     const handlePlanChange = (index: number, value: string) => {
@@ -130,61 +172,77 @@ const FinalReportCard: React.FC<{ report: FinalReport, patientData: Partial<Pati
     };
 
     const handleCancelEditPlan = () => {
-        setEditedPlan(report.treatmentPlan);
+        setEditedPlan((Array.isArray(report.treatmentPlan) ? report.treatmentPlan : []).map(planItemToString));
         setIsEditingPlan(false);
     };
 
     return (
         <div className={`animate-fade-in-up mt-8 ${isScenario ? 'p-4 border-2 border-dashed border-purple-300 rounded-2xl bg-purple-50' : ''}`}>
-            <h2 className={`text-3xl font-extrabold mb-6 pb-4 border-b-2 ${isScenario ? 'text-purple-700 border-purple-300' : 'text-transparent bg-clip-text animated-gradient-text border-border-color'}`}>
-                {isScenario ? "Alternativ Senariy Natijasi" : "Yakuniy Xulosa: Konsilium Konsensusi"}
-            </h2>
-            <div className="space-y-10">
-                {report.criticalFinding && (
-                    <div className="p-4 bg-red-100 border-l-4 border-red-500 rounded-r-lg shadow-lg">
-                        <div className="flex items-center gap-3">
-                             <AlertTriangleIcon className="w-8 h-8 text-red-600"/>
-                             <div>
-                                 <h3 className="text-xl font-bold text-red-800">DIQQAT! KRITIK TOPILMA!</h3>
-                                 <p className="font-semibold text-red-700">{report.criticalFinding.finding}</p>
-                             </div>
-                        </div>
-                        <p className="mt-2 text-sm text-red-700 pl-11">{report.criticalFinding.implication}</p>
-                    </div>
-                )}
-                
-                <Section title="Konsensus Tashxis" icon={<ClipboardListIcon className="w-6 h-6 text-purple-600"/>}>
-                    {report.consensusDiagnosis.map((diag, index) => (
-                        <div key={index} className="p-4 bg-white/80 rounded-xl border border-border-color shadow-sm mb-3">
-                            <div className="flex justify-between font-bold text-base text-text-primary">
-                                <span className="text-lg text-blue-900">{diag.name}</span>
-                                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">{diag.probability}%</span>
+            {/* Asosiy sarlavha — hujjat uslubi */}
+            <div className="mb-8">
+                <h1 className={`text-2xl font-bold tracking-tight ${isScenario ? 'text-purple-700' : 'text-slate-800'}`}>
+                    {isScenario ? "Alternativ Senariy Natijasi" : "YAKUNIY KLINIK XULOSA"}
+                </h1>
+                <p className="text-sm text-slate-500 mt-1">Konsilium konsensusi asosida - tibbiy hujjat</p>
+            </div>
+
+            {/* ASOSIY XULOSA — bitta aniq blok, boshqa matn bilan aralashmasin */}
+            <div className="rounded-2xl border-2 border-slate-200 bg-white shadow-md overflow-hidden mb-10">
+                <div className="px-6 py-4 bg-slate-800 text-white">
+                    <h2 className="text-lg font-bold uppercase tracking-wide">Asosiy xulosa</h2>
+                    <p className="text-slate-200 text-sm mt-0.5">Konsensus tashxis va kritik topilmalar</p>
+                </div>
+                <div className="p-6 space-y-6">
+                    {report.criticalFinding && (
+                        <div className="p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                            <div className="flex items-center gap-3">
+                                <AlertTriangleIcon className="w-8 h-8 text-red-600 flex-shrink-0"/>
+                                <div>
+                                    <h3 className="text-base font-bold text-red-800">DIQQAT! KRITIK TOPILMA!</h3>
+                                    <p className="font-semibold text-red-700 text-sm mt-1">{report.criticalFinding.finding}</p>
+                                </div>
                             </div>
-                            
-                            {/* Protocols */}
-                            {diag.uzbekProtocolMatch && (
-                                <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-green-50 border border-green-200 rounded-lg text-xs font-semibold text-green-700">
-                                    <ShieldCheckIcon className="w-4 h-4" />
-                                    {diag.uzbekProtocolMatch}
-                                </div>
-                            )}
-
-                            {/* Deep Reasoning Chain */}
-                            {diag.reasoningChain && diag.reasoningChain.length > 0 && (
-                                <div className="mt-3 p-3 bg-slate-50 rounded-lg border-l-4 border-blue-400">
-                                    <p className="text-xs font-bold text-slate-500 uppercase mb-1">Mantiqiy Zanjir (Reasoning):</p>
-                                    <ol className="list-decimal list-inside text-sm text-text-secondary space-y-1">
-                                        {diag.reasoningChain.map((step, i) => (
-                                            <li key={i}>{step}</li>
-                                        ))}
-                                    </ol>
-                                </div>
-                            )}
-
-                            <p className="text-sm text-text-secondary mt-3 font-medium">Asoslash: {diag.justification}</p>
+                            <p className="mt-2 text-sm text-red-700 pl-11">{report.criticalFinding.implication}</p>
                         </div>
-                    ))}
-                </Section>
+                    )}
+                    <div>
+                        <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Konsensus tashxis(lar)</h3>
+                        {normalizeConsensusDiagnosis(report.consensusDiagnosis).map((diag, index) => (
+                            <div key={index} className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 mb-4 last:mb-0">
+                                <div className="flex justify-between items-start gap-2">
+                                    <span className="text-base font-bold text-slate-900">{diag.name}</span>
+                                    <span className="px-2.5 py-0.5 bg-blue-100 text-blue-800 rounded text-sm font-semibold shrink-0">
+                                        {Number.isFinite(diag.probability) ? `${diag.probability}%` : '-'}
+                                    </span>
+                                </div>
+                                {diag.uzbekProtocolMatch && (
+                                    <div className="mt-2 inline-flex items-center gap-2 px-2.5 py-1 bg-green-50 border border-green-200 rounded text-xs font-semibold text-green-700">
+                                        <ShieldCheckIcon className="w-4 h-4" />
+                                        {diag.uzbekProtocolMatch}
+                                    </div>
+                                )}
+                                <p className="text-sm text-slate-700 mt-2 font-medium">Asoslash: {diag.justification}</p>
+                                {(() => {
+                                    const chain = getReasoningChainArray(diag);
+                                    return chain.length > 0 && (
+                                        <div className="mt-3 p-3 bg-white rounded-lg border border-slate-200">
+                                            <p className="text-xs font-bold text-slate-500 uppercase mb-2">Mantiqiy zanjir</p>
+                                            <ol className="list-decimal list-inside text-sm text-slate-600 space-y-1">
+                                                {chain.map((step, i) => (
+                                                    <li key={i}>{step}</li>
+                                                ))}
+                                            </ol>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* Qolgan bo'limlar — alohida hujjat bo'limlari */}
+            <div className="space-y-10">
 
                 {report.imageAnalysis?.findings && (
                     <Section title="Tasvir Tahlili" icon={<ImageIcon className="w-6 h-6"/>}>
@@ -195,12 +253,31 @@ const FinalReportCard: React.FC<{ report: FinalReport, patientData: Partial<Pati
                     </Section>
                 )}
 
+                {report.unexpectedFindings && String(report.unexpectedFindings).trim() && (
+                    <Section title="Kutilmagan topilmalar va gipotezalar" icon={<LightBulbIcon className="w-6 h-6 text-amber-500"/>}>
+                        <p className="text-text-primary whitespace-pre-wrap">{report.unexpectedFindings}</p>
+                    </Section>
+                )}
+
                 <Section title="Tavsiya Etilgan Davolash Rejasi" icon={<BrainCircuitIcon className="w-6 h-6"/>}>
                     {!isEditingPlan ? (
                         <div className="space-y-3">
+                            {safePlan.length > 0 ? (
                             <ul className="list-disc list-inside space-y-2 text-text-primary">
-                                {report.treatmentPlan.map((item, index) => <li key={index}>{item}</li>)}
+                                {safePlan.map((item, index) => <li key={index}>{item}</li>)}
                             </ul>
+                            ) : (
+                                <div className="space-y-2 text-sm text-slate-600">
+                                    <p className="italic text-slate-500">
+                                        Yakuniy JSONda davolash rejasi bo‘sh kelgan. Quyidagi «Dori-darmonlar» bo‘limi va konsensus tashxisiga qarab, «Tahrirlash» orqali 3–5 ta aniq qadamni qo‘lda yozishingiz mumkin.
+                                    </p>
+                                    {(Array.isArray(report.medicationRecommendations) && report.medicationRecommendations.length > 0) && (
+                                        <p className="text-xs text-slate-500">
+                                            Masalan, dori blokidagi tavsiyalar asosida: birinchi qadam — tashxisni tasdiqlash / qo‘shimcha tekshiruv; keyingi qadamlar — dori rejasi va kuzatuv.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
                             {onUpdateReport && !isScenario && (
                                 <button onClick={() => setIsEditingPlan(true)} className="flex items-center gap-2 text-sm font-semibold text-accent-color-blue bg-slate-200/50 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors mt-3">
                                     <PencilIcon className="w-4 h-4" /> Tahrirlash
@@ -241,13 +318,19 @@ const FinalReportCard: React.FC<{ report: FinalReport, patientData: Partial<Pati
                 
                 <Section title="Dori-Darmonlar bo'yicha Tavsiyalar (O'zbekiston)" icon={<PillIcon className="w-6 h-6"/>}>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     {report.medicationRecommendations.map((med, index) => (
+                     {(Array.isArray(report.medicationRecommendations) && report.medicationRecommendations.length > 0) ? report.medicationRecommendations.map((med, index) => {
+                        const drugName = (med.name && String(med.name).trim()) || (med.localAvailability && String(med.localAvailability).trim()) || 'Dori';
+                        const hasRealName = med.name && String(med.name).trim() && !/^(doza|dori|tabletka|tavsiya)$/i.test(String(med.name).trim());
+                        const showLocalAvailability = med.localAvailability && (hasRealName || !drugName.includes(med.localAvailability));
+                        return (
                         <div key={index} className="p-4 bg-slate-50 rounded-xl border border-border-color shadow-sm relative overflow-hidden">
                            <div className="absolute top-0 right-0 bg-blue-500 w-16 h-16 rounded-bl-full -mr-8 -mt-8 opacity-10"></div>
-                           <p className="font-bold text-lg text-text-primary">{med.name}</p>
-                           <p className="text-sm text-text-secondary mt-1"><span className="font-semibold">Doza:</span> {med.dosage}</p>
+                           <p className="font-bold text-lg text-text-primary">{drugName}</p>
+                           {(med.dosage && String(med.dosage).trim()) ? (
+                               <p className="text-sm text-text-secondary mt-1"><span className="font-semibold">Doza:</span> {med.dosage}</p>
+                           ) : null}
                            
-                           {med.localAvailability && (
+                           {showLocalAvailability && (
                                <div className="mt-2 p-2 bg-green-50 border border-green-100 rounded text-xs text-green-800">
                                    <span className="font-bold">Mahalliy savdo nomlari:</span> {med.localAvailability}
                                </div>
@@ -257,9 +340,15 @@ const FinalReportCard: React.FC<{ report: FinalReport, patientData: Partial<Pati
                                <p className="text-xs text-slate-500 mt-1 italic">Taxminiy narxi: {med.priceEstimate}</p>
                            )}
                            
-                           <p className="text-xs text-text-secondary mt-2 border-t pt-2">{med.notes}</p>
+                           {med.notes && (
+                               <p className="text-sm text-text-secondary mt-2 pt-2 border-t border-slate-200">
+                                   <span className="font-semibold">Qanday qabul qilish (yo&apos;riqnoma):</span> {med.notes}
+                               </p>
+                           )}
                         </div>
-                    ))}
+                    ); }) : (
+                        <p className="text-slate-500 text-sm italic">Dori tavsiyalari tashxis asosida hisobotga kiritiladi. Konsiliumni qayta ishga tushiring yoki bir oz kuting.</p>
+                    )}
                     </div>
                 </Section>
 
@@ -267,7 +356,9 @@ const FinalReportCard: React.FC<{ report: FinalReport, patientData: Partial<Pati
 
                  <Section title="Qo'shimcha Tekshiruvlar" icon={<DocumentTextIcon className="w-6 h-6"/>}>
                     <ul className="list-disc list-inside space-y-2 text-text-primary">
-                        {report.recommendedTests.map((item, index) => <li key={index}>{item}</li>)}
+                        {(Array.isArray(report.recommendedTests) ? report.recommendedTests : []).map((item, index) => (
+                            <li key={index}>{recommendedTestToDisplay(item)}</li>
+                        ))}
                     </ul>
                 </Section>
                 
@@ -284,14 +375,16 @@ const FinalReportCard: React.FC<{ report: FinalReport, patientData: Partial<Pati
                 <RelatedResearchCard research={report.relatedResearch} />
 
                  <Section title="Inkor Etilgan Gipotezalar" icon={<DocumentTextIcon className="text-slate-500 w-6 h-6" />}>
-                     {report.rejectedHypotheses.map((hypo, index) => (
+                     {(Array.isArray(report.rejectedHypotheses) && report.rejectedHypotheses.length > 0) ? report.rejectedHypotheses.map((hypo, index) => (
                         <div key={index} className="p-3 bg-slate-100/50 rounded-lg border border-border-color">
                            <p className="font-semibold text-text-primary line-through">{hypo.name}</p>
                            <p className="text-sm text-text-secondary mt-1">Sabab: {hypo.reason}</p>
                         </div>
-                    ))}
+                    )) : (
+                        <p className="text-slate-500 text-sm italic">Ma'lumot kiritilmagan.</p>
+                    )}
                 </Section>
-                
+
                 {/* Legal Disclaimer specific to Uzbekistan */}
                 <div className="mt-8 p-4 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-500 text-center">
                     <p className="font-bold mb-1">Yuridik Eslatma (O'zbekiston Respublikasi):</p>

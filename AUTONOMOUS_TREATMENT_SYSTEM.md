@@ -2,7 +2,7 @@
 
 ## Umumiy Ma'lumot
 
-MEDORA AI tizimiga avtonom davolash protokollarini yaratish va boshqarish imkoniyati qo'shildi. Bu tizim inson aralashuvini minimal qilib, davolash jarayonini to'liq avtomatlashtiradi.
+AiDoktor tizimiga avtonom davolash protokollarini yaratish va boshqarish imkoniyati qo'shildi. Bu tizim inson aralashuvini minimal qilib, davolash jarayonini to'liq avtomatlashtiradi.
 
 ## Asosiy Komponentlar
 
@@ -284,3 +284,4 @@ python manage.py test ai_services.tests.test_integration
 ---
 
 **Eslatma:** Bu tizim faqat shifokor nazorati ostida ishlatilishi kerak. Avtonom qarorlar har doim tekshiruvdan o'tishi va inson tomonidan tasdiqlanishi shart.
+-NoNewline

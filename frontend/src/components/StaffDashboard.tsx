@@ -18,6 +18,7 @@ import QRCode from 'qrcode'; // Import QR library
 import { useTranslation } from '../hooks/useTranslation';
 import LanguageSwitcher from './LanguageSwitcher';
 import { logger } from '../utils/logger';
+import { INSTITUTE_NAME_SHORT, INSTITUTE_LOGO_SRC } from '../constants/brand';
 
 interface StaffDashboardProps {
     user: User;
@@ -109,7 +110,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ user, onLogout }) => {
                     </head>
                     <body>
                         <div class="ticket">
-                            <h2>MEDORA AI</h2>
+                            <h2>{INSTITUTE_NAME_SHORT}</h2>
                             <p>Klinik Navbat Cheki</p>
                             <br/>
                             <h1>#${item.ticketNumber}</h1>
@@ -185,7 +186,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ user, onLogout }) => {
     const completedList = queue.filter(p => p.status === 'completed').sort((a, b) => b.ticketNumber - a.ticketNumber);
 
     return (
-        <div className="h-screen w-full medical-mesh-bg text-white flex flex-col font-sans overflow-hidden relative">
+        <div className="h-screen w-full max-w-[100vw] medical-mesh-bg text-white flex flex-col font-sans overflow-hidden relative min-w-0">
             
             {/* --- ADD PATIENT MODAL --- */}
             {showAddModal && (
@@ -197,7 +198,7 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ user, onLogout }) => {
                         </div>
                         
                         <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-xs font-bold text-slate-400 uppercase ml-1">{t('data_input_patient_name')}</label>
                                     <input 
@@ -259,7 +260,8 @@ const StaffDashboard: React.FC<StaffDashboardProps> = ({ user, onLogout }) => {
             {/* Header */}
             <div className="p-5 flex justify-between items-center safe-top bg-black/20 backdrop-blur-md">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold">
+                    <img src={INSTITUTE_LOGO_SRC} alt={INSTITUTE_NAME_SHORT} className="w-10 h-10 rounded-full object-contain bg-white/5 flex-shrink-0" />
+                    <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold flex-shrink-0">
                         {user.name.charAt(0)}
                     </div>
                     <div>

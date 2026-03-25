@@ -1,5 +1,5 @@
 /**
- * ZiyrakConsultation — Passiv Konsultatsiya Monitori
+ * ZiyrakConsultation  -  Passiv Konsultatsiya Monitori
  * Shifokor-bemor suhbatini yozib oladi va real-vaqt transkript yaratadi.
  */
 import React, { useState, useRef, useCallback, useEffect } from 'react';
@@ -26,9 +26,9 @@ interface Props {
 }
 
 const SPEAKERS = {
-  doctor:  { label: "👨‍⚕️ Shifokor", color: "text-sky-400" },
-  patient: { label: "🧑 Bemor",     color: "text-violet-400" },
-  system:  { label: "🤖 Ziyrak",    color: "text-emerald-400" },
+  doctor:  { label: "Shifokor", color: "text-sky-400" },
+  patient: { label: "Bemor",    color: "text-violet-400" },
+  system:  { label: "Ziyrak",  color: "text-emerald-400" },
 };
 
 export const ZiyrakConsultation: React.FC<Props> = ({
@@ -163,7 +163,7 @@ export const ZiyrakConsultation: React.FC<Props> = ({
       {/* Alert */}
       {alertMsg && (
         <div className="rounded-2xl bg-red-950/60 border border-red-500 p-3 flex gap-2 animate-pulse">
-          <span className="text-2xl">🚨</span>
+          <span className="text-red-400 font-bold text-xl">!</span>
           <p className="text-red-200 text-sm">{alertMsg}</p>
         </div>
       )}
@@ -174,7 +174,7 @@ export const ZiyrakConsultation: React.FC<Props> = ({
       }`}>
         <div className="flex items-center justify-between mb-2">
           <span className={`text-xs font-medium ${isListening ? "text-sky-400" : "text-slate-500"}`}>
-            {isListening ? `🔴 ${formatDur(duration)}` : "Tayyorlanmoqda..."}
+            {isListening ? `${formatDur(duration)}` : "Tayyorlanmoqda..."}
           </span>
           <span className="text-xs text-slate-500">{transcript.length} gap</span>
         </div>
@@ -201,7 +201,7 @@ export const ZiyrakConsultation: React.FC<Props> = ({
         className={`w-full py-3 rounded-2xl font-semibold text-sm transition-all active:scale-95 ${
           isListening ? "bg-red-600 hover:bg-red-500 text-white" : "bg-sky-600 hover:bg-sky-500 text-white"
         }`}>
-        {isListening ? "⏹ Tinglashni To'xtatish" : "🎙 Tinglashni Boshlash"}
+        {isListening ? "Tinglashni To'xtatish" : "Tinglashni Boshlash"}
       </button>
 
       {/* Transcript */}
@@ -223,7 +223,7 @@ export const ZiyrakConsultation: React.FC<Props> = ({
               <span className={`shrink-0 text-xs font-medium mt-0.5 ${SPEAKERS[speaker].color}`}>
                 {SPEAKERS[speaker].label}
               </span>
-              <span className="text-slate-400 italic">{interim}▋</span>
+              <span className="text-slate-400 italic">{interim}</span>
             </div>
           )}
         </div>
@@ -233,7 +233,7 @@ export const ZiyrakConsultation: React.FC<Props> = ({
       {!isListening && transcript.length > 3 && !diagnosis && (
         <button onClick={handleDiagnosis} disabled={diagnosing}
           className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-sky-600 text-white font-semibold disabled:opacity-50">
-          {diagnosing ? "⟳ Ziyrak tahlil qilmoqda..." : "🧠 Ziyrak Tashxis Qo'ysin"}
+          {diagnosing ? "Ziyrak tahlil qilmoqda..." : "Ziyrak Tashxis Qo'ysin"}
         </button>
       )}
 
@@ -241,8 +241,8 @@ export const ZiyrakConsultation: React.FC<Props> = ({
       {diagnosis && (
         <div className="rounded-2xl bg-emerald-950/30 border border-emerald-500/30 p-4 space-y-2">
           <div className="flex items-center justify-between">
-            <h4 className="font-bold text-emerald-300 text-sm">🧠 Ziyrak Tashxis Xulosasi</h4>
-            <button onClick={() => setDiagnosis(null)} className="text-slate-500 text-lg">×</button>
+            <h4 className="font-bold text-emerald-300 text-sm">Ziyrak Tashxis Xulosasi</h4>
+            <button onClick={() => setDiagnosis(null)} className="text-slate-500 text-lg" aria-label="Yopish">x</button>
           </div>
           {diagnosis.patient_complaints_summary && (
             <p className="text-slate-300 text-sm">{String(diagnosis.patient_complaints_summary)}</p>

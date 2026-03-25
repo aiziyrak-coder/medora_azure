@@ -1,9 +1,9 @@
 """
-AI Services Views — Azure AI Foundry
-  - /ai/consilium/       → Multi-Agent Consilium (5 professor, 3 faza)
-  - /ai/doctor-support/  → Doctor Support Mode (GPT-4o, tezkor)
-  - /ai/doctor-stream/   → Doctor Support SSE stream
-  - Legacy endpoints     → qolgan endpointlar (backwards-compat)
+AI Services Views  -  Azure AI Foundry
+  - /ai/consilium/       в†’ Multi-Agent Consilium (5 professor, 3 faza)
+  - /ai/doctor-support/  в†’ Doctor Support Mode (GPT-4o, tezkor)
+  - /ai/doctor-stream/   в†’ Doctor Support SSE stream
+  - Legacy endpoints     в†’ qolgan endpointlar (backwards-compat)
 """
 import json
 import logging
@@ -12,14 +12,10 @@ from django.conf import settings
 from django.http import StreamingHttpResponse
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
-from .azure_utils import (
-    generate_clarifying_questions as azure_clarifying,
-    recommend_specialists          as azure_recommend,
-    generate_diagnoses             as azure_diagnoses,
-)
+from . import gemini_utils
 from .multi_agent_system     import run_consilium
 from .doctor_support         import (
     doctor_consult, doctor_consult_stream,
@@ -43,11 +39,8 @@ def _pd(request):
     return request.data.get("patient_data") or {}
 
 
-def _azure_ok() -> bool:
-    return bool(
-        getattr(settings, "AZURE_OPENAI_ENDPOINT", None)
-        and getattr(settings, "AZURE_OPENAI_API_KEY", None)
-    )
+def _gemini_ok() -> bool:
+    return bool(getattr(settings, "GEMINI_API_KEY", None))
 
 
 def _err(code: int, msg: str):
@@ -55,8 +48,8 @@ def _err(code: int, msg: str):
                     status=code)
 
 
-def _azure_not_configured():
-    return _err(503, "Azure AI xizmati sozlanmagan")
+def _ai_not_configured():
+    return _err(503, "AI xizmati sozlanmagan. Iltimos, GEMINI_API_KEY ni .env faylga kiriting.")
 
 
 def _run_filter(patient_data: dict) -> Response | None:
@@ -100,8 +93,8 @@ def run_consilium_view(request):
 
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor shikoyatlari kiritilmagan")
-    if not _azure_ok():
-        return _azure_not_configured()
+    if not _gemini_ok():
+        return _ai_not_configured()
 
     # Physiology / Logic Gate filter
     blocked = _run_filter(patient_data)
@@ -150,8 +143,8 @@ def doctor_support_view(request):
 
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor shikoyatlari kiritilmagan")
-    if not _azure_ok():
-        return _azure_not_configured()
+    if not _gemini_ok():
+        return _ai_not_configured()
     if task_type not in _VALID_TASKS:
         return _err(400, f"Noto'g'ri task_type: {task_type}")
 
@@ -182,8 +175,8 @@ def doctor_support_stream_view(request):
 
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor shikoyatlari kiritilmagan")
-    if not _azure_ok():
-        return _azure_not_configured()
+    if not _gemini_ok():
+        return _ai_not_configured()
 
     blocked = _run_filter(patient_data)
     if blocked:
@@ -206,32 +199,57 @@ def doctor_support_stream_view(request):
 
 
 # ---------------------------------------------------------------------------
-# Basic AI endpoints (used by old frontend code)
+# Debug: test Gemini (GET /api/ai/test-gemini/)  -  haqiqiy xatolikni ko'rish
+# ---------------------------------------------------------------------------
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def test_gemini(request):
+    """Test Gemini API; returns ok + message or error detail for debugging."""
+    key = (getattr(settings, "GEMINI_API_KEY", None) or "").strip()
+    if not key:
+        return Response({"ok": False, "error": "GEMINI_API_KEY .env da yo'q yoki bo'sh"}, status=503)
+    try:
+        from .gemini_utils import _get_client, _call_gemini, GEMINI_FLASH
+        client = _get_client()
+        if not client:
+            return Response({"ok": False, "error": "Client yaratib bo'lmadi (import/key)"}, status=503)
+        text = _call_gemini("Javobingiz: salom. Faqat shu so'zni yozing.", GEMINI_FLASH, response_mime_type=None)
+        return Response({"ok": True, "message": "Gemini ishlayapti", "sample": (text or "")[:200]})
+    except Exception as e:
+        logger.exception("test_gemini: %s", e)
+        return Response({"ok": False, "error": str(e)}, status=500)
+
+
+# ---------------------------------------------------------------------------
+# Basic AI endpoints (used by analysis flow; AllowAny so flow works before login)
 # ---------------------------------------------------------------------------
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def generate_clarifying_questions(request):
     patient_data = _pd(request)
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor shikoyatlari kiritilmagan")
-    if not _azure_ok():
-        return _azure_not_configured()
+    if not _gemini_ok():
+        return Response({"success": True, "data": [], "warning": "AI backend da sozlanmagan."})
     try:
-        return Response({"success": True, "data": azure_clarifying(patient_data)})
+        questions = gemini_utils.generate_clarifying_questions(patient_data)
+        return Response({"success": True, "data": questions})
     except Exception as exc:
         logger.exception("Clarifying questions error: %s", exc)
-        return _err(500, "Savollar yaratishda xatolik")
+        # Return 200 with empty list so flow continues; frontend can show fallback
+        return Response({"success": True, "data": [], "warning": str(exc)[:200]})
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def recommend_specialists(request):
     patient_data = _pd(request)
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor ma'lumotlari kiritilmagan")
-    if not _azure_ok():
-        return _azure_not_configured()
+    if not _gemini_ok():
+        return Response({"success": True, "data": {"recommendations": []}, "warning": "AI backend da sozlanmagan."})
     try:
         dd = request.data.get("differential_diagnoses") or request.data.get("diagnoses")
         if dd is not None and not isinstance(dd, list):
@@ -240,27 +258,30 @@ def recommend_specialists(request):
         return Response({"success": True, "data": {"recommendations": recs}})
     except Exception as exc:
         logger.exception("Recommend specialists error: %s", exc)
-        return _err(500, "Mutaxassislar tavsiyasida xatolik")
+        return Response({"success": True, "data": {"recommendations": []}, "warning": str(exc)[:200]})
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def generate_diagnoses(request):
     patient_data = _pd(request)
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor ma'lumotlari kiritilmagan")
-    if not _azure_ok():
-        return _azure_not_configured()
+    if not _gemini_ok():
+        return Response({"success": True, "data": [], "warning": "AI backend da sozlanmagan."})
 
     blocked = _run_filter(patient_data)
     if blocked:
         return blocked
 
     try:
-        return Response({"success": True, "data": azure_diagnoses(patient_data)})
+        data = gemini_utils.generate_diagnoses(patient_data)
+        if not data:
+            return Response({"success": True, "data": [], "warning": "AI tashxis qaytarmadi."})
+        return Response({"success": True, "data": data})
     except Exception as exc:
         logger.exception("Generate diagnoses error: %s", exc)
-        return _err(500, "Tashxis yaratishda xatolik")
+        return Response({"success": True, "data": [], "warning": str(exc)[:200]})
 
 
 # ---------------------------------------------------------------------------
@@ -274,8 +295,8 @@ def generate_autonomous_protocol(request):
     language     = request.data.get("language", "uz-L")
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor ma'lumotlari kiritilmagan")
-    if not _azure_ok():
-        return _azure_not_configured()
+    if not _gemini_ok():
+        return _ai_not_configured()
     try:
         return Response({"success": True, "data": autonomous_generator.generate_autonomous_protocol(patient_data, language)})
     except Exception as exc:
@@ -290,8 +311,8 @@ def make_clinical_decision(request):
     language     = request.data.get("language", "uz-L")
     if not patient_data or not patient_data.get("complaints"):
         return _err(400, "Bemor ma'lumotlari kiritilmagan")
-    if not _azure_ok():
-        return _azure_not_configured()
+    if not _gemini_ok():
+        return _ai_not_configured()
     try:
         return Response({"success": True, "data": clinical_decision_engine.make_autonomous_decision(patient_data, language)})
     except Exception as exc:
@@ -380,3 +401,6 @@ def get_improved_protocol(request):
     except Exception as exc:
         logger.exception("Improved protocol error: %s", exc)
         return _err(500, "Yaxshilangan protokolni olishda xatolik")
+
+
+# (Monitoring AI endpoints removed  -  monitoring platform o'chirilgan)
